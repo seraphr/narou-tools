@@ -1,7 +1,5 @@
 package jp.seraphr.narou
 
-import java.io.BufferedWriter
-
 import narou4j.Narou
 import narou4j.entities.Novel
 import narou4j.enums.OutputOrder

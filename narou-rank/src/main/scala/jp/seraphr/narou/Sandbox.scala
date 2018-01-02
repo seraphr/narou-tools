@@ -5,10 +5,6 @@ import java.nio.charset.StandardCharsets
 import java.text.SimpleDateFormat
 import java.util.{Date, Locale}
 
-import narou4j.enums.NovelGenre
-
-import scala.collection.JavaConverters
-
 /**
   */
 object Sandbox extends App {

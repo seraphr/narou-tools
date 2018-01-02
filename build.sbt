@@ -15,3 +15,6 @@ lazy val `narou-tools` = (project in file("narou-tools"))
   .settings()
   .dependsOn(`narou-libs`)
 
+lazy val `narou-rank` = (project in file("narou-rank"))
+  .settings()
+  .dependsOn(`narou-libs`)
