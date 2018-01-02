@@ -7,7 +7,7 @@ lazy val `narou-libs` = (project in file("narou-libs"))
     libraryDependencies ++= Seq(
       narou4j,
       commonsIO,
-      scalaTest % Test,
+      scalaTest % Test
     )
   )
 
