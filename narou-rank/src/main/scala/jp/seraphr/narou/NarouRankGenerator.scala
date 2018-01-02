@@ -29,7 +29,7 @@ case class NarouRankResult(novels: Seq[NovelAndRate], allNovelCount: Int, unique
 case class NovelAndRate(novel: Novel, rate: Double)
 
 /**
-  */
+ */
 class NarouRankGenerator() {
   def generateRank(aSettings: NarouRankSettings): NarouRankResult = {
     import JavaConverters._

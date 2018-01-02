@@ -8,13 +8,13 @@ import narou4j.network.NarouApiClient
 import okhttp3.Response
 import org.apache.commons.io.FileUtils
 import org.jsoup.Jsoup
-import org.jsoup.nodes.{Document, Element}
+import org.jsoup.nodes.{ Document, Element }
 
 /**
-  */
+ */
 class MyNarou extends Narou {
   override def getNovelBody(ncode: String, page: Int): NovelBody = {
-    if(page <= 0) throw new RuntimeException("pageは1以上である必要があります")
+    if (page <= 0) throw new RuntimeException("pageは1以上である必要があります")
     val client = new NarouApiClient
 
     val response: Response = client.getNovelBody(ncode, page)
@@ -32,8 +32,8 @@ class MyNarou extends Narou {
     val element: Element = document.getElementById("novel_honbun")
     var body: String = element.html
 
-//    if(page <= 3)
-//      FileUtils.write(new File(s"./orig_${ncode}_${page}"), body, "UTF-8")
+    //    if(page <= 3)
+    //      FileUtils.write(new File(s"./orig_${ncode}_${page}"), body, "UTF-8")
 
     body = body.replaceAll("\n", "")
     body = body.replaceAll("\r", "")

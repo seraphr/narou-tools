@@ -1,10 +1,10 @@
 package jp.seraphr.narou
 
 import narou4j.Narou
-import narou4j.enums.{NovelBigGenre, NovelGenre, OutputOrder}
+import narou4j.enums.{ NovelBigGenre, NovelGenre, OutputOrder }
 
 /**
-  */
+ */
 case class NarouClientBuilder(build: Narou => Narou) {
   def n[U](f: Narou => U): NarouClientBuilder = {
     val g: Narou => Narou = _.tap(f)
@@ -15,7 +15,7 @@ case class NarouClientBuilder(build: Narou => Narou) {
 
   def order(aOrder: OutputOrder) = this.n(_.setOrder(aOrder))
   def skipLim(aSkip: Int, aLimit: Int) = {
-    val tSkipped = if(aSkip == 0) this else this.n(_.setSt(aSkip))
+    val tSkipped = if (aSkip == 0) this else this.n(_.setSt(aSkip))
     tSkipped.n(_.setLim(aLimit))
   }
 

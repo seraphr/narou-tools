@@ -12,16 +12,16 @@ import scala.collection.JavaConverters
 import scala.io.Source
 
 /**
-  */
+ */
 class NovelDownloader(aRootDir: File) {
   private val mInvalidCharSet = """\/:*?"<>|.""".toSet
 
   /**
-    *
-    * @param aNovel
-    * @param aOverride
-    * @return 一つ以上のファイルをダウンロードしたらtrue
-    */
+   *
+   * @param aNovel
+   * @param aOverride
+   * @return 一つ以上のファイルをダウンロードしたらtrue
+   */
   def downloadNovel(aNovel: Novel, aOverride: Boolean = false): Boolean = {
     val tNovelDir = new File(aRootDir, s"${aNovel.getNcode}_${aNovel.getTitle.filterNot(c => c.isControl || mInvalidCharSet(c)).take(10).trim}")
     tNovelDir.mkdirs()
@@ -44,7 +44,7 @@ class NovelDownloader(aRootDir: File) {
       FileUtils.write(tNovelFile, tBody.getBody, StandardCharsets.UTF_8)
     }
 
-    if(tResult) println()
+    if (tResult) println()
     tResult
   }
 }
@@ -77,7 +77,7 @@ object NovelDownloaderMain extends App {
       new NovelDownloader(new File("./novels")).downloadNovel(n)
     }
     .filter(identity) // ダウンロードが1つ以上行われたものを数える
-    .take(500)          // とりあえず1000ノベルダウンロード
+    .take(500) // とりあえず1000ノベルダウンロード
     .zipWithIndex.foreach(println)
 
 }
