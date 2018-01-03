@@ -61,7 +61,7 @@ class CollectNovelCommand(aDefaultArg: CollectNovelCommandArg) extends Command w
     def loadFrom(aFile: File): Map[String, Novel] = {
       Source.fromFile(aFile, "UTF-8").loan {
         _.getLines
-          .map(tMapper.readValue[Novel](_, new TypeReference[Novel]() {}))
+          .map(mMapper.readValue[Novel](_, new TypeReference[Novel]() {}))
           .foldLeft(Map.empty[String, Novel])((m, n) => m.updated(n.getNcode, n))
       }
     }
@@ -127,6 +127,7 @@ class CollectNovelCommand(aDefaultArg: CollectNovelCommandArg) extends Command w
     opt[Long]('i', "interval")
       .optional()
       .text(s"なろう小説APIへのアクセスインターバルをミリ秒単位で指定します。 省略した場合は、${aDefaultArg.intervalMillis}です")
+      .action((i, c) => c.copy(intervalMillis = i))
 
     private implicit val mReadOverwhite: Read[OverwriteOption] = Read.reads {
       case Recreate.text => Recreate
@@ -138,6 +139,7 @@ class CollectNovelCommand(aDefaultArg: CollectNovelCommandArg) extends Command w
       .optional()
       .valueName("recreate | update | fail")
       .text(s"出力先ファイルが既にある場合の動作を指定します。 省略した場合は、${aDefaultArg.overwrite.text}です")
+      .action((o, c) => c.copy(overwrite = o))
   }
 }
 
