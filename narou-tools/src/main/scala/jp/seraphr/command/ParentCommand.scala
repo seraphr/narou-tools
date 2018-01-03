@@ -13,10 +13,7 @@ trait ParentCommand extends Command { self =>
     ArgsParser.parse(tHead, ParentCommandArg(None)).flatMap(_.subCommand).foreach(_.run(tTail))
   }
 
-  object ArgsParser extends scopt.OptionParser[ParentCommandArg](self.name) {
-    override def errorOnUnknownArgument: Boolean = true
-    override def showUsageOnError: Boolean = true
-    head(self.name, self.version)
+  object ArgsParser extends CommandArgParser[ParentCommandArg] {
     note("各サブコマンドの詳細は、各々のヘルプを参照してください")
 
     subCommands.foreach { tSub =>
@@ -24,8 +21,6 @@ trait ParentCommand extends Command { self =>
         .text(tSub.description)
         .action { (_, c) => c.copy(subCommand = Some(tSub)) }
     }
-
-    help("help").abbr("h")
   }
 }
 

@@ -15,7 +15,7 @@ import scala.collection.JavaConverters
 
 /**
  */
-object NovelCollector {
+object OldNovelCollector {
   def collect(aBuilder: NarouClientBuilder): Iterator[Novel] = {
     import JavaConverters._
     def tSkips = Iterator(0, 500, 1000, 1500, 2000)
@@ -70,7 +70,7 @@ object NovelCollectorMain extends App {
   val tFile = new File("./novellist2")
   if (tFile.exists()) tFile.delete()
 
-  val tNovelMap = NovelCollector.collect(NarouClientBuilder.init).take(10000).foldLeft(Map.empty[String, Novel]) {
+  val tNovelMap = OldNovelCollector.collect(NarouClientBuilder.init).take(10000).foldLeft(Map.empty[String, Novel]) {
     (m, n) => m.updated(n.getNcode, n)
   }
 

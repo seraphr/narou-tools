@@ -6,6 +6,8 @@ import narou4j.enums.{ NovelBigGenre, NovelGenre, OutputOrder }
 /**
  */
 case class NarouClientBuilder(build: Narou => Narou) {
+  def buildFromEmpty: Narou = build(new Narou)
+
   def n[U](f: Narou => U): NarouClientBuilder = {
     val g: Narou => Narou = _.tap(f)
     this.copy(build = build andThen g)
@@ -19,6 +21,7 @@ case class NarouClientBuilder(build: Narou => Narou) {
     tSkipped.n(_.setLim(aLimit))
   }
 
+  def pickup(aIsPickup: Boolean) = this.n(_.setPickup(aIsPickup))
   def genre(aGenre: NovelGenre) = this.n(_.setGenre(aGenre))
   def bigGenre(aGenre: NovelBigGenre) = this.n(_.setBigGenre(aGenre))
   def length(aMin: Option[Int], aMax: Option[Int]) = {
