@@ -18,6 +18,12 @@ lazy val `narou-tools` = (project in file("narou-tools"))
       logback,
       scopt
     ))
+  .enablePlugins(PackPlugin)
+  .settings(PackPlugin.packSettings)
+  .settings(
+    packMain := Map("narou" -> "jp.seraphr.narou.commands.narou.NarouCommand"),
+    packJvmOpts := Map("narou" -> Seq("-Xmx2g"))
+  )
   .dependsOn(`narou-libs`)
 
 lazy val `narou-rank` = (project in file("narou-rank"))

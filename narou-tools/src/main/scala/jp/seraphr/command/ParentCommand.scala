@@ -15,6 +15,7 @@ trait ParentCommand extends Command { self =>
 
   object ArgsParser extends CommandArgParser[ParentCommandArg] {
     note("各サブコマンドの詳細は、各々のヘルプを参照してください")
+    note("")
 
     subCommands.foreach { tSub =>
       cmd(tSub.name)
