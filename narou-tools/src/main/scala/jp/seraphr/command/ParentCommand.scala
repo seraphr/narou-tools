@@ -10,7 +10,7 @@ trait ParentCommand extends Command { self =>
   protected val subCommands: Seq[Command]
   override def run(aArgs: Seq[String]): Try[Unit] = Try {
     val (tHead, tTail) = aArgs.splitAt(1)
-    ArgsParser.parse(tHead, ParentCommandArg(None)).flatMap(_.subCommand).foreach(_.run(tTail))
+    ArgsParser.parse(tHead, ParentCommandArg(None)).flatMap(_.subCommand).foreach(_.run(tTail).get)
   }
 
   object ArgsParser extends CommandArgParser[ParentCommandArg] {
