@@ -13,7 +13,7 @@ import scala.io.Source
 
 /**
  */
-class NovelDownloader(aRootDir: File) {
+class OldNovelDownloader(aRootDir: File) {
   private val mInvalidCharSet = """\/:*?"<>|.""".toSet
 
   /**
@@ -49,7 +49,7 @@ class NovelDownloader(aRootDir: File) {
   }
 }
 
-object NovelDownloaderMain extends App {
+object OldNovelDownloaderMain extends App {
 
   import com.fasterxml.jackson.core.`type`.TypeReference
 
@@ -74,7 +74,7 @@ object NovelDownloaderMain extends App {
     .filter(_.getNovelType == 1) // 短編がgetNovelBodyに失敗するので、とりあえず取らない
     .grouped(40).flatMap(filterExists) // 40小説ずつ、存在するものだけを残す
     .map { n =>
-      new NovelDownloader(new File("./novels")).downloadNovel(n)
+      new OldNovelDownloader(new File("./novels")).downloadNovel(n)
     }
     .filter(identity) // ダウンロードが1つ以上行われたものを数える
     .take(500) // とりあえず1000ノベルダウンロード

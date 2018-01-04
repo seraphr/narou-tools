@@ -9,13 +9,11 @@ import com.fasterxml.jackson.databind.module.SimpleModule
 import com.fasterxml.jackson.databind.{ ObjectMapper, SerializerProvider }
 import com.fasterxml.jackson.databind.ser.std.StdSerializer
 import jp.seraphr.command.Command
-import jp.seraphr.narou.NovelCollectorMain.tFile
 import jp.seraphr.narou.{ GenreSerializer, HasLogger, NarouClientBuilder, NovelCollector }
-import jp.seraphr.narou.NovelDownloaderMain.tMapper
 import jp.seraphr.narou.commands.collect.CollectNovelCommand._
 import narou4j.entities.Novel
 import narou4j.enums.NovelGenre
-import org.apache.commons.io.{ FileUtils, IOUtils }
+import org.apache.commons.io.FileUtils
 import scopt.Read
 
 import scala.io.Source
