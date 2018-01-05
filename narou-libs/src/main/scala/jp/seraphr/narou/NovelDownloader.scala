@@ -45,6 +45,11 @@ class NovelDownloader(aTargetDir: File, aIntervalMillis: Long) extends HasLogger
     DownloadResult(tNovelCount, tPageCount)
   }
 
+  class LazyDownload(aNovel: Novel, aOverride: Boolean) {
+    lazy val mResult = downloadNovel(aNovel, aOverride)
+    def get: DownloadResult = mResult
+  }
+
   def downloadNovels(aNovels: Iterator[Novel], aOverride: Boolean = false): Iterator[DownloadResult] = {
     def filterExists(aNovels: Seq[Novel]): Iterator[Novel] = {
       import scala.collection.JavaConverters._
@@ -63,17 +68,16 @@ class NovelDownloader(aTargetDir: File, aIntervalMillis: Long) extends HasLogger
     aNovels
       .filter(_.getNovelType == 1) // 短編がgetNovelBodyに失敗するので、とりあえず取らない
       .grouped(40).flatMap(filterExists) // 40小説ずつ、存在するものだけを残す
-      .map(n => () => downloadNovel(n, aOverride))
+      .map(new LazyDownload(_, aOverride))
       .scanLeft(() => DownloadResult(0, 0)) {
         (tAccThunk, tResult) =>
           // * scanLeftを噛ませると、最小限必要な要素よりも1個多く値の評価を行ってしまうのに対応するため、関数に包む
-          // * Accの評価も遅延させなければならない
-          // * 関数内で評価してしまうと
+          // * 単純に行うと
           // ** 要素数が多い時にstackoverflowする
           // ** downloadが何度も評価されてしまう
-          // * ので lazy val にする
-          lazy val tAcc = tAccThunk()
-          () => tAcc merge tResult()
+          // * ので LazyDownloadで2度目の評価を抑制 & 関数外で評価 する
+          val tAcc = tAccThunk()
+          () => tAcc merge tResult.get
       }.map(_())
   }
 }
