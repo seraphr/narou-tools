@@ -37,6 +37,10 @@ class DownloadNovelCommand(aDefaultArg: DownloadNovelCommandArg) extends Command
     }
   }
 
+  implicit class IteratorOps[A](itr: Iterator[A]) {
+    def tee[U](f: A => U): Iterator[A] = itr.map { a => f(a); a }
+  }
+
   import scala.concurrent.ExecutionContext.Implicits.global
   private def download(aArgs: DownloadNovelCommandArg): Try[Unit] = Try {
     import com.fasterxml.jackson.core.`type`.TypeReference
@@ -56,9 +60,11 @@ class DownloadNovelCommand(aDefaultArg: DownloadNovelCommandArg) extends Command
         val tNovels =
           tLines.getLines.map(tMapper.readValue[Novel](_, new TypeReference[Novel]() {}))
 
+        var tLastResult = DownloadResult(0, 0)
         import jp.seraphr.narou.IteratorUtils._
         tDownloader.downloadNovels(tNovels, aArgs.overwrite)
           .takeWhileOne(_.novelCount < aArgs.maxNovels && !tStopBoolean.get())
+          .tee(r => if (tLastResult != r) { tLastResult = r; logger.info(s"${r.novelCount} / ${aArgs.maxNovels} (${r.pageCount} pages)") })
           .foldLeft(DownloadResult(0, 0))((_, r) => r)
       }
 
