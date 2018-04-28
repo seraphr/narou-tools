@@ -85,7 +85,7 @@ class CollectNovelCommand(aDefaultArg: CollectNovelCommandArg) extends Command w
     val tInitSize = tInitMap.size
     logger.info(s"小説リストの収集を開始します。 初期ノベル数: ${tInitSize}")
     try {
-      val tResultMap = tCollector.collect(NarouClientBuilder.init).foldLeft(Map.empty[String, Novel]) {
+      val tResultMap = tCollector.collect(NarouClientBuilder.init).foldLeft(tInitMap) {
         (m, n) => m.updated(n.getNcode, n)
       }
       val tResultSize = tResultMap.size
