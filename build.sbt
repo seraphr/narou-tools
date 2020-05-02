@@ -1,5 +1,6 @@
 import Dependencies._
 
+name := "narou-tools"
 organization in ThisBuild := "jp.seraphr"
 
 val commonSettings = Def.settings(
