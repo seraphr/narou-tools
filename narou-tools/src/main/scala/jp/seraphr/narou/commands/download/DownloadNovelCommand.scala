@@ -30,6 +30,7 @@ class DownloadNovelCommand(aDefaultArg: DownloadNovelCommandArg) extends Command
   }
 
   implicit class LoanPattern[A <: { def close(): Unit }](a: A) extends HasLogger {
+    import scala.language.reflectiveCalls
     def loan[B](f: A => B): B = {
       try f(a) finally try a.close() catch {
         case NonFatal(e) => logger.warn("[skip] リソースのクローズに失敗しました。 この例外を無視します。 ", e)

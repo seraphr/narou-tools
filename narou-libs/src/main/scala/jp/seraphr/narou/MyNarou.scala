@@ -1,12 +1,9 @@
 package jp.seraphr.narou
 
-import java.io.File
-
 import narou4j.Narou
 import narou4j.entities.NovelBody
 import narou4j.network.NarouApiClient
 import okhttp3.Response
-import org.apache.commons.io.FileUtils
 import org.jsoup.Jsoup
 import org.jsoup.nodes.{ Document, Element }
 

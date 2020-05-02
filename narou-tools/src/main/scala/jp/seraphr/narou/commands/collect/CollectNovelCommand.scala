@@ -9,7 +9,7 @@ import com.fasterxml.jackson.databind.module.SimpleModule
 import com.fasterxml.jackson.databind.{ ObjectMapper, SerializerProvider }
 import com.fasterxml.jackson.databind.ser.std.StdSerializer
 import jp.seraphr.command.Command
-import jp.seraphr.narou.{ GenreSerializer, HasLogger, NarouClientBuilder, NovelCollector }
+import jp.seraphr.narou.{ HasLogger, NarouClientBuilder, NovelCollector }
 import jp.seraphr.narou.commands.collect.CollectNovelCommand._
 import narou4j.entities.Novel
 import narou4j.enums.NovelGenre
@@ -48,6 +48,7 @@ class CollectNovelCommand(aDefaultArg: CollectNovelCommandArg) extends Command w
   }
 
   implicit class LoanPattern[A <: { def close(): Unit }](a: A) extends HasLogger {
+    import scala.language.reflectiveCalls
     def loan[B](f: A => B): B = {
       try f(a) finally try a.close() catch {
         case NonFatal(e) => logger.warn("[skip] リソースのクローズに失敗しました。 この例外を無視します。 ", e)

@@ -34,7 +34,7 @@ object NarouCommand extends HasLogger {
   )
 
   def main(aArgs: Array[String]): Unit = {
-    new NarouCommand(mSubCommands).run(aArgs) match {
+    new NarouCommand(mSubCommands).run(aArgs.toSeq) match {
       case Failure(e) => logger.error("コマンドの実行に失敗しました", e)
       case _          =>
     }

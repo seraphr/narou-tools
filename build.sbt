@@ -2,6 +2,16 @@ import Dependencies._
 
 organization in ThisBuild := "jp.seraphr"
 
+val commonSettings = Def.settings(
+  scalacOptions ++= Seq(
+    "-encoding", "UTF-8",
+    "-feature", "-deprecation", "-unchecked", "-Xlint:_,-missing-interpolator",
+    "-Ywarn-dead-code",
+    "-Ywarn-unused:patvars",
+    "-Xfatal-warnings"
+  ),
+)
+
 lazy val `narou-libs` = (project in file("narou-libs"))
   .settings(
     libraryDependencies ++= Seq(
@@ -11,6 +21,7 @@ lazy val `narou-libs` = (project in file("narou-libs"))
       scalaTest % Test
     )
   )
+  .settings(commonSettings)
 
 lazy val `narou-tools` = (project in file("narou-tools"))
   .settings(
@@ -24,8 +35,9 @@ lazy val `narou-tools` = (project in file("narou-tools"))
     packMain := Map("narou" -> "jp.seraphr.narou.commands.narou.NarouCommand"),
     packJvmOpts := Map("narou" -> Seq("-Xmx2g"))
   )
+  .settings(commonSettings)
   .dependsOn(`narou-libs`)
 
 lazy val `narou-rank` = (project in file("narou-rank"))
-  .settings()
+  .settings(commonSettings)
   .dependsOn(`narou-libs`)

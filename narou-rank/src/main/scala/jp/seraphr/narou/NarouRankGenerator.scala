@@ -4,7 +4,7 @@ import narou4j.Narou
 import narou4j.entities.Novel
 import narou4j.enums.OutputOrder
 
-import scala.collection.JavaConverters
+import scala.jdk.CollectionConverters
 import scala.collection.mutable.ListBuffer
 
 case class NarouRankSettings(buildNarou: Narou => Narou, filter: Novel => Boolean, limit: Int) {
@@ -32,7 +32,7 @@ case class NovelAndRate(novel: Novel, rate: Double)
  */
 class NarouRankGenerator() {
   def generateRank(aSettings: NarouRankSettings): NarouRankResult = {
-    import JavaConverters._
+    import CollectionConverters._
     val tSkips = List(0, 500, 1000, 1500, 2000)
     val tOrders = OutputOrder.values().toList
     val tNovelBuffer = new ListBuffer[Novel]

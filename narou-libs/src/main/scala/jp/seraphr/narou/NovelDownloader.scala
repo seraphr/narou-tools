@@ -4,7 +4,6 @@ import java.io.File
 import java.nio.charset.StandardCharsets
 
 import jp.seraphr.narou.NovelDownloader.DownloadResult
-import narou4j.Narou
 import narou4j.entities.Novel
 import org.apache.commons.io.FileUtils
 
@@ -26,7 +25,6 @@ class NovelDownloader(aTargetDir: File, aIntervalMillis: Long) extends HasLogger
 
     // アクセス頻度の調整
     val tAdjuster = new IntervalAdjuster(aIntervalMillis)
-    var tResult = false
 
     val tMaxPage = tNovelDir.list().map(_.toInt).reduceOption(_ max _).getOrElse(0)
     val tAllNovels = (1 to aNovel.getAllNumberOfNovel).filter(tMaxPage < _ || aOverride)
@@ -52,7 +50,7 @@ class NovelDownloader(aTargetDir: File, aIntervalMillis: Long) extends HasLogger
 
   def downloadNovels(aNovels: Iterator[Novel], aOverride: Boolean = false): Iterator[DownloadResult] = {
     def filterExists(aNovels: Seq[Novel]): Iterator[Novel] = {
-      import scala.collection.JavaConverters._
+      import scala.jdk.CollectionConverters._
 
       val tFiltered =
         NarouClientBuilder.init

@@ -8,7 +8,7 @@ import narou4j.Narou
 import narou4j.entities.Novel
 import org.apache.commons.io.FileUtils
 
-import scala.collection.JavaConverters
+import scala.jdk.CollectionConverters
 import scala.io.Source
 
 /**
@@ -57,7 +57,7 @@ object OldNovelDownloaderMain extends App {
   val tNovels = Source.fromFile(new File("./novellist"), "UTF-8").getLines.map(tMapper.readValue[Novel](_, new TypeReference[Novel]() {}))
 
   def filterExists(aNovels: Seq[Novel]): Iterator[Novel] = {
-    import JavaConverters._
+    import CollectionConverters._
 
     val tFiltered =
       NarouClientBuilder.init

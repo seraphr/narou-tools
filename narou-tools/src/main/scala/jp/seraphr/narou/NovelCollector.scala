@@ -11,13 +11,13 @@ import narou4j.Narou
 import narou4j.entities.Novel
 import narou4j.enums.{ NovelGenre, OutputOrder }
 
-import scala.collection.JavaConverters
+import scala.jdk.CollectionConverters
 
 /**
  */
 object OldNovelCollector {
   def collect(aBuilder: NarouClientBuilder): Iterator[Novel] = {
-    import JavaConverters._
+    import CollectionConverters._
     def tSkips = Iterator(0, 500, 1000, 1500, 2000)
     def tOrders = (None +: OutputOrder.values().toList.map(Option(_))).iterator
     def tGenres = NovelGenre.values().iterator
