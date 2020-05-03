@@ -13,7 +13,12 @@ case class NarouClientBuilder(build: Narou => Narou) {
     this.copy(build = build andThen g)
   }
 
-  def opt[A](f: NarouClientBuilder => A => NarouClientBuilder)(aOptA: Option[A]): NarouClientBuilder = aOptA.fold(this)(f(this))
+  def opt[A](f: NarouClientBuilder => A => NarouClientBuilder)(aOptA: Option[A]): NarouClientBuilder = {
+    aOptA.fold(this)(f(this))
+  }
+  def seq[A](f: NarouClientBuilder => A => NarouClientBuilder)(aSeq: Seq[A]): NarouClientBuilder = {
+    aSeq.foldLeft(this)((builder, a) => f(builder)(a))
+  }
 
   def order(aOrder: OutputOrder) = this.n(_.setOrder(aOrder))
   def skipLim(aSkip: Int, aLimit: Int) = {

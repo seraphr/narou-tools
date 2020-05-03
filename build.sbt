@@ -9,8 +9,12 @@ val commonSettings = Def.settings(
     "-feature", "-deprecation", "-unchecked", "-Xlint:_,-missing-interpolator",
     "-Ywarn-dead-code",
     "-Ywarn-unused:patvars",
-    "-Xfatal-warnings"
+    "-Werror"
   ),
+
+  Compile / console / scalacOptions ~= {
+    _.filterNot(Set("-Werror"))
+  }
 )
 
 lazy val `narou-libs` = (project in file("narou-libs"))
