@@ -8,6 +8,7 @@ import jp.seraphr.narou.commands.collect.CollectNovelCommand
 import jp.seraphr.narou.commands.collect.CollectNovelCommand.CollectNovelCommandArg
 import jp.seraphr.narou.commands.download.DownloadNovelCommand
 import jp.seraphr.narou.commands.download.DownloadNovelCommand.DownloadNovelCommandArg
+import jp.seraphr.narou.commands.sandbox.{ SandboxCommand, SandboxCommandArg }
 
 import scala.util.{ Failure, Try }
 
@@ -30,7 +31,8 @@ class NarouCommand(aSubCommands: Seq[Command]) extends ParentCommand with HasLog
 object NarouCommand extends HasLogger {
   private val mSubCommands = Seq(
     new CollectNovelCommand(CollectNovelCommandArg(new File("./novel_list"), CollectNovelCommand.Update, 1000)),
-    new DownloadNovelCommand(DownloadNovelCommandArg(new File("./novel_list"), new File("./novels"), false, 1000, 100))
+    new DownloadNovelCommand(DownloadNovelCommandArg(new File("./novel_list"), new File("./novels"), false, 1000, 100)),
+    new SandboxCommand(SandboxCommandArg(new File("./novel_list")))
   )
 
   def main(aArgs: Array[String]): Unit = {
