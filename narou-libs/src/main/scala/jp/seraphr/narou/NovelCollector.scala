@@ -9,20 +9,28 @@ class KeywordFilter private (val build: Narou => Unit, val bits: Int, name: Stri
 }
 object KeywordFilter {
   private var bits = 1
-  private def keyword[U](f: Narou => Boolean => Unit, aName: String): KeywordFilter = {
+  private def keyword[U](f: Narou => Boolean => Unit, aValue: Boolean, aName: String): KeywordFilter = {
     val tBits = bits
     bits <<= 1
     new KeywordFilter(tNarou => f(tNarou)(true), tBits, aName)
   }
 
+  // positive negative keyword
+  private def pnKeyword(f: Narou => Boolean => Unit, aName: String): Set[KeywordFilter] = {
+    Set(
+      keyword(f, true, s"+${aName}"),
+      keyword(f, false, s"-${aName}")
+    )
+  }
+
   val all = Set(
-    keyword(_.setR15, "R15"),
-    keyword(_.setBl, "BL"),
-    keyword(_.setGl, "GL"),
-    keyword(_.setZankoku, "残酷"),
-    keyword(_.setTensei, "転生"),
-    keyword(_.setTenni, "転移")
-  )
+    pnKeyword(_.setR15, "R15"),
+    pnKeyword(_.setBl, "BL"),
+    pnKeyword(_.setGl, "GL"),
+    pnKeyword(_.setZankoku, "残酷"),
+    pnKeyword(_.setTensei, "転生"),
+    pnKeyword(_.setTenni, "転移")
+  ).flatten
 }
 
 case class SearchFilter(genre: NovelGenre, isPickup: Option[Boolean], keywords: Set[KeywordFilter]) {
