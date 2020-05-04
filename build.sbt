@@ -35,10 +35,9 @@ lazy val `narou-tools` = (project in file("narou-tools"))
       scopt
     ))
   .enablePlugins(PackPlugin)
-  .settings(PackPlugin.packSettings)
   .settings(
     packMain := Map("narou" -> "jp.seraphr.narou.commands.narou.NarouCommand"),
-    packJvmOpts := Map("narou" -> Seq("-Xmx2g"))
+    packJvmOpts := Map("narou" -> Seq("-Xmx4g"))
   )
   .settings(commonSettings)
   .dependsOn(`narou-libs`)
