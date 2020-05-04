@@ -113,7 +113,7 @@ class NovelCollector(aIntervalMillis: Long) extends HasLogger {
     val tInitSettings = SearchSetting.all.filter(aFilter).toVector.sorted
     val tInitSettingsSize = tInitSettings.size
 
-    def collectOne(aSetting: SearchSetting): Vector[Novel] = {
+    def collectOne(aSetting: SearchSetting, aRemainRetry: Int = 4): Vector[Novel] = {
       tAdjuster.adjust()
 
       val tGenre = aSetting.filter.genre
@@ -123,25 +123,35 @@ class NovelCollector(aIntervalMillis: Long) extends HasLogger {
       val tSkip = aSetting.skip
 
       import scala.jdk.CollectionConverters._
-      aBuilder
-        .genre(tGenre)
-        .seq(_.n)(tKeywords.toSeq.map(_.build))
-        .opt(_.pickup)(tPickup)
-        .order(tOrder)
-        .skipLim(tSkip, mLimit)
-        .buildFromEmpty
-        .getNovels.asScala.tail.toVector // 先頭はallcountだけが入っているデータなので削る
+      try {
+        aBuilder
+          .genre(tGenre)
+          .seq(_.n)(tKeywords.toSeq.map(_.build))
+          .opt(_.pickup)(tPickup)
+          .order(tOrder)
+          .skipLim(tSkip, mLimit)
+          .buildFromEmpty
+          .getNovels.asScala.tail.toVector // 先頭はallcountだけが入っているデータなので削る
+      } catch {
+        case e: Throwable if 0 < aRemainRetry =>
+          logger.warn(s"[retry] 例外が発生したため、リトライを行います。 remain = ${aRemainRetry}: ${e.getMessage}")
+          val tSleep = math.pow(2, 5 - aRemainRetry).toInt
+          Thread.sleep(tSleep * 1000)
+          collectOne(aSetting, aRemainRetry - 1)
+      }
     }
 
     def collectBySettings(aRemainSettings: Vector[SearchSetting]): Iterator[Novel] = aRemainSettings match {
       case Vector() => Iterator.empty
       case Vector(h, t @ _*) =>
         val tRemainSize = t.size
+        val tHead = collectOne(h)
+
         if (tRemainSize % 100 == 0) {
           logger.info(h.toString)
           logger.info(f"初期検索条件=${tInitSettingsSize} 残り検索条件=${tRemainSize} 進捗=${100.0 - (tRemainSize.toDouble / tInitSettingsSize * 100)}%.4f%%")
+          logger.info(s"skip=${h.skip} size=${tHead.size}")
         }
-        val tHead = collectOne(h)
         if (tHead.size < mLimit) {
           // Limitに達し無かったとき、同じ検索条件のものはすべて発見したことになるので、以下の検索条件を削る
           // * 検索結果が包含関係にある（= 検索結果がより小さい）もの
