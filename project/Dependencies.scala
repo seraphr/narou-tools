@@ -2,8 +2,8 @@ import sbt._
 import org.scalajs.sbtplugin.ScalaJSPlugin._
 import org.portablescala.sbtplatformdeps.PlatformDepsPlugin.autoImport._
 
-
 object Dependencies {
+  val reactVersion = "16.7.0"
   val scalatestVersion = "3.1.1"
   val scalatestplusVersion = s"${scalatestVersion}.0"
   val circeVersion = "0.13.0"
@@ -38,5 +38,10 @@ object Dependencies {
         "io.circe" %%% "circe-generic-extras"
       ).map(_ % circeVersion)
     )
+  }
+
+  object js {
+    val react = "react" -> reactVersion
+    val reactDom = "react-dom" -> reactVersion
   }
 }

@@ -71,3 +71,21 @@ lazy val `narou-tools` = (project in file("narou-tools"))
 lazy val `narou-rank` = (project in file("narou-rank"))
   .settings(commonSettings)
   .dependsOn(`narou-libs`)
+
+// -----------------------
+
+lazy val `narou-webui` = (project in file("narou-webui"))
+  .enablePlugins(ScalaJSPlugin)
+  .enablePlugins(ScalaJSBundlerPlugin)
+  .settings(commonSettings)
+  .settings(
+    scalaJSUseMainModuleInitializer := true,
+    libraryDependencies ++= Seq(
+      scalajs.reactjs.value
+    ) ++ scalajs.circe.value,
+    Compile / npmDependencies ++= Seq(
+      js.react,
+      js.reactDom
+    )
+  )
+  .dependsOn(modelJS)
