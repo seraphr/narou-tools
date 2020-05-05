@@ -2,7 +2,7 @@ import Dependencies._
 import sbtcrossproject.CrossPlugin.autoImport.{CrossType, crossProject}
 
 name := "narou-tools"
-organization in ThisBuild := "jp.seraphr"
+ThisBuild / organization := "jp.seraphr"
 
 val commonDependencies = Def.settings(
   libraryDependencies ++= Seq(
