@@ -1,6 +1,7 @@
 package jp.seraphr.narou.commands.sandbox
 
 import java.io.File
+import java.nio.file.{ Files, StandardOpenOption }
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import jp.seraphr.command.Command
@@ -32,6 +33,7 @@ class SandboxCommand(aDefaultArg: SandboxCommandArg) extends Command with HasLog
     }.get
 
     showKeywords(tNovels)
+    convertNovelList(tNovels, new File(aArgs.input.getParentFile, aArgs.input.getName + ".jsonl"))
   }
 
   private def showKeywords(aNovels: Vector[Novel]): Unit = {
@@ -48,7 +50,21 @@ class SandboxCommand(aDefaultArg: SandboxCommandArg) extends Command with HasLog
 
     logger.info(s"下位10件")
     tSortedKeywords.takeRight((10)).foreach(println)
+  }
 
+  private def convertNovelList(aNovels: Vector[Novel], aOutput: File): Unit = {
+    import io.circe.syntax._
+    import jp.seraphr.narou.json.NarouNovelFormats._
+    import jp.seraphr.narou.model.NarouNovelConverter._
+
+    def newOutputStream = Files.newBufferedWriter(aOutput.toPath, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.WRITE)
+
+    Using(newOutputStream) { tStream =>
+      aNovels.foreach { n =>
+        tStream.write(n.asScala.asJson.noSpaces)
+        tStream.write("\n")
+      }
+    }
   }
 
   class OptionParser(aDefaultArg: SandboxCommandArg) extends CommandArgParser[SandboxCommandArg] {

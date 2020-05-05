@@ -2,10 +2,11 @@ package jp.seraphr.narou.model
 
 case class Genre(id: Int, text: String)
 
-sealed trait NovelType
+sealed abstract class NovelType(val id: Int)
 object NovelType {
-  case object Serially extends NovelType
-  case object ShortStory extends NovelType
+  case object Serially extends NovelType(1)
+  case object ShortStory extends NovelType(2)
+  case class Etc(i: Int) extends NovelType(i)
 }
 
 sealed trait UploadType

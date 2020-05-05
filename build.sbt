@@ -63,7 +63,10 @@ lazy val `narou-tools` = (project in file("narou-tools"))
     packJvmOpts := Map("narou" -> Seq("-Xmx4g"))
   )
   .settings(commonSettings)
-  .dependsOn(`narou-libs`)
+  .dependsOn(
+    `narou-libs`,
+    modelJVM
+  )
 
 lazy val `narou-rank` = (project in file("narou-rank"))
   .settings(commonSettings)
