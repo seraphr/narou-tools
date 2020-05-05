@@ -9,7 +9,7 @@ import com.fasterxml.jackson.databind.module.SimpleModule
 import com.fasterxml.jackson.databind.{ ObjectMapper, SerializerProvider }
 import com.fasterxml.jackson.databind.ser.std.StdSerializer
 import jp.seraphr.command.Command
-import jp.seraphr.narou.{ HasLogger, NarouClientBuilder, NovelCollector }
+import jp.seraphr.narou.{ AllNovelCollector, HasLogger, NarouClientBuilder }
 import jp.seraphr.narou.commands.collect.CollectNovelCommand._
 import narou4j.entities.Novel
 import narou4j.enums.NovelGenre
@@ -81,7 +81,8 @@ class CollectNovelCommand(aDefaultArg: CollectNovelCommandArg) extends Command w
         loadFrom(tOutput)
     }
 
-    val tCollector = new NovelCollector(aArg.intervalMillis)
+    //    val tCollector = new NovelCollector(aArg.intervalMillis)
+    val tCollector = new AllNovelCollector(aArg.intervalMillis)
     val tTempOutputFile = File.createTempFile("novel_list", "")
     val tInitSize = tInitMap.size
     logger.info(s"小説リストの収集を開始します。 初期ノベル数: ${tInitSize}")
