@@ -79,13 +79,15 @@ lazy val `narou-webui` = (project in file("narou-webui"))
   .enablePlugins(ScalaJSBundlerPlugin)
   .settings(commonSettings)
   .settings(
+    scalacOptions += "-P:scalajs:sjsDefinedByDefault",
     scalaJSUseMainModuleInitializer := true,
     libraryDependencies ++= Seq(
       scalajs.reactjs.value
     ) ++ scalajs.circe.value,
     Compile / npmDependencies ++= Seq(
       js.react,
-      js.reactDom
+      js.reactDom,
+      js.recharts
     )
   )
   .dependsOn(modelJS)

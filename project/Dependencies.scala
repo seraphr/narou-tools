@@ -43,5 +43,6 @@ object Dependencies {
   object js {
     val react = "react" -> reactVersion
     val reactDom = "react-dom" -> reactVersion
+    val recharts = "recharts" -> "1.8.5"
   }
 }
