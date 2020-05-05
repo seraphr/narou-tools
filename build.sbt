@@ -1,7 +1,15 @@
 import Dependencies._
+import sbtcrossproject.CrossPlugin.autoImport.{CrossType, crossProject}
 
 name := "narou-tools"
 organization in ThisBuild := "jp.seraphr"
+
+val commonDependencies = Def.settings(
+  libraryDependencies ++= Seq(
+    scalajs.scalatest.value % "test",
+    scalajs.scalacheck.value % "test"
+  )
+)
 
 val commonSettings = Def.settings(
   scalacOptions ++= Seq(
@@ -15,7 +23,22 @@ val commonSettings = Def.settings(
   Compile / console / scalacOptions ~= {
     _.filterNot(Set("-Werror"))
   }
-)
+) ++ commonDependencies
+
+lazy val `narou-libs-model` = crossProject(JVMPlatform, JSPlatform)
+  .crossType(CrossType.Full)
+  .in(file("narou-libs-model"))
+  .settings(
+    libraryDependencies ++= scalajs.circe.value
+  )
+  .settings(commonSettings)
+  .jvmSettings(
+    libraryDependencies ++= Seq(
+      jvm.narou4j
+    )
+  )
+lazy val modelJVM = `narou-libs-model`.jvm
+lazy val modelJS = `narou-libs-model`.js
 
 lazy val `narou-libs` = (project in file("narou-libs"))
   .settings(
