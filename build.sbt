@@ -20,10 +20,10 @@ val commonSettings = Def.settings(
 lazy val `narou-libs` = (project in file("narou-libs"))
   .settings(
     libraryDependencies ++= Seq(
-      narou4j,
-      commonsIO,
-      slf4j,
-      scalaTest % Test
+      jvm.narou4j,
+      jvm.commonsIO,
+      jvm.slf4j,
+      jvm.scalaTest % Test
     )
   )
   .settings(commonSettings)
@@ -31,8 +31,8 @@ lazy val `narou-libs` = (project in file("narou-libs"))
 lazy val `narou-tools` = (project in file("narou-tools"))
   .settings(
     libraryDependencies ++= Seq(
-      logback,
-      scopt
+      jvm.logback,
+      jvm.scopt
     ))
   .enablePlugins(PackPlugin)
   .settings(
