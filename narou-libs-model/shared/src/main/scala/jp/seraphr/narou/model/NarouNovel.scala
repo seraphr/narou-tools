@@ -26,7 +26,7 @@ object UploadType {
  * @param gensaku 未使用。 常にから文字列
  * @param keywords
  * @param firstUpload 初アップロード時刻
- * @param lastupload 最終アップロード時刻
+ * @param lastUpload 最終アップロード時刻
  * @param novelType
  * @param isFinished trueであれば完結済み。　短編はfalse
  * @param chapterCount 全部分数
@@ -58,7 +58,7 @@ case class NarouNovel(
   gensaku: String,
   keywords: Seq[String],
   firstUpload: String,
-  lastupload: String,
+  lastUpload: String,
   novelType: NovelType,
   isFinished: Boolean,
   chapterCount: Int,
