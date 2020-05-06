@@ -7,12 +7,12 @@ import japgolly.scalajs.react._
 object ScatterChart {
   @js.native
   @JSImport("recharts", "ScatterChart")
-  object RowComponent extends js.Object
+  object RawComponent extends js.Object
 
   type Props = CategoricalChartProps
   val Props = CategoricalChartProps
 
-  private val component = JsComponent[Props, Children.Varargs, Null](RowComponent)
+  private val component = JsComponent[Props, Children.Varargs, Null](RawComponent)
 
   def apply(p: Props)(children: CtorType.ChildArg*): JsComponent.Unmounted[Props, Null] = component.apply(p)(children: _*)
 }
