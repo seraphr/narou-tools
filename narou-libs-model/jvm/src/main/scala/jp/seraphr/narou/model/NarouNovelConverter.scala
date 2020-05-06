@@ -14,6 +14,7 @@ object NarouNovelConverter {
       case 1 => UploadType.CellularPhone
       case 2 => UploadType.PC
       case 3 => UploadType.Both
+      case n => UploadType.Etc(n)
     }
 
     def asScala: NarouNovel = {

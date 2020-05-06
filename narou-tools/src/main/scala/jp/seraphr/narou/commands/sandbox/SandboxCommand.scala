@@ -2,12 +2,14 @@ package jp.seraphr.narou.commands.sandbox
 
 import java.io.File
 import java.nio.file.{ Files, StandardOpenOption }
+import java.util.concurrent.atomic.AtomicInteger
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import jp.seraphr.command.Command
 import jp.seraphr.narou.HasLogger
 import narou4j.entities.Novel
 
+import scala.annotation.nowarn
 import scala.io.Source
 import scala.util.{ Failure, Try, Using }
 
@@ -23,6 +25,11 @@ class SandboxCommand(aDefaultArg: SandboxCommandArg) extends Command with HasLog
     }
   }
 
+  implicit class FileOps(file: File) {
+    def /(aChild: String) = new File(file, aChild)
+    def modName(f: String => String) = new File(file.getParentFile, f(file.getName))
+  }
+
   private def runSandbox(aArgs: SandboxCommandArg): Try[Unit] = Try {
     import com.fasterxml.jackson.core.`type`.TypeReference
     val tMapper: ObjectMapper = new ObjectMapper
@@ -32,10 +39,22 @@ class SandboxCommand(aDefaultArg: SandboxCommandArg) extends Command with HasLog
       tLines.getLines.map(tMapper.readValue[Novel](_, new TypeReference[Novel]() {})).toVector
     }.get
 
-    showKeywords(tNovels)
-    convertNovelList(tNovels, new File(aArgs.input.getParentFile, aArgs.input.getName + ".jsonl"))
+    //    showKeywords(tNovels)
+    convertNovelList(tNovels, aArgs.input.modName(_ + ".jsonl"))
+    //    findUploadType0(tNovels)
   }
 
+  @nowarn("cat=unused")
+  private def findUploadType0(aNovels: Vector[Novel]): Unit = {
+    val tFiltered = aNovels.filter(_.getUploadType == 0)
+    logger.info(s"count = ${tFiltered.size}")
+    logger.info(s"全短編数 = ${aNovels.filter(_.getNovelType == 2).size}")
+    logger.info(s"短編 = ${tFiltered.filter(_.getNovelType == 2).size}")
+    logger.info(s"長編 = ${tFiltered.filter(_.getNovelType == 1).size}")
+    tFiltered.filter(_.getNovelType == 1).take(10).foreach(n => logger.info(s"ncode=${n.getNcode}, length=${n.getNumberOfChar}"))
+  }
+
+  @nowarn("cat=unused")
   private def showKeywords(aNovels: Vector[Novel]): Unit = {
     logger.info(s"keyword情報取得")
     val tSortedKeywords = aNovels.flatMap(_.getKeyword.split(" ")).groupBy(identity).view.mapValues(_.size).toSeq.sortBy(-_._2)
@@ -52,19 +71,26 @@ class SandboxCommand(aDefaultArg: SandboxCommandArg) extends Command with HasLog
     tSortedKeywords.takeRight((10)).foreach(println)
   }
 
+  //  @nowarn("cat=unused")
   private def convertNovelList(aNovels: Vector[Novel], aOutput: File): Unit = {
+    logger.info(s"novelの変換を行います: Novel数=${aNovels.size}")
     import io.circe.syntax._
     import jp.seraphr.narou.json.NarouNovelFormats._
     import jp.seraphr.narou.model.NarouNovelConverter._
 
     def newOutputStream = Files.newBufferedWriter(aOutput.toPath, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.WRITE)
 
+    val tCounter = new AtomicInteger()
     Using(newOutputStream) { tStream =>
       aNovels.foreach { n =>
+        if (tCounter.incrementAndGet() % 5000 == 0) {
+          logger.info(s"変換: ${tCounter.get()}")
+        }
         tStream.write(n.asScala.asJson.noSpaces)
         tStream.write("\n")
       }
-    }
+    }.get
+    logger.info(s"novelの変換が完了しました")
   }
 
   class OptionParser(aDefaultArg: SandboxCommandArg) extends CommandArgParser[SandboxCommandArg] {

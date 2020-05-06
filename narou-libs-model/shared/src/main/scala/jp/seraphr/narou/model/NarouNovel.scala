@@ -14,6 +14,9 @@ object UploadType {
   case object CellularPhone extends UploadType
   case object PC extends UploadType
   case object Both extends UploadType
+
+  /** 更新されてない、古い小説で0になっているものがあるっぽい */
+  case class Etc(i: Int) extends UploadType
 }
 
 /**
