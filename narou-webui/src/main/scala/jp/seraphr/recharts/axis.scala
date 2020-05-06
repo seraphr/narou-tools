@@ -1,8 +1,11 @@
 package jp.seraphr.recharts
 
+import japgolly.scalajs.react._
 import japgolly.scalajs.react.vdom.VdomNode
+import org.scalajs.dom.raw.{ SVGElement, SVGLineElement, SVGTextElement }
 
 import scala.scalajs.js
+import scala.scalajs.js.annotation.JSImport
 import scala.scalajs.js.|
 
 object Axis {
@@ -59,9 +62,6 @@ object Axis {
 }
 
 trait BaseAxisProps extends js.Object {
-  type SVGElement = VdomNode
-  type SVGLineElement = VdomNode
-  type SVGTextElement = VdomNode
   type ReactElement[E] = VdomNode
   type PresentationAttributes[E] = js.Object
 
@@ -117,6 +117,10 @@ trait BaseAxisProps extends js.Object {
 object XAxis {
   import Axis._
 
+  @js.native
+  @JSImport("recharts", "XAxis")
+  object RawComponent extends js.Object
+
   type Orientation = String
   object Orientation {
     val top = "top"
@@ -148,10 +152,18 @@ object XAxis {
     val interval: js.UndefOr[AxisInterval]
     val reversed: js.UndefOr[Boolean]
   }
+
+  private val component = JsFnComponent[Props, Children.None](RawComponent)
+  def apply(p: Props): JsFnComponent.Unmounted[Props] = component(p)
 }
 
 object YAxis {
   import Axis._
+
+  @js.native
+  @JSImport("recharts", "YAxis")
+  object RawComponent extends js.Object
+
   type Orientation = String
   object Orientation {
     val left = "left"
@@ -183,10 +195,18 @@ object YAxis {
     val interval: js.UndefOr[AxisInterval]
     val reversed: js.UndefOr[Boolean]
   }
+
+  private val component = JsFnComponent[Props, Children.None](RawComponent)
+  def apply(p: Props): JsFnComponent.Unmounted[Props] = component(p)
 }
 
 object ZAxis {
   import Axis._
+
+  @js.native
+  @JSImport("recharts", "ZAxis")
+  object RawComponent extends js.Object
+
   type Orientation = String
   object Orientation {
     val left = "left"
@@ -198,7 +218,7 @@ object ZAxis {
     val bottom: js.UndefOr[Int] = js.undefined
   }
 
-  trait Props {
+  trait Props extends js.Object {
     val `type`: Type
     /** The name of data displayed in the axis */
     val name: js.UndefOr[String | Int]
@@ -212,4 +232,7 @@ object ZAxis {
     val range: js.UndefOr[js.Array[Int]]
     val scale: js.UndefOr[ScaleType | js.Function]
   }
+
+  private val component = JsFnComponent[Props, Children.None](RawComponent)
+  def apply(p: Props): JsFnComponent.Unmounted[Props] = component(p)
 }
