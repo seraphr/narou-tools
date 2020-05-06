@@ -1,6 +1,6 @@
 package jp.seraphr.recharts
 
-import japgolly.scalajs.react.{ Children, JsComponent, vdom }
+import japgolly.scalajs.react.{ Children, JsComponent }
 import org.scalajs.dom.raw.{ SVGElement, SVGLineElement }
 
 import scala.scalajs.js
@@ -13,7 +13,6 @@ object CartesianGrid {
   object RawComponent extends js.Object
 
   type PresentationAttributes[E] = js.Object
-  type ReactElement[E] = vdom.VdomElement
   type GridLineType = PresentationAttributes[SVGLineElement] | js.Function1[js.Any, SVGElement] | Boolean
 
   trait Props extends js.Object {

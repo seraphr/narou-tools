@@ -9,7 +9,6 @@ import scala.scalajs.js.annotation.JSImport
 import scala.scalajs.js.|
 
 object Axis {
-  type DataKey[T] = String | Int | T => js.Any
 
   type Type = String
   object Type {
@@ -68,7 +67,7 @@ trait BaseAxisProps extends js.Object {
   /** The type of axis */
   val `type`: js.UndefOr[Axis.Type]
   /** The key of data displayed in the axis */
-  val dataKey: js.UndefOr[Axis.DataKey[js.Any]]
+  val dataKey: js.UndefOr[DataKey[js.Any]]
   /** Whether or not display the axis */
   val hide: js.UndefOr[Boolean]
   /** The scale type or functor of scale */
