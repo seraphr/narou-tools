@@ -7,7 +7,8 @@ import scala.scalajs.js.|
 
 package object recharts {
   type ContentRenderer[P] = js.Function1[P, vdom.VdomNode]
-  type DataKey[T] = String | Int | T => js.Any
+  type DataKey[T] = String | Int | js.Function1[T, js.Any]
+
   type ReactElement[E] = vdom.VdomElement
 
   type LegendType = String
