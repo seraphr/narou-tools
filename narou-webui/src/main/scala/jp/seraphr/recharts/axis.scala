@@ -6,6 +6,8 @@ import scala.scalajs.js
 import scala.scalajs.js.|
 
 object Axis {
+  type DataKey[T] = String | Int | T => js.Any
+
   type Type = String
   object Type {
     val category = "category"
@@ -46,11 +48,17 @@ object Axis {
     val dataMax = "dataMax"
   }
   type AxisDomain = (AxisDomainItem, AxisDomainItem)
+
+  type AxisInterval = Int | String
+  object AxisInterval {
+    val preserveStart: AxisInterval = "preserveStart"
+    val preserveEnd: AxisInterval = "preserveEnd"
+    val preserveStartEnd: AxisInterval = "preserveStartEnd"
+  }
+
 }
 
 trait BaseAxisProps extends js.Object {
-
-  type DataKey[T] = String | Int | T => js.Any
   type SVGElement = VdomNode
   type SVGLineElement = VdomNode
   type SVGTextElement = VdomNode
@@ -60,7 +68,7 @@ trait BaseAxisProps extends js.Object {
   /** The type of axis */
   val `type`: js.UndefOr[Axis.Type]
   /** The key of data displayed in the axis */
-  val dataKey: js.UndefOr[DataKey[js.Any]]
+  val dataKey: js.UndefOr[Axis.DataKey[js.Any]]
   /** Whether or not display the axis */
   val hide: js.UndefOr[Boolean]
   /** The scale type or functor of scale */
@@ -104,4 +112,104 @@ trait BaseAxisProps extends js.Object {
   val range: js.UndefOr[js.Array[Int]]
   /** axis react component */
   val AxisComp: js.UndefOr[js.Any]
+}
+
+object XAxis {
+  import Axis._
+
+  type Orientation = String
+  object Orientation {
+    val top = "top"
+    val botton = "botom"
+  }
+
+  trait Padding extends js.Object {
+    val left: js.UndefOr[Int] = js.undefined
+    val right: js.UndefOr[Int] = js.undefined
+  }
+
+  trait Props extends BaseAxisProps {
+    /** The unique id of x-axis */
+    val xAxisId: js.UndefOr[String | Int]
+    /** The width of axis which is usually calculated internally */
+    val width: js.UndefOr[Int]
+    /** The height of axis, which need to be setted by user */
+    val height: js.UndefOr[Int]
+    val mirror: js.UndefOr[Boolean]
+    // The orientation of axis
+    val orientation: js.UndefOr[Orientation]
+    /**
+     * Ticks can be any type when the axis is the type of category
+     * Ticks must be Ints when the axis is the type of Int
+     */
+    val ticks: js.UndefOr[Array[String | Int]]
+    val padding: js.UndefOr[Padding]
+    val minTickGap: js.UndefOr[Int]
+    val interval: js.UndefOr[AxisInterval]
+    val reversed: js.UndefOr[Boolean]
+  }
+}
+
+object YAxis {
+  import Axis._
+  type Orientation = String
+  object Orientation {
+    val left = "left"
+    val right = "right"
+  }
+
+  trait Padding extends js.Object {
+    val top: js.UndefOr[Int] = js.undefined
+    val bottom: js.UndefOr[Int] = js.undefined
+  }
+
+  trait Props extends BaseAxisProps {
+    /** The unique id of x-axis */
+    val yAxisId: js.UndefOr[String | Int]
+    /** The width of axis which is usually calculated internally */
+    val width: js.UndefOr[Int]
+    /** The height of axis, which need to be setted by user */
+    val height: js.UndefOr[Int]
+    val mirror: js.UndefOr[Boolean]
+    // The orientation of axis
+    val orientation: js.UndefOr[Orientation]
+    /**
+     * Ticks can be any type when the axis is the type of category
+     * Ticks must be Ints when the axis is the type of Int
+     */
+    val ticks: js.UndefOr[Array[String | Int]]
+    val padding: js.UndefOr[Padding]
+    val minTickGap: js.UndefOr[Int]
+    val interval: js.UndefOr[AxisInterval]
+    val reversed: js.UndefOr[Boolean]
+  }
+}
+
+object ZAxis {
+  import Axis._
+  type Orientation = String
+  object Orientation {
+    val left = "left"
+    val right = "right"
+  }
+
+  trait Padding extends js.Object {
+    val top: js.UndefOr[Int] = js.undefined
+    val bottom: js.UndefOr[Int] = js.undefined
+  }
+
+  trait Props {
+    val `type`: Type
+    /** The name of data displayed in the axis */
+    val name: js.UndefOr[String | Int]
+    /** The unit of data displayed in the axis */
+    val unit: js.UndefOr[String | Int]
+    /** The unique id of z-axis */
+    val zAxisId: js.UndefOr[String | Int]
+    /** The key of data displayed in the axis */
+    val dataKey: js.UndefOr[DataKey[js.Any]]
+    /** The range of axis */
+    val range: js.UndefOr[js.Array[Int]]
+    val scale: js.UndefOr[ScaleType | js.Function]
+  }
 }
