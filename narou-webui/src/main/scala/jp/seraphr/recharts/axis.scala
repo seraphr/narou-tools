@@ -6,7 +6,7 @@ import org.scalajs.dom.raw.{ SVGElement, SVGLineElement, SVGTextElement }
 
 import scala.scalajs.js
 import scala.scalajs.js.annotation.JSImport
-import scala.scalajs.js.|
+import scala.scalajs.js.{ UndefOr, | }
 
 object Axis {
 
@@ -65,25 +65,25 @@ trait BaseAxisProps extends js.Object {
   type PresentationAttributes[E] = js.Object
 
   /** The type of axis */
-  val `type`: js.UndefOr[Axis.Type]
+  val `type`: js.UndefOr[Axis.Type] = js.undefined
   /** The key of data displayed in the axis */
-  val dataKey: js.UndefOr[DataKey[js.Any]]
+  val dataKey: js.UndefOr[DataKey[js.Any]] = js.undefined
   /** Whether or not display the axis */
-  val hide: js.UndefOr[Boolean]
+  val hide: js.UndefOr[Boolean] = js.undefined
   /** The scale type or functor of scale */
-  val scale: js.UndefOr[Axis.ScaleType | js.Function]
+  val scale: js.UndefOr[Axis.ScaleType | js.Function] = js.undefined
   /** The option for tick */
-  val tick: js.UndefOr[PresentationAttributes[SVGTextElement] | ReactElement[SVGElement] | ContentRenderer[_] | Boolean]
+  val tick: js.UndefOr[PresentationAttributes[SVGTextElement] | ReactElement[SVGElement] | ContentRenderer[_] | Boolean] = js.undefined
   /** The count of ticks */
-  val tickCount: js.UndefOr[Int]
+  val tickCount: js.UndefOr[Int] = js.undefined
   /** The option for axisLine */
-  val axisLine: js.UndefOr[Boolean | PresentationAttributes[SVGLineElement]]
+  val axisLine: js.UndefOr[Boolean | PresentationAttributes[SVGLineElement]] = js.undefined
   /** The option for tickLine */
-  val tickLine: js.UndefOr[Boolean | PresentationAttributes[SVGTextElement]]
+  val tickLine: js.UndefOr[Boolean | PresentationAttributes[SVGTextElement]] = js.undefined
   /** The size of tick line */
-  val tickSize: js.UndefOr[Int]
+  val tickSize: js.UndefOr[Int] = js.undefined
   /** The formatter function of tick */
-  val tickFormatter: js.UndefOr[(js.Any, Int) => String]
+  val tickFormatter: js.UndefOr[(js.Any, Int) => String] = js.undefined
   /**
    * When domain of the axis is specified and the type of the axis is "number",
    * if allowDataOverflow is set to be false,
@@ -91,26 +91,26 @@ trait BaseAxisProps extends js.Object {
    * the maximum value of data is greater than domain[1] so that the axis displays all data values.
    * If set to true, graphic elements (line, area, bars) will be clipped to conform to the specified domain.
    */
-  val allowDataOverflow: js.UndefOr[Boolean]
+  val allowDataOverflow: js.UndefOr[Boolean] = js.undefined
   /**
    * Allow the axis has duplicated categorys or not when the type of axis is "category".
    */
-  val allowDuplicatedCategory: js.UndefOr[Boolean]
+  val allowDuplicatedCategory: js.UndefOr[Boolean] = js.undefined
   /**
    * Allow the ticks of axis to be decimals or not.
    */
-  val allowDecimals: js.UndefOr[Boolean]
+  val allowDecimals: js.UndefOr[Boolean] = js.undefined
   /** The domain of scale in this axis */
-  val domain: js.UndefOr[Axis.AxisDomain]
+  val domain: js.UndefOr[Axis.AxisDomain] = js.undefined
   /** The name of data displayed in the axis */
-  val name: js.UndefOr[String]
+  val name: js.UndefOr[String] = js.undefined
   /** The unit of data displayed in the axis */
-  val unit: js.UndefOr[String | Number]
+  val unit: js.UndefOr[String | Int] = js.undefined
   /** The type of axis */
-  val axisType: js.UndefOr[Axis.AxisType]
-  val range: js.UndefOr[js.Array[Int]]
+  val axisType: js.UndefOr[Axis.AxisType] = js.undefined
+  val range: js.UndefOr[js.Array[Int]] = js.undefined
   /** axis react component */
-  val AxisComp: js.UndefOr[js.Any]
+  val AxisComp: js.UndefOr[js.Any] = js.undefined
 }
 
 object XAxis {
@@ -133,27 +133,44 @@ object XAxis {
 
   trait Props extends BaseAxisProps {
     /** The unique id of x-axis */
-    val xAxisId: js.UndefOr[String | Int]
+    val xAxisId: js.UndefOr[String | Int] = js.undefined
     /** The width of axis which is usually calculated internally */
-    val width: js.UndefOr[Int]
+    val width: js.UndefOr[Int] = js.undefined
     /** The height of axis, which need to be setted by user */
-    val height: js.UndefOr[Int]
-    val mirror: js.UndefOr[Boolean]
+    val height: js.UndefOr[Int] = js.undefined
+    val mirror: js.UndefOr[Boolean] = js.undefined
     // The orientation of axis
-    val orientation: js.UndefOr[Orientation]
+    val orientation: js.UndefOr[Orientation] = js.undefined
     /**
      * Ticks can be any type when the axis is the type of category
      * Ticks must be Ints when the axis is the type of Int
      */
-    val ticks: js.UndefOr[Array[String | Int]]
-    val padding: js.UndefOr[Padding]
-    val minTickGap: js.UndefOr[Int]
-    val interval: js.UndefOr[AxisInterval]
-    val reversed: js.UndefOr[Boolean]
+    val ticks: js.UndefOr[Array[String | Int]] = js.undefined
+    val padding: js.UndefOr[Padding] = js.undefined
+    val minTickGap: js.UndefOr[Int] = js.undefined
+    val interval: js.UndefOr[AxisInterval] = js.undefined
+    val reversed: js.UndefOr[Boolean] = js.undefined
   }
 
-  private val component = JsFnComponent[Props, Children.None](RawComponent)
-  def apply(p: Props): JsFnComponent.Unmounted[Props] = component(p)
+  object Props {
+    def apply(
+      aType: UndefOr[Type] = js.undefined,
+      aDataKey: js.UndefOr[String | Int] = js.undefined,
+      aName: js.UndefOr[String] = js.undefined,
+      aUnit: js.UndefOr[String | Int] = js.undefined
+    ): Props = {
+
+      new Props {
+        override val `type`: UndefOr[Type] = aType
+        override val dataKey: UndefOr[DataKey[js.Any]] = aDataKey.map(a => a.asInstanceOf[DataKey[js.Any]])
+        override val name: UndefOr[String] = aName
+        override val unit: UndefOr[String | Int] = aUnit
+      }
+    }
+  }
+
+  private val component = JsComponent[Props, Children.None, Null](RawComponent)
+  def apply(p: Props): JsComponent.Unmounted[Props, Null] = component(p)
 }
 
 object YAxis {
@@ -176,27 +193,44 @@ object YAxis {
 
   trait Props extends BaseAxisProps {
     /** The unique id of x-axis */
-    val yAxisId: js.UndefOr[String | Int]
+    val yAxisId: js.UndefOr[String | Int] = js.undefined
     /** The width of axis which is usually calculated internally */
-    val width: js.UndefOr[Int]
+    val width: js.UndefOr[Int] = js.undefined
     /** The height of axis, which need to be setted by user */
-    val height: js.UndefOr[Int]
-    val mirror: js.UndefOr[Boolean]
+    val height: js.UndefOr[Int] = js.undefined
+    val mirror: js.UndefOr[Boolean] = js.undefined
     // The orientation of axis
-    val orientation: js.UndefOr[Orientation]
+    val orientation: js.UndefOr[Orientation] = js.undefined
     /**
      * Ticks can be any type when the axis is the type of category
      * Ticks must be Ints when the axis is the type of Int
      */
-    val ticks: js.UndefOr[Array[String | Int]]
-    val padding: js.UndefOr[Padding]
-    val minTickGap: js.UndefOr[Int]
-    val interval: js.UndefOr[AxisInterval]
-    val reversed: js.UndefOr[Boolean]
+    val ticks: js.UndefOr[Array[String | Int]] = js.undefined
+    val padding: js.UndefOr[Padding] = js.undefined
+    val minTickGap: js.UndefOr[Int] = js.undefined
+    val interval: js.UndefOr[AxisInterval] = js.undefined
+    val reversed: js.UndefOr[Boolean] = js.undefined
   }
 
-  private val component = JsFnComponent[Props, Children.None](RawComponent)
-  def apply(p: Props): JsFnComponent.Unmounted[Props] = component(p)
+  object Props {
+    def apply(
+      aType: UndefOr[Type] = js.undefined,
+      aDataKey: js.UndefOr[String | Int] = js.undefined,
+      aName: js.UndefOr[String] = js.undefined,
+      aUnit: js.UndefOr[String | Int] = js.undefined
+    ): Props = {
+
+      new Props {
+        override val `type`: UndefOr[Type] = aType
+        override val dataKey: UndefOr[DataKey[js.Any]] = aDataKey.map(a => a.asInstanceOf[DataKey[js.Any]])
+        override val name: UndefOr[String] = aName
+        override val unit: UndefOr[String | Int] = aUnit
+      }
+    }
+  }
+
+  private val component = JsComponent[Props, Children.None, Null](RawComponent)
+  def apply(p: Props): JsComponent.Unmounted[Props, Null] = component(p)
 }
 
 object ZAxis {
@@ -218,20 +252,38 @@ object ZAxis {
   }
 
   trait Props extends js.Object {
-    val `type`: Type
+    val `type`: js.UndefOr[Type] = js.undefined
     /** The name of data displayed in the axis */
-    val name: js.UndefOr[String | Int]
+    val name: js.UndefOr[String | Int] = js.undefined
     /** The unit of data displayed in the axis */
-    val unit: js.UndefOr[String | Int]
+    val unit: js.UndefOr[String | Int] = js.undefined
     /** The unique id of z-axis */
-    val zAxisId: js.UndefOr[String | Int]
+    val zAxisId: js.UndefOr[String | Int] = js.undefined
     /** The key of data displayed in the axis */
-    val dataKey: js.UndefOr[DataKey[js.Any]]
+    val dataKey: js.UndefOr[DataKey[js.Any]] = js.undefined
     /** The range of axis */
-    val range: js.UndefOr[js.Array[Int]]
-    val scale: js.UndefOr[ScaleType | js.Function]
+    val range: js.UndefOr[js.Array[Int]] = js.undefined
+    val scale: js.UndefOr[ScaleType | js.Function] = js.undefined
   }
 
-  private val component = JsFnComponent[Props, Children.None](RawComponent)
-  def apply(p: Props): JsFnComponent.Unmounted[Props] = component(p)
+  object Props {
+    def apply(
+      aType: UndefOr[Type] = js.undefined,
+      aDataKey: UndefOr[DataKey[js.Any]] = js.undefined,
+      aRange: UndefOr[(Int, Int)] = js.undefined,
+      aName: UndefOr[String | Int] = js.undefined,
+      aUnit: js.UndefOr[String | Int] = js.undefined
+    ): Props = {
+      new Props {
+        override val `type`: UndefOr[Type] = aType
+        override val name: UndefOr[String | Int] = aName
+        override val unit: UndefOr[String | Int] = aUnit
+        override val range: UndefOr[js.Array[Int]] = aRange.map { case (v1, v2) => js.Array(v1, v2) }
+        override val dataKey: UndefOr[DataKey[js.Any]] = aDataKey
+      }
+    }
+  }
+
+  private val component = JsComponent[Props, Children.None, Null](RawComponent)
+  def apply(p: Props): JsComponent.Unmounted[Props, Null] = component(p)
 }

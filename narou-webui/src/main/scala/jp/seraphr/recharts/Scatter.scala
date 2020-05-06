@@ -5,7 +5,7 @@ import org.scalajs.dom.raw.SVGElement
 
 import scala.scalajs.js
 import scala.scalajs.js.annotation.JSImport
-import scala.scalajs.js.|
+import scala.scalajs.js.{ UndefOr, | }
 
 object Scatter {
   @js.native
@@ -47,8 +47,8 @@ object Scatter {
     val yAxisId: js.UndefOr[String | Int] = js.undefined
     val zAxisId: js.UndefOr[String | Int] = js.undefined
 
-    val left: js.UndefOr[Int]
-    val top: js.UndefOr[Int]
+    val left: js.UndefOr[Int] = js.undefined
+    val top: js.UndefOr[Int] = js.undefined
 
     //    yAxis?: Omit<XAxisProps, 'scale'> & { scale: D3Scale<string | number> };
     //    xAxis?: Omit<YAxisProps, 'scale'> & { scale: D3Scale<string | number> };
@@ -61,20 +61,36 @@ object Scatter {
     val lineJointType: js.UndefOr[CurveType] = js.undefined
     val legendType: js.UndefOr[LegendType] = js.undefined
     val tooltipType: js.UndefOr[TooltipType] = js.undefined
-    val className: js.UndefOr[String] // これ定義だと ? ついてなかったけど、サンプルのコードは渡してなかった・・・
-    val name: js.UndefOr[String | Int]
+    val className: js.UndefOr[String] = js.undefined // これ定義だと ? ついてなかったけど、サンプルのコードは渡してなかった・・・
+    val name: js.UndefOr[String | Int] = js.undefined
 
-    val activeIndex: js.UndefOr[Int]
-    val activeShape: js.UndefOr[ReactElement[SVGElement] | js.Function1[js.Any, SVGElement] | SymbolsProps]
-    val shape: js.UndefOr[SymbolType | ReactElement[SVGElement] | js.Function1[js.Any, SVGElement]]
-    val points: js.UndefOr[js.Array[ScatterPointItem]]
-    val hide: js.UndefOr[Boolean]
+    val activeIndex: js.UndefOr[Int] = js.undefined
+    val activeShape: js.UndefOr[ReactElement[SVGElement] | js.Function1[js.Any, SVGElement] | SymbolsProps] = js.undefined
+    val shape: js.UndefOr[SymbolType | ReactElement[SVGElement] | js.Function1[js.Any, SVGElement]] = js.undefined
+    val points: js.UndefOr[js.Array[ScatterPointItem]] = js.undefined
+    val hide: js.UndefOr[Boolean] = js.undefined
 
-    val isAnimationActive: js.UndefOr[Boolean]
-    val animationId: js.UndefOr[Int]
-    val animationBegin: js.UndefOr[Int]
-    val animationDuration: js.UndefOr[Int]
-    val animationEasing: js.UndefOr[AnimationTiming]
+    val isAnimationActive: js.UndefOr[Boolean] = js.undefined
+    val animationId: js.UndefOr[Int] = js.undefined
+    val animationBegin: js.UndefOr[Int] = js.undefined
+    val animationDuration: js.UndefOr[Int] = js.undefined
+    val animationEasing: js.UndefOr[AnimationTiming] = js.undefined
+  }
+
+  object Props {
+    def apply(
+      aName: js.UndefOr[String | Int] = js.undefined,
+      aData: js.UndefOr[js.Array[js.Any]] = js.undefined,
+      aFill: js.UndefOr[String]
+    ): Props = {
+      new Props {
+        override val data: UndefOr[js.Array[js.Any]] = aData
+        override val name: UndefOr[String | Int] = aName
+
+        @scala.annotation.nowarn
+        val fill: js.UndefOr[String] = aFill
+      }
+    }
   }
 
   private val component = JsComponent[Props, Children.Varargs, Null](RawComponent)

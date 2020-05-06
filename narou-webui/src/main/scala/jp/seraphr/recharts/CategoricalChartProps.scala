@@ -12,18 +12,16 @@ trait Margin extends js.Object {
 
 object Margin {
   def apply(
-    aTop: Option[Int] = None,
-    aRight: Option[Int] = None,
-    aBottom: Option[Int] = None,
-    aLeft: Option[Int] = None
+    aTop: js.UndefOr[Int] = js.undefined,
+    aRight: js.UndefOr[Int] = js.undefined,
+    aBottom: js.UndefOr[Int] = js.undefined,
+    aLeft: js.UndefOr[Int] = js.undefined
   ): Margin = {
-    import jp.seraphr.js.ScalaJsConverters._
-
     new Margin {
-      override val top: UndefOr[Int] = aTop.asUndefOr
-      override val right: UndefOr[Int] = aRight.asUndefOr
-      override val bottom: UndefOr[Int] = aBottom.asUndefOr
-      override val left: UndefOr[Int] = aLeft.asUndefOr
+      override val top: UndefOr[Int] = aTop
+      override val right: UndefOr[Int] = aRight
+      override val bottom: UndefOr[Int] = aBottom
+      override val left: UndefOr[Int] = aLeft
     }
   }
 }
@@ -36,16 +34,14 @@ trait CategoricalChartProps extends js.Object {
 
 object CategoricalChartProps {
   def apply(
-    aWidth: Option[Int] = None,
-    aHeight: Option[Int] = None,
-    aMargin: Option[Margin] = None
+    aWidth: js.UndefOr[Int] = js.undefined,
+    aHeight: js.UndefOr[Int] = js.undefined,
+    aMargin: js.UndefOr[Margin] = js.undefined
   ): CategoricalChartProps = {
-    import jp.seraphr.js.ScalaJsConverters._
-
     new CategoricalChartProps {
-      override val width: UndefOr[Int] = aWidth.asUndefOr
-      override val height: UndefOr[Int] = aHeight.asUndefOr
-      override val margin: UndefOr[Margin] = aMargin.asUndefOr
+      override val width: UndefOr[Int] = aWidth
+      override val height: UndefOr[Int] = aHeight
+      override val margin: UndefOr[Margin] = aMargin
     }
   }
 }
