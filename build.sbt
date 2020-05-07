@@ -77,6 +77,7 @@ lazy val `narou-rank` = (project in file("narou-rank"))
 lazy val `narou-webui` = (project in file("narou-webui"))
   .enablePlugins(ScalaJSPlugin)
   .enablePlugins(ScalaJSBundlerPlugin)
+  .enablePlugins(ScalablyTypedConverterPlugin)
   .settings(commonSettings)
   .settings(
     scalacOptions += "-P:scalajs:sjsDefinedByDefault",
@@ -87,7 +88,9 @@ lazy val `narou-webui` = (project in file("narou-webui"))
     Compile / npmDependencies ++= Seq(
       js.react,
       js.reactDom,
-      js.recharts
-    )
+      js.recharts,
+      js.antd
+    ),
+    stFlavour := Flavour.Japgolly
   )
   .dependsOn(modelJS)
