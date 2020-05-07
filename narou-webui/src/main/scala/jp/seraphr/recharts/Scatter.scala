@@ -80,11 +80,13 @@ object Scatter {
   object Props {
     def apply(
       aName: js.UndefOr[String | Int] = js.undefined,
-      aData: js.UndefOr[js.Array[js.Any]] = js.undefined,
+      aData: js.UndefOr[Seq[js.Any]] = js.undefined,
       aFill: js.UndefOr[String]
     ): Props = {
+      import scala.scalajs.js.JSConverters._
+
       new Props {
-        override val data: UndefOr[js.Array[js.Any]] = aData
+        override val data: UndefOr[js.Array[js.Any]] = aData.map(_.toJSArray)
         override val name: UndefOr[String | Int] = aName
 
         @scala.annotation.nowarn
