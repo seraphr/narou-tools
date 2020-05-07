@@ -45,5 +45,10 @@ object Dependencies {
     val reactDom = "react-dom" -> reactVersion
     val recharts = "recharts" -> "1.8.5"
     val antd = "antd" -> "3.26.0"
+
+    val `css-loader` = "css-loader" -> "3.4.2"
+    val `style-loader` = "style-loader" -> "1.1.3"
+    val `file-loader` = "file-loader" -> "5.1.0"
+    val `url-loader` = "url-loader" -> "3.0.0"
   }
 }

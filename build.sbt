@@ -91,6 +91,14 @@ lazy val `narou-webui` = (project in file("narou-webui"))
       js.recharts,
       js.antd
     ),
-    stFlavour := Flavour.Japgolly
+    stFlavour := Flavour.Japgolly,
+    // css-load設定 fileとかurlは要らんが、scalablytypedデモプロジェクトからそのまま持ってきた
+    webpackConfigFile := Some(baseDirectory.value / "custom-scalajs.webpack.config"),
+    Compile / npmDevDependencies ++= Seq(
+      js.`css-loader`,
+      js.`style-loader`,
+      js.`file-loader`,
+      js.`url-loader`
+    )
   )
   .dependsOn(modelJS)
