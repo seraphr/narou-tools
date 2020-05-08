@@ -1,12 +1,11 @@
 package jp.seraphr.narou.commands.sandbox
 
 import java.io.File
-import java.nio.file.{ Files, StandardOpenOption }
 import java.util.concurrent.atomic.AtomicInteger
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import jp.seraphr.command.Command
-import jp.seraphr.narou.HasLogger
+import jp.seraphr.narou.{ HasLogger, NarouNovelsWriter }
 import narou4j.entities.Novel
 
 import scala.annotation.nowarn
@@ -40,7 +39,7 @@ class SandboxCommand(aDefaultArg: SandboxCommandArg) extends Command with HasLog
     }.get
 
     //    showKeywords(tNovels)
-    convertNovelList(tNovels, aArgs.input.modName(_ + ".jsonl"))
+    convertNovelList(tNovels, aArgs.input.modName(_ => "novels"))
     //    findUploadType0(tNovels)
   }
 
@@ -72,22 +71,17 @@ class SandboxCommand(aDefaultArg: SandboxCommandArg) extends Command with HasLog
   }
 
   //  @nowarn("cat=unused")
-  private def convertNovelList(aNovels: Vector[Novel], aOutput: File): Unit = {
+  private def convertNovelList(aNovels: Vector[Novel], aOutputDir: File): Unit = {
     logger.info(s"novelの変換を行います: Novel数=${aNovels.size}")
-    import io.circe.syntax._
-    import jp.seraphr.narou.json.NarouNovelFormats._
     import jp.seraphr.narou.model.NarouNovelConverter._
 
-    def newOutputStream = Files.newBufferedWriter(aOutput.toPath, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.WRITE)
-
     val tCounter = new AtomicInteger()
-    Using(newOutputStream) { tStream =>
+    Using(new NarouNovelsWriter(aOutputDir, 50000)) { tStream =>
       aNovels.foreach { n =>
         if (tCounter.incrementAndGet() % 5000 == 0) {
           logger.info(s"変換: ${tCounter.get()}")
         }
-        tStream.write(n.asScala.asJson.noSpaces)
-        tStream.write("\n")
+        tStream.write(n.asScala)
       }
     }.get
     logger.info(s"novelの変換が完了しました")
