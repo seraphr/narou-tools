@@ -129,7 +129,7 @@ class CollectNovelCommand(aDefaultArg: CollectNovelCommandArg) extends Command w
       .text(s"なろう小説APIへのアクセスインターバルをミリ秒単位で指定します。 省略した場合は、${aDefaultArg.intervalMillis}です")
       .action((i, c) => c.copy(intervalMillis = i))
 
-    private implicit val mReadOverwhite: Read[OverwriteOption] = Read.reads {
+    private implicit val mReadOverwrite: Read[OverwriteOption] = Read.reads {
       case Recreate.text => Recreate
       case Update.text   => Update
       case Fail.text     => Fail
