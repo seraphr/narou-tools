@@ -29,7 +29,10 @@ lazy val `narou-libs-model` = crossProject(JVMPlatform, JSPlatform)
   .crossType(CrossType.Full)
   .in(file("narou-libs-model"))
   .settings(
-    libraryDependencies ++= scalajs.circe.value
+    libraryDependencies ++= scalajs.circe.value,
+    libraryDependencies ++= Seq(
+      scalajs.monixReactive.value
+    )
   )
   .settings(commonSettings)
   .jvmSettings(

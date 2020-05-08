@@ -19,8 +19,8 @@ class NarouNovelsWriter(aDir: File, aNovelPerFile: Int) extends AutoCloseable {
   }
   aDir.mkdirs()
 
-  private val mMetaFile = aDir / "novel_list.meta.json"
-  private def fileName(aIndex: Int) = s"novel_list_${aIndex}.jsonl"
+  private val mMetaFile = aDir / NovelFileNames.metaFile
+  private def fileName(aIndex: Int) = NovelFileNames.novelFile(aIndex)
   private def novelFile(aIndex: Int) = aDir / fileName(aIndex)
   private def fileCount = {
     val tCount = mNovelCount.get() / aNovelPerFile

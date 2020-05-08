@@ -1,22 +1,17 @@
 package jp.seraphr.narou.commands.collect
 
-import java.io.{ File, FileOutputStream, OutputStreamWriter }
-import java.nio.charset.StandardCharsets
+import java.io.File
+import java.nio.file.Files
 
-import com.fasterxml.jackson.core.JsonGenerator
-import com.fasterxml.jackson.core.`type`.TypeReference
-import com.fasterxml.jackson.databind.module.SimpleModule
-import com.fasterxml.jackson.databind.{ ObjectMapper, SerializerProvider }
-import com.fasterxml.jackson.databind.ser.std.StdSerializer
 import jp.seraphr.command.Command
-import jp.seraphr.narou.{ AllNovelCollector, HasLogger, NarouClientBuilder }
+import jp.seraphr.narou.{ AllNovelCollector, DefaultNovelLoader, FileNovelDataAccessor, HasLogger, NarouClientBuilder, NarouNovelsWriter }
 import jp.seraphr.narou.commands.collect.CollectNovelCommand._
-import narou4j.entities.Novel
-import narou4j.enums.NovelGenre
+import jp.seraphr.narou.model.NarouNovel
 import org.apache.commons.io.FileUtils
 import scopt.Read
 
-import scala.io.Source
+import scala.concurrent.Await
+import scala.concurrent.duration.Duration
 import scala.util.control.NonFatal
 import scala.util.{ Failure, Try }
 
@@ -34,19 +29,6 @@ class CollectNovelCommand(aDefaultArg: CollectNovelCommandArg) extends Command w
     }
   }
 
-  object GenreSerializer extends StdSerializer[NovelGenre](classOf[NovelGenre]) {
-    override def serialize(value: NovelGenre, gen: JsonGenerator, provider: SerializerProvider): Unit = {
-      gen.writeNumber(value.getId)
-    }
-  }
-
-  private val mMapper = {
-    import jp.seraphr.narou.Tapper
-    new ObjectMapper().tap { tMapper =>
-      tMapper.registerModule(new SimpleModule().tap(_.addSerializer(classOf[NovelGenre], GenreSerializer)))
-    }
-  }
-
   implicit class LoanPattern[A <: { def close(): Unit }](a: A) extends HasLogger {
     import scala.language.reflectiveCalls
     def loan[B](f: A => B): B = {
@@ -57,12 +39,12 @@ class CollectNovelCommand(aDefaultArg: CollectNovelCommandArg) extends Command w
   }
 
   private def collect(aArg: CollectNovelCommandArg): Try[Unit] = Try {
-    def loadFrom(aFile: File): Map[String, Novel] = {
-      Source.fromFile(aFile, "UTF-8").loan {
-        _.getLines
-          .map(mMapper.readValue[Novel](_, new TypeReference[Novel]() {}))
-          .foldLeft(Map.empty[String, Novel])((m, n) => m.updated(n.getNcode, n))
-      }
+    def loadFrom(aDir: File): Map[String, NarouNovel] = {
+      val tNovelsObs = new DefaultNovelLoader(new FileNovelDataAccessor(aDir)).novels
+
+      import monix.execution.Scheduler.Implicits.global
+      val tFuture = tNovelsObs.foldLeftL(Map.empty[String, NarouNovel])((map, n) => map.updated(n.ncode, n)).runToFuture
+      Await.result(tFuture, Duration.Inf)
     }
 
     val tOutput = aArg.output
@@ -71,11 +53,11 @@ class CollectNovelCommand(aDefaultArg: CollectNovelCommandArg) extends Command w
     }
 
     val tInitMap = (tOutput.exists(), aArg.overwrite) match {
-      case (false, _)   => Map.empty[String, Novel]
+      case (false, _)   => Map.empty[String, NarouNovel]
       case (true, Fail) => throw new RuntimeException(s"出力先がすでに存在します: ${tOutput.getCanonicalPath}")
       case (true, Recreate) =>
         logger.info("既存の出力ファイルを消して再生成します")
-        Map.empty[String, Novel]
+        Map.empty[String, NarouNovel]
       case (true, Update) =>
         logger.info("既存の出力ファイルに情報を追加します")
         loadFrom(tOutput)
@@ -83,36 +65,37 @@ class CollectNovelCommand(aDefaultArg: CollectNovelCommandArg) extends Command w
 
     //    val tCollector = new NovelCollector(aArg.intervalMillis)
     val tCollector = new AllNovelCollector(aArg.intervalMillis)
-    val tTempOutputFile = File.createTempFile("novel_list", "")
+    val tTempOutputDir = Files.createTempDirectory("novel_list").toFile
     val tInitSize = tInitMap.size
     logger.info(s"小説リストの収集を開始します。 初期ノベル数: ${tInitSize}")
     try {
-      val tResultMap = tCollector.collect(NarouClientBuilder.init).foldLeft(tInitMap) {
-        (m, n) => m.updated(n.getNcode, n)
+      val tResultMap = tCollector.collect(NarouClientBuilder.init).take(aArg.limit).foldLeft(tInitMap) {
+        import jp.seraphr.narou.model.NarouNovelConverter._
+        (m, n) => m.updated(n.getNcode, n.asScala)
       }
       val tResultSize = tResultMap.size
       logger.info(s"収集が完了しました。 最終ノベル数: ${tResultSize}  増加ノベル数: ${tResultSize - tInitSize}")
       logger.info(s"一時ファイルへの書き込みを開始します")
-      new OutputStreamWriter(new FileOutputStream(tTempOutputFile), StandardCharsets.UTF_8).loan { tWriter =>
+
+      new NarouNovelsWriter(tTempOutputDir, aArg.novelsPerFile).loan { tWriter =>
         tResultMap.values.foreach { tNovel =>
-          tWriter.write(mMapper.writeValueAsString(tNovel))
-          tWriter.write("\n")
+          tWriter.write(tNovel)
         }
       }
       logger.info(s"一時ファイルへの書き込みを完了しました。")
       logger.info(s"出力ファイルの差し替えを行います。")
       if (tOutput.exists()) {
-        val tBackupFile = new File(tOutput.getParentFile, s"${tOutput.getName}.bak")
-        if (tBackupFile.exists()) {
-          FileUtils.deleteQuietly(tBackupFile)
-          logger.info(s"旧出力ファイルを、バックアップしました: ${tBackupFile.getCanonicalPath}")
+        val tBackupDir = new File(tOutput.getParentFile, s"${tOutput.getName}.bak")
+        if (tBackupDir.exists()) {
+          FileUtils.deleteQuietly(tBackupDir)
         }
-        FileUtils.moveFile(tOutput, tBackupFile)
+        FileUtils.moveDirectory(tOutput, tBackupDir)
+        logger.info(s"旧出力ファイルを、バックアップしました: ${tBackupDir.getCanonicalPath}")
       }
-      FileUtils.moveFile(tTempOutputFile, tOutput)
+      FileUtils.moveDirectory(tTempOutputDir, tOutput)
       logger.info(s"出力が完了しました。")
     } finally {
-      FileUtils.deleteQuietly(tTempOutputFile)
+      FileUtils.deleteQuietly(tTempOutputDir)
     }
   }
 
@@ -128,6 +111,16 @@ class CollectNovelCommand(aDefaultArg: CollectNovelCommandArg) extends Command w
       .optional()
       .text(s"なろう小説APIへのアクセスインターバルをミリ秒単位で指定します。 省略した場合は、${aDefaultArg.intervalMillis}です")
       .action((i, c) => c.copy(intervalMillis = i))
+
+    opt[Int]('l', "limit")
+      .optional()
+      .text(s"取得する小説の最大数を指定します。 省略した場合は、${aDefaultArg.limit}です")
+      .action((i, c) => c.copy(limit = i))
+
+    opt[Int]("novelsPerFile")
+      .optional()
+      .text(s"1ファイルにいくつの小説を格納するかを指定します。。 省略した場合は、${aDefaultArg.novelsPerFile}です")
+      .action((i, c) => c.copy(novelsPerFile = i))
 
     private implicit val mReadOverwrite: Read[OverwriteOption] = Read.reads {
       case Recreate.text => Recreate
@@ -165,6 +158,8 @@ object CollectNovelCommand {
   case class CollectNovelCommandArg(
     output: File,
     overwrite: OverwriteOption,
-    intervalMillis: Long
+    intervalMillis: Long,
+    limit: Int,
+    novelsPerFile: Int
   )
 }

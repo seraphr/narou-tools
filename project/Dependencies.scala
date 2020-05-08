@@ -7,6 +7,7 @@ object Dependencies {
   val scalatestVersion = "3.1.1"
   val scalatestplusVersion = s"${scalatestVersion}.0"
   val circeVersion = "0.13.0"
+  val monixVersion = "3.2.1"
 
   object jvm {
     val scalaTest = "org.scalatest" %% "scalatest" % scalatestVersion
@@ -15,6 +16,8 @@ object Dependencies {
     val scopt = "com.github.scopt" %% "scopt" % "3.7.1"
     val slf4j = "org.slf4j" % "slf4j-api" % "1.7.+"
     val logback = "ch.qos.logback" % "logback-classic" % "1.2.3"
+    val monix = "io.monix" %% "monix" % monixVersion
+    val monixReactive = "io.monix" %% "monix-reactive" % monixVersion
 
     val circe = Seq(
       "io.circe" %% "circe-core",
@@ -30,6 +33,7 @@ object Dependencies {
     val scalacheck = Def.setting("org.scalatestplus" %%% "scalacheck-1-14" % scalatestplusVersion)
     val reactjs = Def.setting("com.github.japgolly.scalajs-react" %%% "core" % "1.6.0")
     val reactjsExtra = Def.setting("com.github.japgolly.scalajs-react" %%% "extra" % "1.6.0")
+    val monixReactive = Def.setting("io.monix" %%% "monix-reactive" % monixVersion)
     val circe = Def.setting(
       Seq(
         "io.circe" %%% "circe-core",
