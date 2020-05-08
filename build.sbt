@@ -3,6 +3,7 @@ import sbtcrossproject.CrossPlugin.autoImport.{CrossType, crossProject}
 
 name := "narou-tools"
 ThisBuild / organization := "jp.seraphr"
+enablePlugins(WorkbenchPlugin)
 
 val commonDependencies = Def.settings(
   libraryDependencies ++= Seq(
@@ -38,6 +39,11 @@ lazy val `narou-libs-model` = crossProject(JVMPlatform, JSPlatform)
   .jvmSettings(
     libraryDependencies ++= Seq(
       jvm.narou4j
+    )
+  )
+  .jsSettings(
+    libraryDependencies ++= Seq(
+      scalajs.scalajsDom.value
     )
   )
 lazy val modelJVM = `narou-libs-model`.jvm
