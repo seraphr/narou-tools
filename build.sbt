@@ -50,6 +50,9 @@ lazy val `narou-libs` = (project in file("narou-libs"))
     )
   )
   .settings(commonSettings)
+  .dependsOn(
+    modelJVM
+  )
 
 lazy val `narou-tools` = (project in file("narou-tools"))
   .settings(
