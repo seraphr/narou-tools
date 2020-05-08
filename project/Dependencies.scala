@@ -25,6 +25,8 @@ object Dependencies {
       "io.circe" %% "circe-parser",
       "io.circe" %% "circe-generic-extras"
     ).map(_ % circeVersion)
+
+    val scalajsStubs = "org.scala-js" %% "scalajs-stubs" % "1.0.0" % "provided"
   }
 
   object scalajs {

@@ -1,5 +1,7 @@
 package jp.seraphr.narou.model
 
+import scala.scalajs.js.annotation.JSExportAll
+
 case class Genre(id: Int, text: String)
 
 sealed abstract class NovelType(val id: Int)
@@ -52,6 +54,7 @@ object UploadType {
  * @param novelUpdatedAt 最終小説更新時刻。 あらすじ・本文追記などのアップデートでも更新される
  * @param updatedAt 更新時刻。 システム用
  */
+@JSExportAll
 case class NarouNovel(
   title: String,
   ncode: String,

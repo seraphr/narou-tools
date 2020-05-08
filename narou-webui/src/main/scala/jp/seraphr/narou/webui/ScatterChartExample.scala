@@ -77,8 +77,8 @@ object ScatterChartExample {
         ZAxis(ZAxis.Props(aDataKey = "z", aRange = (10, 10), aName = "score", aUnit = "km")),
         Tooltip(Tooltip.Props(aCursor = CursorStruct("3 3"))),
         Legend(Legend.Props()),
-        Scatter(Scatter.Props(aName = "A school", aData = tRandomData1, aFill = "#8884d8"))(),
-        Scatter(Scatter.Props(aName = "B school", aData = tRandomData2, aFill = "#82ca9d"))()
+        Scatter(Scatter.Props(aName = "A school", aData = tRandomData1, aFill = "#8884d8", aIsAnimationActive = false))(),
+        Scatter(Scatter.Props(aName = "B school", aData = tRandomData2, aFill = "#82ca9d", aIsAnimationActive = false))()
       )
   }
 
