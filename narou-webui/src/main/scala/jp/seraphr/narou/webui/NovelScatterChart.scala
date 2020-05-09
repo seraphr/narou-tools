@@ -6,20 +6,6 @@ import jp.seraphr.recharts.{ Axis, CartesianGrid, Legend, Margin, Scatter, Scatt
 import jp.seraphr.recharts.Tooltip.CursorStruct
 
 import scala.scalajs.js
-import scala.scalajs.js.annotation.{ JSExport }
-
-class Hoge(field1: Int, field2: String) {
-  @JSExport("hogehoge")
-  val f1 = field1
-  @JSExport("fugafuga")
-  val f2 = field2
-}
-
-@js.native
-trait HogeObj extends js.Object {
-  def hogehoge: Int = js.native
-  def fugafuga: String = js.native
-}
 
 object NovelScatterChart {
   case class Props(novels: Seq[NarouNovel])

@@ -20,8 +20,8 @@ trait NovelDataAccessor {
 
 trait ExtractedNovelLoader {
   val metadata: Task[ExtractedNarouNovelsMeta]
-  val allMetadata: Task[Seq[NarouNovelsMeta]]
-  def loader(aDir: String): Task[DefaultNovelLoader]
+  val allMetadata: Task[Map[String, NarouNovelsMeta]]
+  def loader(aDir: String): Task[NovelLoader]
   def load(aDir: String): Observable[NarouNovel] = {
     Observable.fromTask(loader((aDir))).flatMap(_.novels)
   }
@@ -38,12 +38,12 @@ import io.circe.parser.decode
 
 class DefaultExtractedNovelLoader(aAccessor: NovelDataAccessor) extends ExtractedNovelLoader {
   override val metadata: Task[ExtractedNarouNovelsMeta] = aAccessor.extractedMeta.flatMap(s => Task.fromEither(decode[ExtractedNarouNovelsMeta](s)))
-  override val allMetadata: Task[Seq[NarouNovelsMeta]] = {
+  override val allMetadata: Task[Map[String, NarouNovelsMeta]] = {
     for {
       tMeta <- metadata
       tLoaders <- Task.traverse(tMeta.conditionDirs)(this.loader)
-      tNovelsMetas <- Task.traverse(tLoaders)(_.metadata)
-    } yield tNovelsMetas
+      tNovelsMetas <- Task.traverse(tLoaders)(_.metadataWithDir)
+    } yield tNovelsMetas.toMap
   }
 
   override def loader(aDir: String): Task[DefaultNovelLoader] = Task.now {
@@ -58,7 +58,9 @@ trait NovelLoader {
 
 class DefaultNovelLoader(aAccessor: NovelDataAccessor, aExtractedDir: String) extends NovelLoader {
 
+  val dir = aExtractedDir
   override val metadata: Task[NarouNovelsMeta] = aAccessor.metadata(aExtractedDir).flatMap(s => Task.fromEither(decode[NarouNovelsMeta](s)))
+  val metadataWithDir: Task[(String, NarouNovelsMeta)] = metadata.map(dir -> _)
 
   override val novels: Observable[NarouNovel] = {
     Observable.fromTask(metadata)
