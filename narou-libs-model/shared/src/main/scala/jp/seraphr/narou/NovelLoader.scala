@@ -25,12 +25,18 @@ trait ExtractedNovelLoader {
   def load(aDir: String): Observable[NarouNovel] = {
     Observable.fromTask(loader((aDir))).flatMap(_.novels)
   }
+
+  lazy val loadAll: Observable[NarouNovel] = {
+    Observable.fromTask(metadata)
+      .flatMap(m => Observable.fromIterable(m.conditionDirs))
+      .flatMap(this.load)
+  }
 }
 
 import jp.seraphr.narou.json.NarouNovelFormats._
 import io.circe.parser.decode
 
-class DefaultExtractedNovelLoader(aAccessor: NovelDataAccessor, aExtractedDir: String) extends ExtractedNovelLoader {
+class DefaultExtractedNovelLoader(aAccessor: NovelDataAccessor) extends ExtractedNovelLoader {
   override val metadata: Task[ExtractNarouNovelsMeta] = aAccessor.extractedMeta.flatMap(s => Task.fromEither(decode[ExtractNarouNovelsMeta](s)))
   override val allMetadata: Task[Seq[NarouNovelsMeta]] = {
     for {
