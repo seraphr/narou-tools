@@ -7,12 +7,14 @@ import monix.reactive.Observable
 import scala.collection.immutable.ArraySeq
 
 object NovelFileNames {
+  val extractedMetaFile = "extracted_novel_list.meta.json"
   val metaFile = "novel_list.meta.json"
   def novelFile(aIndex: Int) = s"novel_list_${aIndex}.jsonl"
 }
 
 trait NovelDataAccessor {
-  def metadata: Task[String]
+  val extractedMeta: Task[String]
+  def metadata(aDir: String): Task[String]
   def getNovel(aFile: String): Task[String]
 }
 
