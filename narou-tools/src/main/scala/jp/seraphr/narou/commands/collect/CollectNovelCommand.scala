@@ -40,7 +40,7 @@ class CollectNovelCommand(aDefaultArg: CollectNovelCommandArg) extends Command w
 
   private def collect(aArg: CollectNovelCommandArg): Try[Unit] = Try {
     def loadFrom(aDir: File): Map[String, NarouNovel] = {
-      val tNovelsObs = new DefaultNovelLoader(new FileNovelDataAccessor(aDir)).novels
+      val tNovelsObs = new DefaultNovelLoader(new FileNovelDataAccessor(aDir), "all").novels
 
       import monix.execution.Scheduler.Implicits.global
       val tFuture = tNovelsObs.foldLeftL(Map.empty[String, NarouNovel])((map, n) => map.updated(n.ncode, n)).runToFuture
@@ -77,7 +77,8 @@ class CollectNovelCommand(aDefaultArg: CollectNovelCommandArg) extends Command w
       logger.info(s"収集が完了しました。 最終ノベル数: ${tResultSize}  増加ノベル数: ${tResultSize - tInitSize}")
       logger.info(s"一時ファイルへの書き込みを開始します")
 
-      new DefaultNarouNovelsWriter("all", tTempOutputDir, aArg.novelsPerFile).loan { tWriter =>
+      import jp.seraphr.narou.FileUtils._
+      new DefaultNarouNovelsWriter("all", tTempOutputDir / "all", aArg.novelsPerFile).loan { tWriter =>
         tResultMap.values.foreach { tNovel =>
           tWriter.write(tNovel)
         }

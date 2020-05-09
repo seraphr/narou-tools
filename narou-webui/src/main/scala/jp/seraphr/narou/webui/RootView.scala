@@ -30,7 +30,7 @@ object RootView {
   //  private val mCurrentURI = new URI(org.scalajs.dom.window.location.href).resolve("./narou_novels")
   private val mCurrentURI = new URI("./narou_novels/")
   println(s"===== currentURI = ${mCurrentURI.toString}")
-  private val mLoader = new DefaultNovelLoader(new AjaxNovelDataAccessor(mCurrentURI))
+  private val mLoader = new DefaultNovelLoader(new AjaxNovelDataAccessor(mCurrentURI), "all")
   private def loadNovels(aLimit: Int, setMeta: NarouNovelsMeta => Callback, setNovels: Seq[NarouNovel] => Callback): Callback = {
     import monix.execution.Scheduler.Implicits.global
 
