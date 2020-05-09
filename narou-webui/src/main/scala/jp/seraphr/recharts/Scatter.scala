@@ -92,6 +92,8 @@ object Scatter {
         override val isAnimationActive: UndefOr[Boolean] = aIsAnimationActive
         @scala.annotation.nowarn
         val fill: js.UndefOr[String] = aFill
+        @scala.annotation.nowarn
+        val fillOpacity: js.UndefOr[Double] = 0.5
       }
     }
   }

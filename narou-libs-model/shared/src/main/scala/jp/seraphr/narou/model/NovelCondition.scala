@@ -5,6 +5,10 @@ case class NovelCondition(id: String, name: String, predicate: NarouNovel => Boo
     NovelCondition(s"${this.id}_and_${aThat.id}", s"${this.name} & ${aThat.name}", n => this.predicate(n) && aThat.predicate(n))
   }
 
+  def andQuietly(aThat: NovelCondition): NovelCondition = {
+    this.copy(predicate = n => this.predicate(n) && aThat.predicate(n))
+  }
+
   def not: NovelCondition = {
     NovelCondition(s"not_${this.id}", s"not ${this.name}", n => !this.predicate(n))
   }
@@ -14,6 +18,7 @@ object NovelCondition {
   val finished = NovelCondition("finished", "完結済み", _.isFinished)
   val length100k = NovelCondition("length100k", "10万字以上", 100000 <= _.length)
   val length1m = NovelCondition("length100k", "100万字以上", 1000000 <= _.length)
+  val bookmark100 = NovelCondition("bookmark100", "100 <= bookmark", 100 <= _.bookmarkCount)
 
   def bookmark(aMin: Int, aMax: Int) =
     NovelCondition(s"bookmark${aMin}-${aMax}", s"${aMin} <= bookmark < ${aMin}", n => aMin <= n.bookmarkCount && n.bookmarkCount < aMax)

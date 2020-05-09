@@ -45,11 +45,15 @@ object Axis {
 
   type AxisDomainItem = String | Int | js.Function
   object AxisDomainItem {
-    val auto = "auto"
-    val dataMin = "dataMin"
-    val dataMax = "dataMax"
+    def number(n: Int): AxisDomainItem = n
+    val auto: AxisDomainItem = "auto"
+    val dataMin: AxisDomainItem = "dataMin"
+    val dataMax: AxisDomainItem = "dataMax"
   }
-  type AxisDomain = (AxisDomainItem, AxisDomainItem)
+  type AxisDomain = js.Array[AxisDomainItem]
+  object AxisDomain {
+    def apply(aTuple: (AxisDomainItem, AxisDomainItem)): AxisDomain = js.Array(aTuple._1, aTuple._2)
+  }
 
   type AxisInterval = Int | String
   object AxisInterval {
@@ -157,7 +161,8 @@ object XAxis {
       aType: UndefOr[Type] = js.undefined,
       aDataKey: js.UndefOr[String | Int] = js.undefined,
       aName: js.UndefOr[String] = js.undefined,
-      aUnit: js.UndefOr[String | Int] = js.undefined
+      aUnit: js.UndefOr[String | Int] = js.undefined,
+      aDomain: js.UndefOr[(AxisDomainItem, AxisDomainItem)] = js.undefined
     ): Props = {
 
       new Props {
@@ -165,6 +170,7 @@ object XAxis {
         override val dataKey: UndefOr[DataKey[js.Any]] = aDataKey.map(a => a.asInstanceOf[DataKey[js.Any]])
         override val name: UndefOr[String] = aName
         override val unit: UndefOr[String | Int] = aUnit
+        override val domain: UndefOr[AxisDomain] = aDomain.map(AxisDomain(_))
       }
     }
   }
@@ -217,7 +223,8 @@ object YAxis {
       aType: UndefOr[Type] = js.undefined,
       aDataKey: js.UndefOr[String | Int] = js.undefined,
       aName: js.UndefOr[String] = js.undefined,
-      aUnit: js.UndefOr[String | Int] = js.undefined
+      aUnit: js.UndefOr[String | Int] = js.undefined,
+      aDomain: js.UndefOr[(AxisDomainItem, AxisDomainItem)] = js.undefined
     ): Props = {
 
       new Props {
@@ -225,6 +232,7 @@ object YAxis {
         override val dataKey: UndefOr[DataKey[js.Any]] = aDataKey.map(a => a.asInstanceOf[DataKey[js.Any]])
         override val name: UndefOr[String] = aName
         override val unit: UndefOr[String | Int] = aUnit
+        override val domain: UndefOr[AxisDomain] = aDomain.map(AxisDomain(_))
       }
     }
   }
