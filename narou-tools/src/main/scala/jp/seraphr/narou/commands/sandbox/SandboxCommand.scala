@@ -76,7 +76,7 @@ class SandboxCommand(aDefaultArg: SandboxCommandArg) extends Command with HasLog
     import jp.seraphr.narou.model.NarouNovelConverter._
 
     val tCounter = new AtomicInteger()
-    Using(new DefaultNarouNovelsWriter(aOutputDir, 50000)) { tStream =>
+    Using(new DefaultNarouNovelsWriter("all", aOutputDir, 50000)) { tStream =>
       aNovels.foreach { n =>
         if (tCounter.incrementAndGet() % 5000 == 0) {
           logger.info(s"変換: ${tCounter.get()}")

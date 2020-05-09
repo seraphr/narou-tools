@@ -26,7 +26,7 @@ object NovelScatterChart {
 
   val compolent = ScalaFnComponent[Props] { case Props(aNovels) =>
     val tNovels = aNovels.map(js.use(_).as[js.Any])
-    println(s"========= novel size = ${aNovels.size}")
+    println(s"========= novel size = ${tNovels.size}")
 
     ScatterChart(
       ScatterChart.Props(
@@ -44,8 +44,8 @@ object NovelScatterChart {
           "strokeDasharray" -> "3 3"
         ))),
         XAxis(XAxis.Props(aType = Axis.Type.number, aDataKey = "bookmarkCount", aName = "bookmark")),
-        YAxis(YAxis.Props(aDataKey = "evaluationPoint", aName = "評価", aUnit = "pt")),
-        ZAxis(ZAxis.Props(aDataKey = "globalPoint", aRange = (10, 10), aName = "score", aUnit = "pt")),
+        YAxis(YAxis.Props(aDataKey = "globalPoint", aName = "評価", aUnit = "pt")),
+        ZAxis(ZAxis.Props(aType = Axis.Type.category, aDataKey = "title", aRange = (20, 20), aName = "title", aUnit = "")),
         Tooltip(Tooltip.Props(aCursor = CursorStruct("3 3"))),
         Legend(Legend.Props()),
         Scatter(Scatter.Props(aName = "narou", aData = tNovels, aFill = "#8884d8", aIsAnimationActive = false))()

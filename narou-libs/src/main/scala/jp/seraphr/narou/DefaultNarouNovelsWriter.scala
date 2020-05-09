@@ -9,7 +9,7 @@ import java.util.concurrent.atomic.AtomicInteger
 import jp.seraphr.narou.model.{ NarouNovel, NarouNovelsMeta }
 import org.apache.commons.io.IOUtils
 
-class DefaultNarouNovelsWriter(aDir: File, aNovelPerFile: Int) extends NarouNovelsWriter {
+class DefaultNarouNovelsWriter(aResultName: String, aDir: File, aNovelPerFile: Int) extends NarouNovelsWriter {
   import FileUtils._
   import jp.seraphr.narou.json.NarouNovelFormats._
   import io.circe.syntax._
@@ -61,7 +61,7 @@ class DefaultNarouNovelsWriter(aDir: File, aNovelPerFile: Int) extends NarouNove
       mWriter.close()
     }
 
-    val tMetaStr = NarouNovelsMeta(new Date(), mNovelCount.get(), novelList).asJson.spaces2
+    val tMetaStr = NarouNovelsMeta(aResultName, new Date(), mNovelCount.get(), novelList).asJson.spaces2
     Files.write(mMetaFile.toPath, tMetaStr.getBytes(StandardCharsets.UTF_8), StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.CREATE, StandardOpenOption.WRITE)
   }
 }
