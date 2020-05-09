@@ -2,7 +2,7 @@ package jp.seraphr.narou.model
 
 import java.util.Date
 
-case class ExtractNarouNovelsMeta(
+case class ExtractedNarouNovelsMeta(
   conditionDirs: Seq[String]
 )
 

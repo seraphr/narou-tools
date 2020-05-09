@@ -1,6 +1,6 @@
 package jp.seraphr.narou
 
-import jp.seraphr.narou.model.{ ExtractNarouNovelsMeta, NarouNovel, NarouNovelsMeta }
+import jp.seraphr.narou.model.{ ExtractedNarouNovelsMeta, NarouNovel, NarouNovelsMeta }
 import monix.eval.Task
 import monix.reactive.Observable
 
@@ -19,7 +19,7 @@ trait NovelDataAccessor {
 }
 
 trait ExtractedNovelLoader {
-  val metadata: Task[ExtractNarouNovelsMeta]
+  val metadata: Task[ExtractedNarouNovelsMeta]
   val allMetadata: Task[Seq[NarouNovelsMeta]]
   def loader(aDir: String): Task[DefaultNovelLoader]
   def load(aDir: String): Observable[NarouNovel] = {
@@ -37,7 +37,7 @@ import jp.seraphr.narou.json.NarouNovelFormats._
 import io.circe.parser.decode
 
 class DefaultExtractedNovelLoader(aAccessor: NovelDataAccessor) extends ExtractedNovelLoader {
-  override val metadata: Task[ExtractNarouNovelsMeta] = aAccessor.extractedMeta.flatMap(s => Task.fromEither(decode[ExtractNarouNovelsMeta](s)))
+  override val metadata: Task[ExtractedNarouNovelsMeta] = aAccessor.extractedMeta.flatMap(s => Task.fromEither(decode[ExtractedNarouNovelsMeta](s)))
   override val allMetadata: Task[Seq[NarouNovelsMeta]] = {
     for {
       tMeta <- metadata

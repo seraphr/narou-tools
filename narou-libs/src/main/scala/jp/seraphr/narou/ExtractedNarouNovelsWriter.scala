@@ -4,7 +4,7 @@ import java.io.{ Closeable, File }
 import java.nio.charset.StandardCharsets
 import java.nio.file.{ Files, StandardOpenOption }
 
-import jp.seraphr.narou.model.{ ExtractNarouNovelsMeta, NarouNovel, NovelCondition }
+import jp.seraphr.narou.model.{ ExtractedNarouNovelsMeta, NarouNovel, NovelCondition }
 import org.apache.commons.io.IOUtils
 
 class ExtractedNarouNovelsWriter(aBaseDir: File, aConditions: Seq[NovelCondition], aNovelsPerFile: Int) extends NarouNovelsWriter {
@@ -35,7 +35,7 @@ class ExtractedNarouNovelsWriter(aBaseDir: File, aConditions: Seq[NovelCondition
     import jp.seraphr.narou.json.NarouNovelFormats._
     import io.circe.syntax._
 
-    val tMetaStr = ExtractNarouNovelsMeta(aConditions.map(_.id)).asJson.spaces2
+    val tMetaStr = ExtractedNarouNovelsMeta(aConditions.map(_.id)).asJson.spaces2
     val tMetaFile = aBaseDir / NovelFileNames.extractedMetaFile
     Files.write(tMetaFile.toPath, tMetaStr.getBytes(StandardCharsets.UTF_8), StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.CREATE, StandardOpenOption.WRITE)
 
