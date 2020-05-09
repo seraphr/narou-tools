@@ -4,7 +4,7 @@ import java.io.File
 import java.nio.file.Files
 
 import jp.seraphr.command.Command
-import jp.seraphr.narou.{ AllNovelCollector, DefaultNovelLoader, FileNovelDataAccessor, HasLogger, NarouClientBuilder, NarouNovelsWriter }
+import jp.seraphr.narou.{ AllNovelCollector, DefaultNovelLoader, FileNovelDataAccessor, HasLogger, NarouClientBuilder, DefaultNarouNovelsWriter }
 import jp.seraphr.narou.commands.collect.CollectNovelCommand._
 import jp.seraphr.narou.model.NarouNovel
 import org.apache.commons.io.FileUtils
@@ -77,7 +77,7 @@ class CollectNovelCommand(aDefaultArg: CollectNovelCommandArg) extends Command w
       logger.info(s"収集が完了しました。 最終ノベル数: ${tResultSize}  増加ノベル数: ${tResultSize - tInitSize}")
       logger.info(s"一時ファイルへの書き込みを開始します")
 
-      new NarouNovelsWriter(tTempOutputDir, aArg.novelsPerFile).loan { tWriter =>
+      new DefaultNarouNovelsWriter(tTempOutputDir, aArg.novelsPerFile).loan { tWriter =>
         tResultMap.values.foreach { tNovel =>
           tWriter.write(tNovel)
         }

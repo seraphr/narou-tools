@@ -5,7 +5,7 @@ import java.util.concurrent.atomic.AtomicInteger
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import jp.seraphr.command.Command
-import jp.seraphr.narou.{ HasLogger, NarouNovelsWriter }
+import jp.seraphr.narou.{ HasLogger, DefaultNarouNovelsWriter }
 import narou4j.entities.Novel
 
 import scala.annotation.nowarn
@@ -76,7 +76,7 @@ class SandboxCommand(aDefaultArg: SandboxCommandArg) extends Command with HasLog
     import jp.seraphr.narou.model.NarouNovelConverter._
 
     val tCounter = new AtomicInteger()
-    Using(new NarouNovelsWriter(aOutputDir, 50000)) { tStream =>
+    Using(new DefaultNarouNovelsWriter(aOutputDir, 50000)) { tStream =>
       aNovels.foreach { n =>
         if (tCounter.incrementAndGet() % 5000 == 0) {
           logger.info(s"変換: ${tCounter.get()}")
