@@ -9,6 +9,7 @@ import jp.seraphr.recharts.Tooltip.CursorStruct
 
 import scala.scalajs.js
 import scala.scalajs.js.annotation.JSExportAll
+import scala.util.Random
 
 case class AxisData(toValue: NarouNovel => Double, name: String, unit: String = "")
 object AxisData {
@@ -18,9 +19,22 @@ object AxisData {
   val evaluationPerBookmark = AxisData(n => n.evaluationPoint * 1000 / n.bookmarkCount, "評価ポイント/ブックマーク")
 }
 
-case class ScatterData(condition: NovelCondition, color: String)
+case class Sampling(calc: Int => Int)
+
+object Sampling {
+  val nop = Sampling(identity)
+  /** count個前後のデータ数になるようにサンプリング */
+  def targetCount(count: Int) = Sampling(_ => count)
+  /** 元の個数の rate倍になるようにサンプリング */
+  def rateSampling(rate: Double) = Sampling(n => (n * rate).toInt)
+  /** 元の数の平方根になるようにサンプリング */
+  val sqrtSampling = Sampling(math.sqrt(_).toInt)
+}
+
+case class ScatterData(condition: NovelCondition, color: String, sampling: Sampling = Sampling.nop)
 
 object NovelScatterChart {
+  private val mRandom = new Random(1234)
 
   case class Props(novels: Seq[NarouNovel], axisX: AxisData, axisY: AxisData, scatters: Seq[ScatterData])
 
@@ -28,8 +42,19 @@ object NovelScatterChart {
   case class PointData(x: Double, y: Double, z: String)
   private def createPointData(aNovels: Seq[NarouNovel], aAxisX: AxisData, aAxisY: AxisData, aScatter: ScatterData): Seq[PointData] = {
     val tTargetNovels = aNovels.filter(aScatter.condition.predicate)
+    val tTargetSize = tTargetNovels.size
+    val tSamplingCount = aScatter.sampling.calc(tTargetSize)
 
-    tTargetNovels.map { n =>
+    val tSampled =
+      if (tTargetSize == tSamplingCount) tTargetNovels
+      else {
+        val tRate = tSamplingCount.toDouble / tTargetSize
+        tTargetNovels.filter { _ =>
+          mRandom.nextDouble() <= tRate
+        }
+      }
+
+    tSampled.map { n =>
       PointData(aAxisX.toValue(n), aAxisY.toValue(n), n.title)
     }
   }
@@ -40,7 +65,8 @@ object NovelScatterChart {
 
     val tScatters: Seq[ChildArg] = aScatters.map { tScatterData =>
       val tPoints = createPointData(aNovels, aAxisX, aAxisY, tScatterData).asInstanceOf[Seq[js.Any]]
-      Scatter(Scatter.Props(aName = tScatterData.condition.name, aData = tPoints, aFill = tScatterData.color, aIsAnimationActive = false))()
+      val tName = s"${tScatterData.condition.name}(${tPoints.size})"
+      Scatter(Scatter.Props(aName = tName, aData = tPoints, aFill = tScatterData.color, aIsAnimationActive = false))()
     }
 
     val tChildren: Seq[ChildArg] = Seq(
@@ -79,8 +105,8 @@ object NovelScatterChart {
         axisX = AxisData.bookmark,
         axisY = AxisData.evaluationPerBookmark,
         scatters = Seq(
-          ScatterData(NovelCondition.finished.withBookmark100, "red"),
-          ScatterData(NovelCondition.finished.not.withBookmark100, "green")
+          ScatterData(NovelCondition.finished.withBookmark100, "red", Sampling.targetCount(1000)),
+          ScatterData(NovelCondition.finished.not.withBookmark100, "green", Sampling.targetCount(1000))
         )
       )
     )
