@@ -3,8 +3,8 @@ import sbtcrossproject.CrossPlugin.autoImport.{CrossType, crossProject}
 
 name := "narou-tools"
 ThisBuild / organization := "jp.seraphr"
-enablePlugins(WorkbenchPlugin)
-localUrl := ("0.0.0.0", 12345)
+//enablePlugins(WorkbenchPlugin)
+//localUrl := ("0.0.0.0", 12345)
 
 val commonDependencies = Def.settings(
   libraryDependencies ++= Seq(
@@ -88,10 +88,14 @@ lazy val `narou-rank` = (project in file("narou-rank"))
 
 // -----------------------
 
+val buildResult = settingKey[File]("")
+val build = taskKey[File]("")
+
 lazy val `narou-webui` = (project in file("narou-webui"))
   .enablePlugins(ScalaJSPlugin)
   .enablePlugins(ScalaJSBundlerPlugin)
   .enablePlugins(ScalablyTypedConverterPlugin)
+  .enablePlugins(GhpagesPlugin)
   .settings(commonSettings)
   .settings(
     scalacOptions += "-P:scalajs:sjsDefinedByDefault",
@@ -113,6 +117,27 @@ lazy val `narou-webui` = (project in file("narou-webui"))
       js.`style-loader`,
       js.`file-loader`,
       js.`url-loader`
-    )
+    ),
+    git.remoteRepo := "git@github.com:seraphr/narou-tools.git",
+    buildResult := target.value / "scalajs-generated",
+    siteSourceDirectory := buildResult.value,
+    makeSite := makeSite.dependsOn(build).value,
+    build := {
+      val tTargetDir = buildResult.value
+      val tHtmlFile = baseDirectory.value / "index-fastopt.html"
+      val tTargetHtmlFile = tTargetDir / "index.html"
+      sbt.IO.delete(tTargetDir)
+      val tJsDir = tTargetDir / "js"
+      val tWebpackFiles = (Compile / fastOptJS / webpack).value
+      tJsDir.mkdirs()
+      val tMapping = tWebpackFiles.map(f => f.data -> tJsDir / f.data.name)
+      sbt.IO.copy(tMapping)
+
+      sbt.IO.copyFile(tHtmlFile, tTargetDir / "index.html")
+      tTargetDir
+    },
+    ghpagesCleanSite / excludeFilter := { (f: File) =>
+      f.isDirectory && f.getName == "narou_novels"
+    }
   )
   .dependsOn(modelJS)
