@@ -3,7 +3,7 @@ package jp.seraphr.narou.webui
 import japgolly.scalajs.react._
 import japgolly.scalajs.react.vdom.html_<^._
 import jp.seraphr.narou.ExtractedNovelLoader
-import jp.seraphr.narou.model.{ NarouNovel, NarouNovelsMeta }
+import jp.seraphr.narou.model.{ NarouNovel, NarouNovelsMeta, NovelCondition }
 
 import scala.annotation.nowarn
 import scala.scalajs.js
@@ -26,19 +26,6 @@ object RootView {
 
   def apply(aAllMeta: Map[String, NarouNovelsMeta], aLoader: ExtractedNovelLoader) = component(Props(aAllMeta, aLoader))
 
-  //  private val mCurrentURI = new URI(org.scalajs.dom.window.location.href).resolve("./narou_novels")
-  //  private val mCurrentURI = new URI("./narou_novels/")
-  //  println(s"===== currentURI = ${mCurrentURI.toString}")
-  //  private val mLoader = new DefaultNovelLoader(new AjaxNovelDataAccessor(mCurrentURI), "all")
-  //  private def loadNovels(setNovels: Seq[NarouNovel] => Callback): Callback = {
-  //    import monix.execution.Scheduler.Implicits.global
-  //
-  //    Callback.future {
-  //      mLoader.metadata.map(setMeta).runToFuture
-  //    } >> Callback.future {
-  //      mLoader.novels.take(aLimit).toListL.map(setNovels).runToFuture
-  //    }
-  //  }
   private def loadNovels(p: Props, aTarget: String, setNovels: Seq[NarouNovel] => Callback): Callback = {
     import monix.execution.Scheduler.Implicits.global
 
@@ -48,6 +35,10 @@ object RootView {
         p.loader.load(aTarget).toListL.map(setNovels).runToFuture
       }
     }
+  }
+
+  implicit class CondOps(c: NovelCondition) {
+    def withBookmark100 = c and NovelCondition.bookmark100
   }
 
   val component =
@@ -71,7 +62,10 @@ object RootView {
           ),
           <.div(s"loaded novel count = ${s.novels.size}"),
           //          ScatterChartExample(s.dataCount).when(false),
-          NovelScatterChart(s.novels)
+          NovelScatterChart(s.novels, Seq(
+            ScatterData.filterAndSampling(NovelCondition.finished.withBookmark100, "red", Sampling.targetCount(1000)),
+            ScatterData.filterAndSampling(NovelCondition.finished.not.withBookmark100, "green", Sampling.targetCount(1000))
+          ))
         )
       }
       .build

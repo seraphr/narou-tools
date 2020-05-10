@@ -133,20 +133,13 @@ object NovelScatterChart {
     )(tChildren ++ tScatters: _*)
   }
 
-  implicit class CondOps(c: NovelCondition) {
-    def withBookmark100 = c and NovelCondition.bookmark100
-  }
-
-  def apply(aNovels: Seq[NarouNovel]): ScalaFnComponent.Unmounted[Props] = {
+  def apply(aNovels: Seq[NarouNovel], aScatters: Seq[ScatterData]): ScalaFnComponent.Unmounted[Props] = {
     compolent(
       Props(
         novels = aNovels,
         axisX = AxisData.bookmark,
         axisY = AxisData.evaluationPerBookmark,
-        scatters = Seq(
-          ScatterData.filterAndSampling(NovelCondition.finished.withBookmark100, "red", Sampling.targetCount(1000)),
-          ScatterData.filterAndSampling(NovelCondition.finished.not.withBookmark100, "green", Sampling.targetCount(1000))
-        )
+        scatters = aScatters
       )
     )
   }
