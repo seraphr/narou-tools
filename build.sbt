@@ -3,8 +3,8 @@ import sbtcrossproject.CrossPlugin.autoImport.{CrossType, crossProject}
 
 name := "narou-tools"
 ThisBuild / organization := "jp.seraphr"
-//enablePlugins(WorkbenchPlugin)
-//localUrl := ("0.0.0.0", 12345)
+enablePlugins(WorkbenchPlugin)
+localUrl := ("0.0.0.0", 12345)
 
 val commonDependencies = Def.settings(
   libraryDependencies ++= Seq(
