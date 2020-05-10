@@ -73,6 +73,7 @@ object RootView {
             val tInterval = 100
             val tMinSectionCount = 50
             NovelScatterChart(s.novels, Seq(
+              ScatterData.representative(Some(NovelCondition.all), tInterval, tMinSectionCount, RepresentativeData.top, "skyblue"),
               ScatterData.representative(Some(NovelCondition.finished), tInterval, tMinSectionCount, RepresentativeData.average, "red"),
               ScatterData.representative(Some(NovelCondition.finished), tInterval, tMinSectionCount, RepresentativeData.mean, "orange"),
               ScatterData.representative(Some(NovelCondition.finished.not), tInterval, tMinSectionCount, RepresentativeData.average, "green"),

@@ -58,6 +58,7 @@ object ScatterData {
   object RepresentativeData {
     val average = RepresentativeData("平均", vs => vs.sum / vs.size)
     val mean = RepresentativeData("中央値", vs => vs.sorted.apply(vs.size / 2))
+    val top = RepresentativeData("最上位", vs => vs.max)
   }
 
   /** データを区間で区切って、代表値に最も近いものを残す */
