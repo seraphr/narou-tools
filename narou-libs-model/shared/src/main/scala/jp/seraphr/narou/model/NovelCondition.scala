@@ -10,12 +10,15 @@ case class NovelCondition(id: String, name: String, predicate: NarouNovel => Boo
   }
 
   def not: NovelCondition = {
-    NovelCondition(s"not_${this.id}", s"not ${this.name}", n => !this.predicate(n))
+    if (this == NovelCondition.finished) NovelCondition.notFinished
+    else if (this == NovelCondition.notFinished) NovelCondition.finished
+    else NovelCondition(s"not_${this.id}", s"not ${this.name}", n => !this.predicate(n))
   }
 }
 object NovelCondition {
   val all = NovelCondition("all", "all", _ => true)
   val finished = NovelCondition("finished", "完結済み", _.isFinished)
+  val notFinished = NovelCondition("notFinished", "連載中", !_.isFinished)
   val length100k = NovelCondition("length100k", "10万字以上", 100000 <= _.length)
   val length1m = NovelCondition("length100k", "100万字以上", 1000000 <= _.length)
   val bookmark100 = NovelCondition("bookmark100", "100 <= bookmark", 100 <= _.bookmarkCount)

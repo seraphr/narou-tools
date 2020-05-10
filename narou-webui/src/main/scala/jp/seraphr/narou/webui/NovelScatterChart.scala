@@ -61,24 +61,38 @@ object ScatterData {
   }
 
   /** データを区間で区切って、代表値に最も近いものを残す */
-  def representative(aCondition: Option[NovelCondition], aInterval: Int, aRepData: RepresentativeData, aColor: String): ScatterData = {
+  def representative(aCondition: Option[NovelCondition], aInterval: Int, aMinSectionCount: Int, aRepData: RepresentativeData, aColor: String): ScatterData = {
     def convert(aInput: ConvertInput): Seq[NarouNovel] = {
       val tBase = aInput.novels
       val tNovels = aCondition.fold(tBase)(c => tBase.filter(c.predicate))
+      if (tNovels.isEmpty) return tNovels
+
       def xValue(n: NarouNovel) = aInput.x.toValue(n)
       def yValue(n: NarouNovel) = aInput.y.toValue(n)
+      val tMinCount = 1 max aMinSectionCount
 
-      tNovels.groupBy(xValue(_) / aInterval).flatMap {
-        case (_, tNovels) if tNovels.isEmpty => Seq()
-        case (_, tNovels) =>
-          val tRepValue = aRepData.value(tNovels.map(yValue))
-          val tRepNovel = tNovels.minBy { n =>
-            // 代表値に最も近いものを返す
-            (yValue(n) - tRepValue).abs
+      tNovels.groupBy(xValue(_) / aInterval)
+        .toVector.sortBy(_._1).map(_._2) // 値で昇順にsortして
+        .concat(Seq.fill(tMinCount - 1)(Seq.empty)) // 後ろにslidingに必要なだけ空列をつなげて
+        .sliding(tMinCount) // slidingすることで、各グループごとにmapする
+        .map { tNovelss =>
+          // 最低数に達するまで、結合する = 足らない場合は移動平均にする
+          tNovelss.foldLeft(Vector[NarouNovel]()) {
+            case (tResult, _) if tMinCount <= tResult.size => tResult
+            case (tResult, ns)                             => tResult ++ ns
           }
+        }
+        .flatMap {
+          case tNovels =>
+            // ここには、emptyなものは来ない
+            val tRepValue = aRepData.value(tNovels.map(yValue))
+            val tRepNovel = tNovels.minBy { n =>
+              // 代表値に最も近いものを返す
+              (yValue(n) - tRepValue).abs
+            }
 
-          Seq(tRepNovel)
-      }.toSeq
+            Seq(tRepNovel)
+        }.toVector
     }
 
     val tConditionName = aCondition.fold("")(c => s"${c.name}-")

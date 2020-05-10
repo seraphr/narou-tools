@@ -4,6 +4,7 @@ import japgolly.scalajs.react._
 import japgolly.scalajs.react.vdom.html_<^._
 import jp.seraphr.narou.ExtractedNovelLoader
 import jp.seraphr.narou.model.{ NarouNovel, NarouNovelsMeta, NovelCondition }
+import jp.seraphr.narou.webui.ScatterData.RepresentativeData
 
 import scala.annotation.nowarn
 import scala.scalajs.js
@@ -62,10 +63,22 @@ object RootView {
           ),
           <.div(s"loaded novel count = ${s.novels.size}"),
           //          ScatterChartExample(s.dataCount).when(false),
+          <.div("サンプリング"),
           NovelScatterChart(s.novels, Seq(
             ScatterData.filterAndSampling(NovelCondition.finished.withBookmark100, "red", Sampling.targetCount(1000)),
             ScatterData.filterAndSampling(NovelCondition.finished.not.withBookmark100, "green", Sampling.targetCount(1000))
-          ))
+          )),
+          <.div("代表値"),
+          {
+            val tInterval = 100
+            val tMinSectionCount = 50
+            NovelScatterChart(s.novels, Seq(
+              ScatterData.representative(Some(NovelCondition.finished), tInterval, tMinSectionCount, RepresentativeData.average, "red"),
+              ScatterData.representative(Some(NovelCondition.finished), tInterval, tMinSectionCount, RepresentativeData.mean, "orange"),
+              ScatterData.representative(Some(NovelCondition.finished.not), tInterval, tMinSectionCount, RepresentativeData.average, "green"),
+              ScatterData.representative(Some(NovelCondition.finished.not), tInterval, tMinSectionCount, RepresentativeData.mean, "lightgreen"),
+            ))
+          }
         )
       }
       .build

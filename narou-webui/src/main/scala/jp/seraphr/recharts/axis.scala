@@ -172,7 +172,7 @@ object XAxis {
         js.Dictionary[js.Any](
           "value" -> tLabel,
           "angle" -> 0,
-          "position" -> "bottom"
+          "position" -> "insideBottom"
         ).asInstanceOf[js.Object]: LabelType
       }
 

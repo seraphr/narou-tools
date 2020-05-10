@@ -93,7 +93,7 @@ object Scatter {
         @scala.annotation.nowarn
         val fill: js.UndefOr[String] = aFill
         @scala.annotation.nowarn
-        val fillOpacity: js.UndefOr[Double] = 0.5
+        val fillOpacity: js.UndefOr[Double] = 1.0
       }
     }
   }
