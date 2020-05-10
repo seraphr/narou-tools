@@ -19,9 +19,10 @@ object NovelCondition {
   val length100k = NovelCondition("length100k", "10万字以上", 100000 <= _.length)
   val length1m = NovelCondition("length100k", "100万字以上", 1000000 <= _.length)
   val bookmark100 = NovelCondition("bookmark100", "100 <= bookmark", 100 <= _.bookmarkCount)
+  val bookmark1000 = NovelCondition("bookmark100", "100 <= bookmark", 1000 <= _.bookmarkCount)
 
   def bookmark(aMin: Int, aMax: Int) =
-    NovelCondition(s"bookmark${aMin}-${aMax}", s"${aMin} <= bookmark < ${aMin}", n => aMin <= n.bookmarkCount && n.bookmarkCount < aMax)
+    NovelCondition(s"bookmark${aMin}-${aMax}", s"${aMin} <= bookmark < ${aMax}", n => aMin <= n.bookmarkCount && n.bookmarkCount < aMax)
 
   val bookmark0_500 = bookmark(0, 500)
   val bookmark500_1000 = bookmark(500, 1000)
