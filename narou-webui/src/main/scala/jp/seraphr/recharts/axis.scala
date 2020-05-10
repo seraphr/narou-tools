@@ -62,9 +62,11 @@ object Axis {
     val preserveStartEnd: AxisInterval = "preserveStartEnd"
   }
 
+  type LabelType = String | Int | ReactElement[_] | js.Object
 }
 
 trait BaseAxisProps extends js.Object {
+  import Axis._
   type ReactElement[E] = VdomNode
   type PresentationAttributes[E] = js.Object
 
@@ -115,6 +117,7 @@ trait BaseAxisProps extends js.Object {
   val range: js.UndefOr[js.Array[Int]] = js.undefined
   /** axis react component */
   val AxisComp: js.UndefOr[js.Any] = js.undefined
+  val label: js.UndefOr[LabelType] = js.undefined
 }
 
 object XAxis {
@@ -162,8 +165,16 @@ object XAxis {
       aDataKey: js.UndefOr[String | Int] = js.undefined,
       aName: js.UndefOr[String] = js.undefined,
       aUnit: js.UndefOr[String | Int] = js.undefined,
-      aDomain: js.UndefOr[(AxisDomainItem, AxisDomainItem)] = js.undefined
+      aDomain: js.UndefOr[(AxisDomainItem, AxisDomainItem)] = js.undefined,
+      aLabel: js.UndefOr[String] = js.undefined
     ): Props = {
+      val tLabelObject = aLabel.map { tLabel =>
+        js.Dictionary[js.Any](
+          "value" -> tLabel,
+          "angle" -> 0,
+          "position" -> "bottom"
+        ).asInstanceOf[js.Object]: LabelType
+      }
 
       new Props {
         override val `type`: UndefOr[Type] = aType
@@ -171,6 +182,7 @@ object XAxis {
         override val name: UndefOr[String] = aName
         override val unit: UndefOr[String | Int] = aUnit
         override val domain: UndefOr[AxisDomain] = aDomain.map(AxisDomain(_))
+        override val label: UndefOr[LabelType] = tLabelObject
       }
     }
   }
@@ -224,8 +236,17 @@ object YAxis {
       aDataKey: js.UndefOr[String | Int] = js.undefined,
       aName: js.UndefOr[String] = js.undefined,
       aUnit: js.UndefOr[String | Int] = js.undefined,
-      aDomain: js.UndefOr[(AxisDomainItem, AxisDomainItem)] = js.undefined
+      aDomain: js.UndefOr[(AxisDomainItem, AxisDomainItem)] = js.undefined,
+      aLabel: js.UndefOr[String] = js.undefined
     ): Props = {
+
+      val tLabelObject = aLabel.map { tLabel =>
+        js.Dictionary[js.Any](
+          "value" -> tLabel,
+          "angle" -> -90,
+          "position" -> "insideLeft"
+        ).asInstanceOf[js.Object]: LabelType
+      }
 
       new Props {
         override val `type`: UndefOr[Type] = aType
@@ -233,6 +254,7 @@ object YAxis {
         override val name: UndefOr[String] = aName
         override val unit: UndefOr[String | Int] = aUnit
         override val domain: UndefOr[AxisDomain] = aDomain.map(AxisDomain(_))
+        override val label: UndefOr[LabelType] = tLabelObject
       }
     }
   }
