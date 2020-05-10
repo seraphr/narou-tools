@@ -75,15 +75,15 @@ object NovelScatterChart {
       ))),
       XAxis(XAxis.Props(aType = Axis.Type.number, aDataKey = "x", aName = aAxisX.name, aUnit = aAxisX.unit)),
       YAxis(YAxis.Props(aDataKey = "y", aName = aAxisY.name, aUnit = aAxisY.unit, aDomain = (AxisDomainItem.number(0), AxisDomainItem.dataMax))),
-      ZAxis(ZAxis.Props(aType = Axis.Type.category, aDataKey = "z", aRange = (15, 15), aName = "title")),
+      ZAxis(ZAxis.Props(aType = Axis.Type.category, aDataKey = "z", aRange = (10, 10), aName = "title")),
       Tooltip(Tooltip.Props(aCursor = CursorStruct("3 3"))),
       Legend(Legend.Props())
     )
 
     ScatterChart(
       ScatterChart.Props(
-        aWidth = 730,
-        aHeight = 250,
+        aWidth = 1920,
+        aHeight = 500,
         aMargin = Margin(
           aTop = 20,
           aRight = 20,
