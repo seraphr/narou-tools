@@ -135,8 +135,8 @@ object NovelScatterChart {
 
     ScatterChart(
       ScatterChart.Props(
-        aWidth = 1920,
-        aHeight = 500,
+        aWidth = 1280,
+        aHeight = 400,
         aMargin = Margin(
           aTop = 20,
           aRight = 20,
