@@ -1,0 +1,13 @@
+{
+  "name" : "10万字以上",
+  "createdAt" : 1589113650299,
+  "novelCount" : 56118,
+  "novelFiles" : [
+    "novel_list_0.jsonl",
+    "novel_list_1.jsonl",
+    "novel_list_2.jsonl",
+    "novel_list_3.jsonl",
+    "novel_list_4.jsonl",
+    "novel_list_5.jsonl"
+  ]
+}

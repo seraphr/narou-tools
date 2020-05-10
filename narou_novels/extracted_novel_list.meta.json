@@ -1,0 +1,6 @@
+{
+  "conditionDirs" : [
+    "length100k",
+    "length100k_and_bookmark100"
+  ]
+}
