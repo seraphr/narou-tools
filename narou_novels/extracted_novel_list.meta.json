@@ -1,6 +1,8 @@
 {
   "conditionDirs" : [
     "length100k",
-    "length100k_and_bookmark100"
+    "length300k_and_bookmark1000",
+    "length500k_and_bookmark1000",
+    "length100k_and_bookmark1000"
   ]
 }
