@@ -20,9 +20,11 @@ object NovelCondition {
   val finished = NovelCondition("finished", "完結済み", _.isFinished)
   val notFinished = NovelCondition("notFinished", "連載中", !_.isFinished)
   val length100k = NovelCondition("length100k", "10万字以上", 100000 <= _.length)
+  val length300k = NovelCondition("length300k", "30万字以上", 300000 <= _.length)
+  val length500k = NovelCondition("length500k", "50万字以上", 500000 <= _.length)
   val length1m = NovelCondition("length100k", "100万字以上", 1000000 <= _.length)
   val bookmark100 = NovelCondition("bookmark100", "100 <= bookmark", 100 <= _.bookmarkCount)
-  val bookmark1000 = NovelCondition("bookmark100", "100 <= bookmark", 1000 <= _.bookmarkCount)
+  val bookmark1000 = NovelCondition("bookmark1000", "1000 <= bookmark", 1000 <= _.bookmarkCount)
 
   def bookmark(aMin: Int, aMax: Int) =
     NovelCondition(s"bookmark${aMin}-${aMax}", s"${aMin} <= bookmark < ${aMax}", n => aMin <= n.bookmarkCount && n.bookmarkCount < aMax)
