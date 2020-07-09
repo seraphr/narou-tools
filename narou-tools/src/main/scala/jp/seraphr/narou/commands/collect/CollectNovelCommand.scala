@@ -82,7 +82,8 @@ class CollectNovelCommand(aDefaultArg: CollectNovelCommandArg) extends Command w
         NovelCondition.length100k,
         NovelCondition.length300k and NovelCondition.bookmark1000,
         NovelCondition.length500k and NovelCondition.bookmark1000,
-        NovelCondition.length100k and NovelCondition.bookmark1000)
+        NovelCondition.length100k and NovelCondition.bookmark1000
+      )
 
       new ExtractedNarouNovelsWriter(tTempOutputDir, tConditions, aArg.novelsPerFile).loan { tWriter =>
         tResultMap.values.foreach { tNovel =>
