@@ -114,9 +114,6 @@ object NovelScatterChart {
   }
 
   val compolent = ScalaFnComponent[Props] { case Props(aNovels, aAxisX, aAxisY, aScatters) =>
-    val tNovels = aNovels.map(js.use(_).as[js.Any])
-    println(s"========= novel size = ${tNovels.size}")
-
     val tScatters: Seq[ChildArg] = aScatters.map { tScatterData =>
       val tPoints = createPointData(aNovels, aAxisX, aAxisY, tScatterData).asInstanceOf[Seq[js.Any]]
       val tName = s"${tScatterData.name}(${tPoints.size})"

@@ -47,18 +47,17 @@ object RootView {
       .initialState(State(novels = Seq()))
       .renderPS { case (scope, p, s) =>
         import typings.antd.components._
+        import typings.antd.components.Select.Option
 
         val novelsState = scope.mountedPure.zoomState(_.novels)(c => s => s.copy(novels = c))
 
         val tSelectOptions = p.allMeta.map { case (tId, tMeta) =>
-          Option(value = tId)(s"${tMeta.name}(${tMeta.novelCount})").vdomElement
+          Option.value(tId)(s"${tMeta.name}(${tMeta.novelCount})").build
         }.toSeq
 
         <.div(
-          Select[String](
-            dropdownMatchSelectWidth = false,
-            onSelect = (tValue, _) => loadNovels(p, tValue, novelsState.setState)
-          )(
+          Select.dropdownMatchSelectWidth(false)
+            .onSelect((tValue, _) => loadNovels(p, tValue, novelsState.setState))(
             tSelectOptions: _*
           ),
           <.div(s"loaded novel count = ${s.novels.size}"),

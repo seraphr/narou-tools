@@ -59,7 +59,7 @@ class DownloadNovelCommand(aDefaultArg: DownloadNovelCommandArg) extends Command
     val tResult =
       Source.fromFile(aArgs.input, "UTF-8").loan { tLines =>
         val tNovels =
-          tLines.getLines.map(tMapper.readValue[Novel](_, new TypeReference[Novel]() {}))
+          tLines.getLines().map(tMapper.readValue[Novel](_, new TypeReference[Novel]() {}))
 
         var tLastResult = DownloadResult(0, 0)
         import jp.seraphr.narou.IteratorUtils._

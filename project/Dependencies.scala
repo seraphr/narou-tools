@@ -49,7 +49,8 @@ object Dependencies {
   object js {
     val react = "react" -> reactVersion
     val reactDom = "react-dom" -> reactVersion
-    val recharts = "recharts" -> "1.8.5"
+    val reactDomType = "@types/react-dom" -> "16.9.13" 
+    val recharts = "recharts" -> "2.0.9"
     val antd = "antd" -> "3.26.0"
 
     val `css-loader` = "css-loader" -> "3.4.2"

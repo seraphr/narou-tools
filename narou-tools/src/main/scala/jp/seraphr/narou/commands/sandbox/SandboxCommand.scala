@@ -35,7 +35,7 @@ class SandboxCommand(aDefaultArg: SandboxCommandArg) extends Command with HasLog
 
     logger.info(s"小説情報の読み込み ${aArgs.input}")
     val tNovels = Using(Source.fromFile(aArgs.input, "UTF-8")) { tLines =>
-      tLines.getLines.map(tMapper.readValue[Novel](_, new TypeReference[Novel]() {})).toVector
+      tLines.getLines().map(tMapper.readValue[Novel](_, new TypeReference[Novel]() {})).toVector
     }.get
 
     //    showKeywords(tNovels)

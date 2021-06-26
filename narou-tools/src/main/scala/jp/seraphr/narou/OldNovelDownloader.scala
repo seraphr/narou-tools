@@ -54,7 +54,7 @@ object OldNovelDownloaderMain extends App {
   import com.fasterxml.jackson.core.`type`.TypeReference
 
   val tMapper: ObjectMapper = new ObjectMapper
-  val tNovels = Source.fromFile(new File("./novellist"), "UTF-8").getLines.map(tMapper.readValue[Novel](_, new TypeReference[Novel]() {}))
+  val tNovels = Source.fromFile(new File("./novellist"), "UTF-8").getLines().map(tMapper.readValue[Novel](_, new TypeReference[Novel]() {}))
 
   def filterExists(aNovels: Seq[Novel]): Iterator[Novel] = {
     import CollectionConverters._

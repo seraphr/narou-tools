@@ -3,8 +3,8 @@ import sbtcrossproject.CrossPlugin.autoImport.{CrossType, crossProject}
 
 name := "narou-tools"
 ThisBuild / organization := "jp.seraphr"
-enablePlugins(WorkbenchPlugin)
-localUrl := ("0.0.0.0", 12345)
+//enablePlugins(WorkbenchPlugin)
+//localUrl := ("0.0.0.0", 12345)
 
 val commonDependencies = Def.settings(
   libraryDependencies ++= Seq(
@@ -16,7 +16,9 @@ val commonDependencies = Def.settings(
 val commonSettings = Def.settings(
   scalacOptions ++= Seq(
     "-encoding", "UTF-8",
-    "-feature", "-deprecation", "-unchecked", "-Xlint:_,-missing-interpolator",
+    "-feature", "-deprecation", "-unchecked",
+    // byname-implicitは https://github.com/scala/bug/issues/12072 の問題の抑止のため削る
+    "-Xlint:_,-missing-interpolator,-byname-implicit",
     "-Ywarn-dead-code",
     "-Ywarn-unused:patvars",
     "-Werror"
@@ -98,7 +100,6 @@ lazy val `narou-webui` = (project in file("narou-webui"))
   .enablePlugins(GhpagesPlugin)
   .settings(commonSettings)
   .settings(
-    scalacOptions += "-P:scalajs:sjsDefinedByDefault",
     scalaJSUseMainModuleInitializer := true,
     libraryDependencies ++= Seq(
       scalajs.reactjs.value
@@ -106,10 +107,15 @@ lazy val `narou-webui` = (project in file("narou-webui"))
     Compile / npmDependencies ++= Seq(
       js.react,
       js.reactDom,
+      js.reactDomType,
       js.recharts,
       js.antd
     ),
     stFlavour := Flavour.Japgolly,
+    stIgnore ++= List(
+      // https://github.com/ScalablyTyped/Converter/issues/324
+      "recharts/types/util/CartesianUtils"
+    ),
     // css-load設定 fileとかurlは要らんが、scalablytypedデモプロジェクトからそのまま持ってきた
     webpackConfigFile := Some(baseDirectory.value / "custom-scalajs.webpack.config"),
     Compile / npmDevDependencies ++= Seq(

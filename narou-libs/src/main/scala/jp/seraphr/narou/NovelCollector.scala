@@ -172,6 +172,7 @@ class NovelCollector(aIntervalMillis: Long) extends HasLogger {
         } else {
           tHead.iterator ++ collectBySettings(t.toVector)
         }
+      case _ => throw new RuntimeException("明らかにexhaustiveなのに、match may not be exhaustive とか言われる…")
     }
 
     logger.info(s"全 ${tInitSettingsSize} 個の検索条件で検索を行います。")

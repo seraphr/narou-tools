@@ -134,6 +134,7 @@ class CollectNovelCommand(aDefaultArg: CollectNovelCommandArg) extends Command w
       case Recreate.text => Recreate
       case Update.text   => Update
       case Fail.text     => Fail
+      case etc => throw new Exception(s"invalid input(=${etc}) for overwrite")
     }
 
     opt[OverwriteOption]("overwrite")
