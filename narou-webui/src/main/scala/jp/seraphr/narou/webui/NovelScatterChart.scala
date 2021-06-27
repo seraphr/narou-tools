@@ -10,12 +10,15 @@ import scala.scalajs.js
 import scala.scalajs.js.annotation.JSExportAll
 import scala.util.Random
 
-case class AxisData(toValue: NarouNovel => Int, name: String, unit: String = "")
+case class AxisData(toValue: NarouNovel => Option[Int], name: String, unit: String = "")
 object AxisData {
-  val bookmark = AxisData(_.bookmarkCount, "bookmark")
-  val evaluationPoint = AxisData(_.evaluationPoint, "評価ポイント", "pt")
-  val globalPoint = AxisData(_.globalPoint, "総合ポイント", "pt")
-  val evaluationPerBookmark = AxisData(n => n.evaluationPoint * 1000 / n.bookmarkCount, "評価ポイント/ブックマーク")
+  implicit class ToOption[A](a: A) {
+    def option: Option[A] = Option(a)
+  }
+  val bookmark = AxisData(_.bookmarkCount.option, "bookmark")
+  val evaluationPoint = AxisData(_.evaluationPoint.option, "評価ポイント", "pt")
+  val globalPoint = AxisData(_.globalPoint.option, "総合ポイント", "pt")
+  val evaluationPerBookmark = AxisData(n => if (n.bookmarkCount == 0) None else (n.evaluationPoint * 1000 / n.bookmarkCount).option, "評価ポイント/ブックマーク")
 }
 
 case class Sampling(calc: Int => Int)
@@ -72,7 +75,9 @@ object ScatterData {
       def yValue(n: NarouNovel) = aInput.y.toValue(n)
       val tMinCount = 1 max aMinSectionCount
 
-      tNovels.groupBy(xValue(_) / aInterval)
+      tNovels.groupBy(xValue(_).map(_ / aInterval)).collect {
+        case (Some(k), v) => k -> v
+      }
         .toVector.sortBy(_._1).map(_._2) // 値で昇順にsortして
         .concat(Seq.fill(tMinCount - 1)(Seq.empty)) // 後ろにslidingに必要なだけ空列をつなげて
         .sliding(tMinCount) // slidingすることで、各グループごとにmapする
@@ -86,10 +91,10 @@ object ScatterData {
         .flatMap {
           case tNovels =>
             // ここには、emptyなものは来ない
-            val tRepValue = aRepData.value(tNovels.map(yValue))
+            val tRepValue = aRepData.value(tNovels.flatMap(yValue))
             val tRepNovel = tNovels.minBy { n =>
               // 代表値に最も近いものを返す
-              (yValue(n) - tRepValue).abs
+              yValue(n).fold(Int.MaxValue)(v => (v - tRepValue).abs)
             }
 
             Seq(tRepNovel)
@@ -108,8 +113,11 @@ object NovelScatterChart {
   @JSExportAll
   case class PointData(x: Double, y: Double, z: String)
   private def createPointData(aNovels: Seq[NarouNovel], aAxisX: AxisData, aAxisY: AxisData, aScatter: ScatterData): Seq[PointData] = {
-    aScatter.convert(ConvertInput(aNovels, aAxisX, aAxisY)).map { n =>
-      PointData(aAxisX.toValue(n), aAxisY.toValue(n), n.title)
+    aScatter.convert(ConvertInput(aNovels, aAxisX, aAxisY)).flatMap { n =>
+      for {
+        x <- aAxisX.toValue(n)
+        y <- aAxisY.toValue(n)
+      } yield PointData(x, y, n.title)
     }
   }
 
