@@ -58,8 +58,8 @@ object RootView {
         <.div(
           Select.dropdownMatchSelectWidth(false)
             .onSelect((tValue, _) => loadNovels(p, tValue, novelsState.setState))(
-            tSelectOptions: _*
-          ),
+              tSelectOptions: _*
+            ),
           <.div(s"loaded novel count = ${s.novels.size}"),
           //          ScatterChartExample(s.dataCount).when(false),
           <.div("サンプリング"),
