@@ -52,7 +52,7 @@ object RootView {
         val novelsState = scope.mountedPure.zoomState(_.novels)(c => s => s.copy(novels = c))
 
         val tSelectOptions = p.allMeta.map { case (tId, tMeta) =>
-          Option.value(tId)(s"${tMeta.name}(${tMeta.novelCount})").build
+          Option(tId)(s"${tMeta.name}(${tMeta.novelCount})").build
         }.toSeq
 
         <.div(
