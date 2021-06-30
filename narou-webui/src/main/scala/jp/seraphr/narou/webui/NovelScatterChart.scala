@@ -33,7 +33,7 @@ object NovelScatterChart {
     }
   }
 
-  val compolent = ScalaFnComponent[Props] { case Props(aNovels, aAxisX, aAxisY, aScatters) =>
+  val component = ScalaFnComponent[Props] { case Props(aNovels, aAxisX, aAxisY, aScatters) =>
     val tScatters: Seq[ChildArg] = aScatters.map { tScatterData =>
       val tPoints = createPointData(aNovels, aAxisX, aAxisY, tScatterData).toJSArray
       val tName = s"${tScatterData.name}(${tPoints.size})"
@@ -90,7 +90,7 @@ object NovelScatterChart {
   }
 
   def apply(aNovels: Seq[NarouNovel], aScatters: Seq[ScatterData]): ScalaFnComponent.Unmounted[Props] = {
-    compolent(
+    component(
       Props(
         novels = aNovels,
         axisX = AxisData.bookmark,
