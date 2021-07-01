@@ -30,7 +30,7 @@ class NarouCommand(aSubCommands: Seq[Command]) extends ParentCommand with HasLog
 
 object NarouCommand extends HasLogger {
   private val mSubCommands = Seq(
-    new CollectNovelCommand(CollectNovelCommandArg(new File("./narou_novels"), CollectNovelCommand.Update, 1000, limit = Int.MaxValue, novelsPerFile = 50000)),
+    new CollectNovelCommand(CollectNovelCommandArg(new File("./narou_novels"), CollectNovelCommand.Update, 1000, limit = Int.MaxValue, novelsPerFile = 10000)),
     new DownloadNovelCommand(DownloadNovelCommandArg(new File("./novel_list"), new File("./novels"), false, 1000, 100)),
     new SandboxCommand(SandboxCommandArg(new File("./narou_novels")))
   )
