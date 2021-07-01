@@ -4,7 +4,7 @@ import japgolly.scalajs.react._
 import japgolly.scalajs.react.vdom.html_<^._
 import jp.seraphr.narou.ExtractedNovelLoader
 import jp.seraphr.narou.model.{ NarouNovel, NarouNovelsMeta, NovelCondition }
-import jp.seraphr.narou.webui.ScatterData.RepresentativeData
+import jp.seraphr.narou.webui.ScatterData.{ RangeFilter, RepresentativeData }
 
 import scala.annotation.nowarn
 import scala.scalajs.js
@@ -71,7 +71,9 @@ object RootView {
           {
             val tInterval = 100
             val tMinSectionCount = 50
+            val tWindow = 300
             NovelScatterChart(s.novels, Seq(
+              ScatterData.range(Some(NovelCondition.all), tWindow, RangeFilter.iqrUpperOutlier, "blue"),
               ScatterData.representative(Some(NovelCondition.all), tInterval, tMinSectionCount, RepresentativeData.top, "skyblue"),
               ScatterData.representative(Some(NovelCondition.finished), tInterval, tMinSectionCount, RepresentativeData.average, "red"),
               ScatterData.representative(Some(NovelCondition.finished), tInterval, tMinSectionCount, RepresentativeData.mean, "orange"),

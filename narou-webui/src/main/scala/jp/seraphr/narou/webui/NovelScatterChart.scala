@@ -73,14 +73,14 @@ object NovelScatterChart {
       ZAxis().
         `type`(rechartsStrings.category)
         .dataKey("z")
-        .range(js.Array(10, 10))
+        .range(js.Array(20, 20))
         .name("title"),
       Tooltip.cursor(SVGProps[SVGElement]().setStrokeDasharray("3 3").asInstanceOf[Boolean | Element | SVGProps[SVGElement]]),
       Legend.create()
     )
 
     ScatterChart(
-      ScatterChart.Props().setWidth(1200).setHeight(400).setMargin(
+      ScatterChart.Props().setWidth(2400).setHeight(600).setMargin(
         Margin().setTop(20)
           .setRight(20)
           .setBottom(10)
