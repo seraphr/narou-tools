@@ -1,9 +1,9 @@
 package jp.seraphr.narou.webui
 
 import japgolly.scalajs.react.CtorType.ChildArg
-import japgolly.scalajs.react.ScalaFnComponent
+import japgolly.scalajs.react.{ Callback, ScalaFnComponent }
 import japgolly.scalajs.react.raw.React.Element
-import jp.seraphr.narou.model.{ NarouNovel }
+import jp.seraphr.narou.model.NarouNovel
 import jp.seraphr.recharts.{ Axis, CartesianGrid, ScatterChart }
 import org.scalajs.dom.raw.SVGElement
 import typings.react.mod.SVGProps
@@ -23,13 +23,13 @@ object NovelScatterChart {
   case class Props(novels: Seq[NarouNovel], axisX: AxisData, axisY: AxisData, scatters: Seq[ScatterData])
 
   @JSExportAll
-  case class PointData(x: Double, y: Double, z: String)
+  case class PointData(x: Double, y: Double, z: String, novel: NarouNovel)
   private def createPointData(aNovels: Seq[NarouNovel], aAxisX: AxisData, aAxisY: AxisData, aScatter: ScatterData): Seq[PointData] = {
     aScatter.convert(ConvertInput(aNovels, aAxisX, aAxisY)).flatMap { n =>
       for {
         x <- aAxisX.toValue(n)
         y <- aAxisY.toValue(n)
-      } yield PointData(x, y, n.title)
+      } yield PointData(x, y, n.title, n)
     }
   }
 
@@ -40,10 +40,16 @@ object NovelScatterChart {
       Scatter.create(tName, js.undefined)
         .data(tPoints)
         .fill(tScatterData.color)
-        .isAnimationActive(false).build
+        .isAnimationActive(false)
+        .onClick((a1, _, _) => Callback {
+          val novel = a1.asInstanceOf[js.Dynamic].payload.asInstanceOf[PointData].novel
+          println(novel.title)
+          //          println(novel.story)
+        })
+        .build
     }
 
-    import typings.recharts.components.{ XAxis, YAxis, ZAxis, Tooltip, Legend, Label }
+    import typings.recharts.components.{ XAxis, YAxis, ZAxis, Tooltip, Legend, Label, Brush }
 
     val tChildren: Seq[ChildArg] = Seq(
       CartesianGrid(CartesianGrid.Props().setStrokeDasharray("3 3")),
@@ -78,7 +84,6 @@ object NovelScatterChart {
       Tooltip.cursor(SVGProps[SVGElement]().setStrokeDasharray("3 3").asInstanceOf[Boolean | Element | SVGProps[SVGElement]]),
       Legend.create()
     )
-
     ScatterChart(
       ScatterChart.Props().setWidth(2400).setHeight(600).setMargin(
         Margin().setTop(20)
