@@ -51,9 +51,9 @@ object RootView {
 
         val novelsState = scope.mountedPure.zoomState(_.novels)(c => s => s.copy(novels = c))
 
-        val tSelectOptions = p.allMeta.map { case (tId, tMeta) =>
+        val tSelectOptions = p.allMeta.toSeq.sortBy(_._2.novelCount).map { case (tId, tMeta) =>
           Option(tId)(s"${tMeta.name}(${tMeta.novelCount})").build
-        }.toSeq
+        }
 
         <.div(
           Select.dropdownMatchSelectWidth(false)
