@@ -103,7 +103,7 @@ lazy val `narou-webui` = (project in file("narou-webui"))
     scalaJSUseMainModuleInitializer := true,
     libraryDependencies ++= Seq(
       scalajs.reactjs.value
-    ) ++ scalajs.circe.value,
+    ) ++ scalajs.circe.value ++ scalajs.monocle.value,
     Compile / npmDependencies ++= Seq(
       js.react,
       js.reactDom,
