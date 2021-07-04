@@ -2,6 +2,7 @@ package jp.seraphr.narou.webui
 
 import java.net.URI
 
+import jp.seraphr.narou.webui.state.AppState
 import jp.seraphr.narou.{ AjaxNovelDataAccessor, DefaultExtractedNovelLoader }
 import org.scalajs.dom
 
@@ -16,7 +17,8 @@ object Main {
     val tNode = dom.document.getElementById("main")
 
     mLoader.allMetadata.foreach { tMetas =>
-      RootView(tMetas, mLoader).renderIntoDOM(tNode)
+      StoreProvider(AppState.emptyState.copy(allMeta = tMetas), mLoader)(RootView())
+        .renderIntoDOM(tNode)
     }
   }
 }
