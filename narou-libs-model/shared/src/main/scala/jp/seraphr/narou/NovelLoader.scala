@@ -23,7 +23,7 @@ trait ExtractedNovelLoader {
   val allMetadata: Task[Map[String, NarouNovelsMeta]]
   def loader(aDir: String): Task[NovelLoader]
   def load(aDir: String): Observable[NarouNovel] = {
-    Observable.fromTask(loader((aDir))).flatMap(_.novels)
+    Observable.fromTask(loader(aDir)).flatMap(_.novels)
   }
 
   lazy val loadAll: Observable[NarouNovel] = {
