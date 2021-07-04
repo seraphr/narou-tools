@@ -22,7 +22,7 @@ object StoreProvider {
           val tActions = new DefaultActions(loader, {
             f =>
               import monix.execution.Scheduler.Implicits.global
-              f(tStateApi).foreach { _ =>  }
+              f(tStateApi).foreach { _ => }
           })
 
           StoreProvider.context.provide(NarouWebAppStore(tActions, scope.state))(children)
