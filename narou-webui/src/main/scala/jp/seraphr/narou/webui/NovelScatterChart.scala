@@ -49,7 +49,7 @@ object NovelScatterChart {
         .build
     }
 
-    import typings.recharts.components.{ XAxis, YAxis, ZAxis, Tooltip, Legend, Label, Brush }
+    import typings.recharts.components.{ XAxis, YAxis, ZAxis, Tooltip, Legend, Label }
 
     val tChildren: Seq[ChildArg] = Seq(
       CartesianGrid(CartesianGrid.Props().setStrokeDasharray("3 3")),
