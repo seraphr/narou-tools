@@ -1,7 +1,7 @@
 package jp.seraphr.narou.webui
 
 import japgolly.scalajs.react.CtorType.ChildArg
-import japgolly.scalajs.react.{ Callback, ScalaFnComponent }
+import japgolly.scalajs.react.{ Callback, React, Reusability, ScalaFnComponent }
 import japgolly.scalajs.react.raw.React.Element
 import jp.seraphr.narou.model.NarouNovel
 import jp.seraphr.recharts.{ Axis, CartesianGrid, ScatterChart }
@@ -44,7 +44,6 @@ object NovelScatterChart {
         .onClick((a1, _, _) => Callback {
           val novel = a1.asInstanceOf[js.Dynamic].payload.asInstanceOf[PointData].novel
           selectNovel(novel)
-          //          println(novel.story)
         })
         .build
     }
@@ -94,8 +93,10 @@ object NovelScatterChart {
     )(tChildren ++ tScatters: _*)
   }
 
-  def apply(aNovels: Seq[NarouNovel], aScatters: Seq[ScatterData], selectNovel: NarouNovel => Unit): ScalaFnComponent.Unmounted[Props] = {
-    component(
+  private implicit val propsReusable: Reusability[Props] = Reusability.by[Props, Seq[Any]](p => Seq(p.axisX, p.axisY, p.novels, p.scatters))(Reusability.by_==)
+  private val memo = React.memo(component)
+  def apply(aNovels: Seq[NarouNovel], aScatters: Seq[ScatterData], selectNovel: NarouNovel => Unit) = {
+    memo(
       Props(
         novels = aNovels,
         axisX = AxisData.bookmark,

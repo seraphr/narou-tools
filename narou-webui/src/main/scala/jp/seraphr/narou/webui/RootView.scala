@@ -9,7 +9,7 @@ import jp.seraphr.narou.webui.component.NovelDrawer
 
 import scala.annotation.nowarn
 import scala.scalajs.js
-import scala.scalajs.js.annotation.JSImport
+import scala.scalajs.js.annotation.{ JSExportAll, JSImport }
 
 @JSImport("antd/dist/antd.css", JSImport.Default)
 @js.native
@@ -19,6 +19,7 @@ object RootView {
   @nowarn("cat=unused")
   private val css = CSS
 
+  @JSExportAll
   case class Props(actions: Actions, allMeta: Map[String, NarouNovelsMeta], selectedNovel: Seq[NarouNovel])
   case class State(novels: Seq[NarouNovel])
 
@@ -26,6 +27,25 @@ object RootView {
 
   implicit class CondOps(c: NovelCondition) {
     def withBookmark100 = c and NovelCondition.bookmark100
+  }
+
+  val samplingScatters = Seq(
+    ScatterData.filterAndSampling(NovelCondition.finished.withBookmark100, "red", Sampling.targetCount(1000)),
+    ScatterData.filterAndSampling(NovelCondition.finished.not.withBookmark100, "green", Sampling.targetCount(1000))
+  )
+
+  val representativeScatters = {
+    val tInterval = 100
+    val tMinSectionCount = 50
+    val tWindow = 300
+    Seq(
+      ScatterData.range(Some(NovelCondition.all), tWindow, RangeFilter.iqrUpperOutlier, "blue"),
+      ScatterData.representative(Some(NovelCondition.all), tInterval, tMinSectionCount, RepresentativeData.top, "skyblue"),
+      ScatterData.representative(Some(NovelCondition.finished), tInterval, tMinSectionCount, RepresentativeData.average, "red"),
+      ScatterData.representative(Some(NovelCondition.finished), tInterval, tMinSectionCount, RepresentativeData.mean, "orange"),
+      ScatterData.representative(Some(NovelCondition.finished.not), tInterval, tMinSectionCount, RepresentativeData.average, "green"),
+      ScatterData.representative(Some(NovelCondition.finished.not), tInterval, tMinSectionCount, RepresentativeData.mean, "lightgreen")
+    )
   }
 
   private val innerComponent =
@@ -48,30 +68,15 @@ object RootView {
           <.div("サンプリング"),
           NovelScatterChart(
             novels,
-            Seq(
-              ScatterData.filterAndSampling(NovelCondition.finished.withBookmark100, "red", Sampling.targetCount(1000)),
-              ScatterData.filterAndSampling(NovelCondition.finished.not.withBookmark100, "green", Sampling.targetCount(1000))
-            ),
+            samplingScatters,
             actions.selectNovel
           ),
           <.div("代表値"),
-          {
-            val tInterval = 100
-            val tMinSectionCount = 50
-            val tWindow = 300
-            NovelScatterChart(
-              novels,
-              Seq(
-                ScatterData.range(Some(NovelCondition.all), tWindow, RangeFilter.iqrUpperOutlier, "blue"),
-                ScatterData.representative(Some(NovelCondition.all), tInterval, tMinSectionCount, RepresentativeData.top, "skyblue"),
-                ScatterData.representative(Some(NovelCondition.finished), tInterval, tMinSectionCount, RepresentativeData.average, "red"),
-                ScatterData.representative(Some(NovelCondition.finished), tInterval, tMinSectionCount, RepresentativeData.mean, "orange"),
-                ScatterData.representative(Some(NovelCondition.finished.not), tInterval, tMinSectionCount, RepresentativeData.average, "green"),
-                ScatterData.representative(Some(NovelCondition.finished.not), tInterval, tMinSectionCount, RepresentativeData.mean, "lightgreen")
-              ),
-              actions.selectNovel
-            )
-          },
+          NovelScatterChart(
+            novels,
+            representativeScatters,
+            actions.selectNovel
+          ),
           NovelDrawer()
         )
       }

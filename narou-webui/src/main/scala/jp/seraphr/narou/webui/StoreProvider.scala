@@ -4,11 +4,11 @@ import japgolly.scalajs.react.{ CtorType, React, ScalaComponent }
 import jp.seraphr.narou.webui.state.{ AppState, NarouWebAppStore }
 import japgolly.scalajs.react.vdom.html_<^._
 import jp.seraphr.narou.ExtractedNovelLoader
-import jp.seraphr.narou.webui.action.DefaultActions
+import jp.seraphr.narou.webui.action.{ Actions, DefaultActions }
 import jp.seraphr.util.DefaultStateApi
 
 object StoreProvider {
-  var lastScope: Any = null
+  private var actions: Actions = null
   val context = React.createContext(NarouWebAppStore.emptyStore)
   val component =
     ScalaComponent.builder[(AppState, ExtractedNovelLoader)]
@@ -16,18 +16,19 @@ object StoreProvider {
       .noBackend
       .renderPC {
         case (scope, (_, loader), children) =>
-          lastScope = scope
-          val tStateApi = new DefaultStateApi[AppState](
-            () => scope.state,
-            f => scope.modState(f).flatMap(_ => scope.mountedPure.state).runNow()
-          )
-          val tActions = new DefaultActions(loader, {
-            f =>
-              import monix.execution.Scheduler.Implicits.global
-              f(tStateApi).foreach { _ => }
-          })
+          if (actions == null) {
+            val tStateApi = new DefaultStateApi[AppState](
+              () => scope.state,
+              f => scope.modState(f).flatMap(_ => scope.mountedPure.state).runNow()
+            )
+            actions = new DefaultActions(loader, {
+              f =>
+                import monix.execution.Scheduler.Implicits.global
+                f(tStateApi).foreach { _ => }
+            })
+          }
 
-          StoreProvider.context.provide(NarouWebAppStore(tActions, scope.state))(children)
+          StoreProvider.context.provide(NarouWebAppStore(actions, scope.state))(children)
       }.build
 
   def apply(initialState: AppState, loader: ExtractedNovelLoader)(aChildren: CtorType.ChildArg) = {
