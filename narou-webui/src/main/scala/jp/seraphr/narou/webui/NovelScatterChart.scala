@@ -20,7 +20,7 @@ object NovelScatterChart {
   import js.JSConverters._
   import jp.seraphr.recharts.Implicits._
 
-  case class Props(novels: Seq[NarouNovel], axisX: AxisData, axisY: AxisData, scatters: Seq[ScatterData])
+  case class Props(novels: Seq[NarouNovel], axisX: AxisData, axisY: AxisData, scatters: Seq[ScatterData], selectNovel: NarouNovel => Unit)
 
   @JSExportAll
   case class PointData(x: Double, y: Double, z: String, novel: NarouNovel)
@@ -33,7 +33,7 @@ object NovelScatterChart {
     }
   }
 
-  val component = ScalaFnComponent[Props] { case Props(aNovels, aAxisX, aAxisY, aScatters) =>
+  val component = ScalaFnComponent[Props] { case Props(aNovels, aAxisX, aAxisY, aScatters, selectNovel) =>
     val tScatters: Seq[ChildArg] = aScatters.map { tScatterData =>
       val tPoints = createPointData(aNovels, aAxisX, aAxisY, tScatterData).toJSArray
       val tName = s"${tScatterData.name}(${tPoints.size})"
@@ -43,7 +43,7 @@ object NovelScatterChart {
         .isAnimationActive(false)
         .onClick((a1, _, _) => Callback {
           val novel = a1.asInstanceOf[js.Dynamic].payload.asInstanceOf[PointData].novel
-          println(novel.title)
+          selectNovel(novel)
           //          println(novel.story)
         })
         .build
@@ -94,13 +94,14 @@ object NovelScatterChart {
     )(tChildren ++ tScatters: _*)
   }
 
-  def apply(aNovels: Seq[NarouNovel], aScatters: Seq[ScatterData]): ScalaFnComponent.Unmounted[Props] = {
+  def apply(aNovels: Seq[NarouNovel], aScatters: Seq[ScatterData], selectNovel: NarouNovel => Unit): ScalaFnComponent.Unmounted[Props] = {
     component(
       Props(
         novels = aNovels,
         axisX = AxisData.bookmark,
         axisY = AxisData.evaluationPerBookmark,
-        scatters = aScatters
+        scatters = aScatters,
+        selectNovel
       )
     )
   }

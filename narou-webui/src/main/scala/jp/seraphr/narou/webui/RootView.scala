@@ -2,9 +2,10 @@ package jp.seraphr.narou.webui
 
 import japgolly.scalajs.react._
 import japgolly.scalajs.react.vdom.html_<^._
-import jp.seraphr.narou.model.{ NarouNovel, NovelCondition }
+import jp.seraphr.narou.model.{ NarouNovel, NarouNovelsMeta, NovelCondition }
 import jp.seraphr.narou.webui.ScatterData.{ RangeFilter, RepresentativeData }
-import jp.seraphr.narou.webui.state.NarouWebAppStore
+import jp.seraphr.narou.webui.action.Actions
+import jp.seraphr.narou.webui.component.NovelDrawer
 
 import scala.annotation.nowarn
 import scala.scalajs.js
@@ -18,7 +19,7 @@ object RootView {
   @nowarn("cat=unused")
   private val css = CSS
 
-  type Props = NarouWebAppStore
+  case class Props(actions: Actions, allMeta: Map[String, NarouNovelsMeta], selectedNovel: Seq[NarouNovel])
   case class State(novels: Seq[NarouNovel])
 
   def apply() = component()
@@ -30,11 +31,11 @@ object RootView {
   private val innerComponent =
     ScalaComponent.builder[Props]("RootView")
       .stateless
-      .render_P { case NarouWebAppStore(actions, p) =>
+      .render_P { case Props(actions, allMeta, novels) =>
         import typings.antd.components._
         import typings.antd.components.Select.Option
 
-        val tSelectOptions = p.allMeta.toSeq.sortBy(_._2.novelCount).map { case (tId, tMeta) =>
+        val tSelectOptions = allMeta.toSeq.sortBy(_._2.novelCount).map { case (tId, tMeta) =>
           Option(tId)(s"${tMeta.name}(${tMeta.novelCount})").build
         }
 
@@ -43,31 +44,39 @@ object RootView {
             .onSelect((tValue, _) => Callback(actions.selectMeta(tValue)))(
               tSelectOptions: _*
             ),
-          <.div(s"loaded novel count = ${p.selected.novels.size}"),
-          //          ScatterChartExample(s.dataCount).when(false),
+          <.div(s"loaded novel count = ${novels.size}"),
           <.div("サンプリング"),
-          NovelScatterChart(p.selected.novels, Seq(
-            ScatterData.filterAndSampling(NovelCondition.finished.withBookmark100, "red", Sampling.targetCount(1000)),
-            ScatterData.filterAndSampling(NovelCondition.finished.not.withBookmark100, "green", Sampling.targetCount(1000))
-          )),
+          NovelScatterChart(
+            novels,
+            Seq(
+              ScatterData.filterAndSampling(NovelCondition.finished.withBookmark100, "red", Sampling.targetCount(1000)),
+              ScatterData.filterAndSampling(NovelCondition.finished.not.withBookmark100, "green", Sampling.targetCount(1000))
+            ),
+            actions.selectNovel
+          ),
           <.div("代表値"),
           {
             val tInterval = 100
             val tMinSectionCount = 50
             val tWindow = 300
-            NovelScatterChart(p.selected.novels, Seq(
-              ScatterData.range(Some(NovelCondition.all), tWindow, RangeFilter.iqrUpperOutlier, "blue"),
-              ScatterData.representative(Some(NovelCondition.all), tInterval, tMinSectionCount, RepresentativeData.top, "skyblue"),
-              ScatterData.representative(Some(NovelCondition.finished), tInterval, tMinSectionCount, RepresentativeData.average, "red"),
-              ScatterData.representative(Some(NovelCondition.finished), tInterval, tMinSectionCount, RepresentativeData.mean, "orange"),
-              ScatterData.representative(Some(NovelCondition.finished.not), tInterval, tMinSectionCount, RepresentativeData.average, "green"),
-              ScatterData.representative(Some(NovelCondition.finished.not), tInterval, tMinSectionCount, RepresentativeData.mean, "lightgreen"),
-            ))
-          }
+            NovelScatterChart(
+              novels,
+              Seq(
+                ScatterData.range(Some(NovelCondition.all), tWindow, RangeFilter.iqrUpperOutlier, "blue"),
+                ScatterData.representative(Some(NovelCondition.all), tInterval, tMinSectionCount, RepresentativeData.top, "skyblue"),
+                ScatterData.representative(Some(NovelCondition.finished), tInterval, tMinSectionCount, RepresentativeData.average, "red"),
+                ScatterData.representative(Some(NovelCondition.finished), tInterval, tMinSectionCount, RepresentativeData.mean, "orange"),
+                ScatterData.representative(Some(NovelCondition.finished.not), tInterval, tMinSectionCount, RepresentativeData.average, "green"),
+                ScatterData.representative(Some(NovelCondition.finished.not), tInterval, tMinSectionCount, RepresentativeData.mean, "lightgreen")
+              ),
+              actions.selectNovel
+            )
+          },
+          NovelDrawer()
         )
       }
       .build
 
-  val storeWrapper = new StoreWrapper(StoreProvider.context)(identity)
+  val storeWrapper = new StoreWrapper(StoreProvider.context)(s => Props(s.actions, s.state.allMeta, s.state.selected.novels))
   val component = storeWrapper.wrap(innerComponent)
 }

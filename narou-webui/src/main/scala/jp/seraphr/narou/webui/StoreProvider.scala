@@ -8,6 +8,7 @@ import jp.seraphr.narou.webui.action.DefaultActions
 import jp.seraphr.util.DefaultStateApi
 
 object StoreProvider {
+  var lastScope: Any = null
   val context = React.createContext(NarouWebAppStore.emptyStore)
   val component =
     ScalaComponent.builder[(AppState, ExtractedNovelLoader)]
@@ -15,6 +16,7 @@ object StoreProvider {
       .noBackend
       .renderPC {
         case (scope, (_, loader), children) =>
+          lastScope = scope
           val tStateApi = new DefaultStateApi[AppState](
             () => scope.state,
             f => scope.modState(f).flatMap(_ => scope.mountedPure.state).runNow()
