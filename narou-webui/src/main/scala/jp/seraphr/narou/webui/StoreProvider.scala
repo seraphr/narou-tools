@@ -11,7 +11,7 @@ object StoreProvider {
   private var actions: Actions = null
   val context = React.createContext(NarouWebAppStore.emptyStore)
   val component =
-    ScalaComponent.builder[(AppState, ExtractedNovelLoader)]
+    ScalaComponent.builder[(AppState, ExtractedNovelLoader)]("StoreProvider")
       .initialStateFromProps(_._1)
       .noBackend
       .renderPC {
