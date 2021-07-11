@@ -20,6 +20,19 @@ case class ConvertInput(novels: Seq[NarouNovel], x: AxisData, y: AxisData)
 case class ScatterData(name: String, convert: ConvertInput => Seq[NarouNovel], color: String)
 object ScatterData {
   private val mRandom = new Random(1234)
+  def memorizeConvert(convert: ConvertInput => Seq[NarouNovel]): ConvertInput => Seq[NarouNovel] = {
+    var tMemorizedInput: ConvertInput = null
+    var tMemorizedResult: Seq[NarouNovel] = null
+    tInput => {
+      if (tMemorizedResult != null && tMemorizedInput == tInput) {
+        tMemorizedResult
+      } else {
+        tMemorizedInput = tInput
+        tMemorizedResult = convert(tInput)
+        tMemorizedResult
+      }
+    }
+  }
 
   def filterAndSampling(aCondition: NovelCondition, aColor: String, aSampling: Sampling = Sampling.nop): ScatterData = {
     def convert(aInput: ConvertInput): Seq[NarouNovel] = {
@@ -36,7 +49,7 @@ object ScatterData {
       }
     }
 
-    ScatterData(aCondition.name, convert, aColor)
+    ScatterData(aCondition.name, memorizeConvert(convert), aColor)
   }
 
   case class SectionData(name: String, value: NarouNovel => Int, interval: Int)
@@ -141,7 +154,7 @@ object ScatterData {
 
     val tConditionName = aCondition.fold("")(c => s"${c.name}-")
     val tName = s"${tConditionName} ${aInterval}毎 ${aRepData.name}"
-    ScatterData(tName, convert, aColor)
+    ScatterData(tName, memorizeConvert(convert), aColor)
   }
 
   /**
@@ -191,6 +204,6 @@ object ScatterData {
 
     val tConditionName = aCondition.fold("")(c => s"${c.name}-")
     val tName = s"${tConditionName} ${aRange.name}"
-    ScatterData(tName, convert, aColor)
+    ScatterData(tName, memorizeConvert(convert), aColor)
   }
 }

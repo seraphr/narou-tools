@@ -2,7 +2,7 @@ package jp.seraphr.recharts
 
 import org.scalajs.dom.raw.Element
 import japgolly.scalajs.react.ReactMouseEventFrom
-import typings.recharts.components
+import typings.recharts.{ components, scatterMod }
 import typings.recharts.rechartsStrings.{ category, left, number, right }
 import typings.recharts.scatterMod.ScatterPointItem
 import typings.recharts.utilTypesMod.AdaptChildMouseEventHandler
@@ -14,6 +14,15 @@ object Implicits {
   implicit class ScatterOps(val s: components.Scatter.type) extends AnyVal {
     def create(aName: js.UndefOr[String], aPoints: js.UndefOr[Seq[ScatterPointItem]]) = {
       components.Scatter(
+        aName.asInstanceOf[js.UndefOr[String] with (js.UndefOr[String | Double])],
+        aPoints.asInstanceOf[js.UndefOr[String] with js.UndefOr[js.Array[ScatterPointItem]]]
+      )
+    }
+  }
+
+  implicit class ScatterProps(val s: scatterMod.Props.type) extends AnyVal {
+    def create(aName: js.UndefOr[String], aPoints: js.UndefOr[Seq[ScatterPointItem]]) = {
+      s(
         aName.asInstanceOf[js.UndefOr[String] with (js.UndefOr[String | Double])],
         aPoints.asInstanceOf[js.UndefOr[String] with js.UndefOr[js.Array[ScatterPointItem]]]
       )
@@ -47,6 +56,17 @@ object Implicits {
     def create(offset: js.UndefOr[String] = js.undefined) = {
       components.Label(
         offset.asInstanceOf[(js.UndefOr[Double | String]) with js.UndefOr[Double]]
+      )
+    }
+  }
+
+  implicit class ReferenceDotOps(val d: components.ReferenceDot.type) extends AnyVal {
+    def create(className: js.UndefOr[String], cx: js.UndefOr[String | Double], cy: js.UndefOr[String | Double], r: js.UndefOr[String | Double]) = {
+      components.ReferenceDot(
+        className.asInstanceOf[js.UndefOr[String] with (js.UndefOr[Double | String])],
+        cx.asInstanceOf[(js.UndefOr[Double | String]) with js.UndefOr[Double]],
+        cy.asInstanceOf[(js.UndefOr[Double | String]) with js.UndefOr[Double]],
+        r.asInstanceOf[(js.UndefOr[Double | String]) with js.UndefOr[Double]]
       )
     }
   }

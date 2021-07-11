@@ -20,7 +20,7 @@ object RootView {
   private val css = CSS
 
   @JSExportAll
-  case class Props(actions: Actions, allMeta: Map[String, NarouNovelsMeta], selectedNovel: Seq[NarouNovel])
+  case class Props(actions: Actions, allMeta: Map[String, NarouNovelsMeta], selectedNovels: Seq[NarouNovel], selectedNovel: Option[NarouNovel])
   case class State(novels: Seq[NarouNovel])
 
   def apply() = component()
@@ -51,7 +51,7 @@ object RootView {
   private val innerComponent =
     ScalaComponent.builder[Props]("RootView")
       .stateless
-      .render_P { case Props(actions, allMeta, novels) =>
+      .render_P { case Props(actions, allMeta, novels, selectedNovel) =>
         import typings.antd.components._
         import typings.antd.components.Select.Option
 
@@ -68,12 +68,14 @@ object RootView {
           <.div("サンプリング"),
           NovelScatterChart(
             novels,
+            selectedNovel,
             samplingScatters,
             actions.selectNovel
           ),
           <.div("代表値"),
           NovelScatterChart(
             novels,
+            selectedNovel,
             representativeScatters,
             actions.selectNovel
           ),
@@ -82,6 +84,6 @@ object RootView {
       }
       .build
 
-  val storeWrapper = new StoreWrapper(StoreProvider.context)(s => Props(s.actions, s.state.allMeta, s.state.selected.novels))
+  val storeWrapper = new StoreWrapper(StoreProvider.context)(s => Props(s.actions, s.state.allMeta, s.state.selected.novels, s.state.selected.novel))
   val component = storeWrapper.wrap(innerComponent)
 }
