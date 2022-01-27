@@ -16,7 +16,7 @@ object Dependencies {
     val commonsIO = "commons-io" % "commons-io" % "2.5"
     val scopt = "com.github.scopt" %% "scopt" % "3.7.1"
     val slf4j = "org.slf4j" % "slf4j-api" % "1.7.+"
-    val logback = "ch.qos.logback" % "logback-classic" % "1.2.3"
+    val logback = "ch.qos.logback" % "logback-classic" % "1.2.10"
     val monix = "io.monix" %% "monix" % monixVersion
     val monixReactive = "io.monix" %% "monix-reactive" % monixVersion
 
