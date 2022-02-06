@@ -7,16 +7,16 @@ object Dependencies {
   val scalatestVersion = "3.1.1"
   val scalatestplusVersion = s"${scalatestVersion}.0"
   val circeVersion = "0.13.0"
-  val monixVersion = "3.2.2"
-  val monocleVersion = "3.0.0-RC2"
+  val monixVersion = "3.2.1"
+  val monocleVersion = "3.0.0"
 
   object jvm {
     val scalaTest = "org.scalatest" %% "scalatest" % scalatestVersion
     val narou4j = "net.nashihara" % "narou4j" % "1.2.6"
-    val commonsIO = "commons-io" % "commons-io" % "2.5"
+    val commonsIO = "commons-io" % "commons-io" % "2.11.0"
     val scopt = "com.github.scopt" %% "scopt" % "3.7.1"
     val slf4j = "org.slf4j" % "slf4j-api" % "1.7.+"
-    val logback = "ch.qos.logback" % "logback-classic" % "1.2.3"
+    val logback = "ch.qos.logback" % "logback-classic" % "1.2.10"
     val monix = "io.monix" %% "monix" % monixVersion
     val monixReactive = "io.monix" %% "monix-reactive" % monixVersion
 
