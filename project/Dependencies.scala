@@ -27,7 +27,7 @@ object Dependencies {
       "io.circe" %% "circe-generic-extras"
     ).map(_ % circeVersion)
 
-    val scalajsStubs = "org.scala-js" %% "scalajs-stubs" % "1.0.0" % "provided"
+    val scalajsStubs = "org.scala-js" %% "scalajs-stubs" % "1.1.0" % "provided"
     val monocle = Seq(
       "dev.optics" %% "monocle-core",
       "dev.optics" %% "monocle-macro"
