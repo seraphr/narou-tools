@@ -4,7 +4,7 @@ import org.portablescala.sbtplatformdeps.PlatformDepsPlugin.autoImport._
 
 object Dependencies {
   val reactVersion = "17.0.2"
-  val scalatestVersion = "3.1.4"
+  val scalatestVersion = "3.2.11"
   val scalatestplusVersion = s"${scalatestVersion}.0"
   val circeVersion = "0.13.0"
   val monixVersion = "3.4.0"
@@ -37,7 +37,7 @@ object Dependencies {
   object scalajs {
     val scalajsDom = Def.setting("org.scala-js" %%% "scalajs-dom" % "1.2.0")
     val scalatest = Def.setting("org.scalatest" %%% "scalatest" % scalatestVersion)
-    val scalacheck = Def.setting("org.scalatestplus" %%% "scalacheck-1-14" % scalatestplusVersion)
+    val scalacheck = Def.setting("org.scalatestplus" %%% "scalacheck-1-15" % scalatestplusVersion)
     val reactjs = Def.setting("com.github.japgolly.scalajs-react" %%% "core" % "1.7.7")
     val reactjsExtra = Def.setting("com.github.japgolly.scalajs-react" %%% "extra" % "1.7.7")
     val monixReactive = Def.setting("io.monix" %%% "monix-reactive" % monixVersion)
