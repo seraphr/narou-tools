@@ -112,7 +112,7 @@ lazy val `narou-webui` = (project in file("narou-webui"))
       js.recharts,
       js.antd
     ),
-    stFlavour := Flavour.Japgolly,
+    stFlavour := Flavour.ScalajsReact,
     stIgnore ++= List(
       // https://github.com/ScalablyTyped/Converter/issues/324
       "recharts/types/util/CartesianUtils"
