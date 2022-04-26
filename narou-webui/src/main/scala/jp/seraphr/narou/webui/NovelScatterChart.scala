@@ -3,15 +3,13 @@ package jp.seraphr.narou.webui
 import japgolly.scalajs.react.CtorType.ChildArg
 import japgolly.scalajs.react.extra.Px
 import japgolly.scalajs.react.{ BackendScope, Callback, Reusability, ScalaComponent }
-import japgolly.scalajs.react.raw.React.Element
 import jp.seraphr.narou.model.NarouNovel
 import jp.seraphr.recharts.{ Axis, CartesianGrid, ScatterChart }
-import org.scalajs.dom.raw.SVGElement
+import org.scalajs.dom.SVGElement
 import typings.react.mod.SVGProps
 import typings.recharts.components.Scatter
 import typings.recharts.{ rechartsStrings, scatterMod }
 
-import scala.scalajs.js.|
 import typings.recharts.utilTypesMod.Margin
 
 import scala.scalajs.js
@@ -78,7 +76,7 @@ object NovelScatterChart {
           println(s"create scatter props !!")
           input.scatters.map { tScatterData =>
             scatterMod.Props.create(tScatterData.name, js.undefined)
-              .setData(tScatterData.points.toJSArray)
+              .setData(tScatterData.points.map(a => a: Any).toJSArray)
               .setFill(tScatterData.color)
               .setIsAnimationActive(false)
               .setOnClick((a1, _, _) => Callback {
@@ -127,7 +125,7 @@ object NovelScatterChart {
           .dataKey("z")
           .range(js.Array(20, 20))
           .name("title"),
-        Tooltip.cursor(SVGProps[SVGElement]().setStrokeDasharray("3 3").asInstanceOf[Boolean | Element | SVGProps[SVGElement]]),
+        Tooltip.cursor(SVGProps[SVGElement]().setStrokeDasharray("3 3")).build,
         Legend.create()
       )
       val tReDot = for {
