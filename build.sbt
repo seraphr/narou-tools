@@ -12,17 +12,25 @@ val commonDependencies = Def.settings(
     scalajs.scalacheck.value % "test"
   )
 )
+val isCI = Option(System.getenv("CI")).contains("true")
 
 val commonSettings = Def.settings(
-  scalacOptions ++= Seq(
-    "-encoding", "UTF-8",
-    "-feature", "-deprecation", "-unchecked",
-    // byname-implicitは https://github.com/scala/bug/issues/12072 の問題の抑止のため削る
-    "-Xlint:_,-missing-interpolator,-byname-implicit",
-    "-Ywarn-dead-code",
-    "-Ywarn-unused:patvars",
-    "-Werror"
-  ),
+  scalacOptions ++= {
+    val tBase = Seq(
+      "-encoding", "UTF-8",
+      "-feature", "-deprecation", "-unchecked",
+      // byname-implicitは https://github.com/scala/bug/issues/12072 の問題の抑止のため削る
+      "-Xlint:_,-missing-interpolator,-byname-implicit",
+      "-Ywarn-dead-code",
+      "-Ywarn-unused:patvars"
+    )
+    val tInCI = Seq(
+      "-Werror"
+    )
+
+    if(isCI) tBase ++ tInCI else tBase
+  }
+  ,
 
   Compile / console / scalacOptions ~= {
     _.filterNot(Set("-Werror"))
