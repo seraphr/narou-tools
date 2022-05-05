@@ -31,7 +31,7 @@ object NovelDrawer {
           .width(400)
           .closable(true)
           .onClose(_ => tScope.setState(false))(
-            <.pre(^.whiteSpace.`pre-wrap`)(tNovel.story)
+            <.pre(^.whiteSpace.preWrap)(tNovel.story)
           )
       )
     }.build
