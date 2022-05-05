@@ -20,6 +20,9 @@ trait NovelDataAccessor {
 
 trait ExtractedNovelLoader {
   val metadata: Task[ExtractedNarouNovelsMeta]
+  /**
+   * ディレクトリ名 -> NarouNovelsMetaのMap
+   */
   val allMetadata: Task[Map[String, NarouNovelsMeta]]
   def loader(aDir: String): Task[NovelLoader]
   def load(aDir: String): Observable[NarouNovel] = {

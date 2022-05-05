@@ -29,7 +29,7 @@ object UploadType {
  * @param writer ユーザ名
  * @param story あらすじ
  * @param genre ジャンル
- * @param gensaku 未使用。 常にから文字列
+ * @param gensaku 未使用。 常に空文字列
  * @param keywords
  * @param firstUpload 初アップロード時刻
  * @param lastUpload 最終アップロード時刻
