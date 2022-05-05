@@ -114,8 +114,6 @@ lazy val `narou-webui` = (project in file("narou-webui"))
     ),
     stFlavour := Flavour.ScalajsReact,
     stIgnore ++= List(
-      // https://github.com/ScalablyTyped/Converter/issues/324
-      "recharts/types/util/CartesianUtils"
     ),
     // css-load設定 fileとかurlは要らんが、scalablytypedデモプロジェクトからそのまま持ってきた
     webpackConfigFile := Some(baseDirectory.value / "custom-scalajs.webpack.config"),
