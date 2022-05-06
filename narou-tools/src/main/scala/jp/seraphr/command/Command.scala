@@ -12,7 +12,7 @@ trait Command { self =>
 
   protected abstract class CommandArgParser[ArgType] extends scopt.OptionParser[ArgType](self.name) {
     override def errorOnUnknownArgument: Boolean = true
-    override def showUsageOnError: Boolean = true
+    override def showUsageOnError: Option[Boolean] = Some(true)
     head(self.name, self.version)
 
     help("help").abbr("h")
