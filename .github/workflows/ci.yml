@@ -13,5 +13,13 @@ jobs:
       with:
         distribution: temurin
         java-version: 11
+    - name: Cache scalablytyped
+      uses: actions/cache@v3
+      with:
+        path: ~/.cache/scalablytyped/
+        key: ${{ runner.os }}-scalablytyped-${{ hashFiles('project/project/ScalablyTyped.scala') }}-${{ hashFiles('project/Dependencies.scala') }}
+        # restore-keys には必ずScalablyTyped.scalaのhashをつける。 ScalablyTypedのバージョンが変わったら必ずキャッシュを新規に作りたい（そうしないと古いバージョンのキャッシュが残り続ける
+        restore-keys: |
+          ${{ runner.os }}-scalablytyped-${{ hashFiles('project/project/ScalablyTyped.scala') }}-
     - name: Build and Test
       run: ./sbt-batch test
