@@ -1,6 +1,5 @@
 // resolvers += Resolver.bintrayRepo("oyvindberg", "converter")
 
-addSbtPlugin("org.scalariform" % "sbt-scalariform" % "1.8.3")
 addSbtPlugin("org.xerial.sbt" % "sbt-pack" % "0.14")
 
 addSbtPlugin("org.scala-js" % "sbt-scalajs" % "1.10.0")
