@@ -7,7 +7,7 @@ object Dependencies {
   val scalatestVersion = "3.2.12"
   val scalatestplusVersion = s"${scalatestVersion}.0"
   val circeVersion = "0.14.1"
-  val monixVersion = "3.4.0"
+  val monixVersion = "3.4.1"
   val monocleVersion = "3.1.0"
 
   object jvm {
