@@ -7,13 +7,13 @@ import narou4j.entities.Novel
 import narou4j.enums.OutputOrder
 
 class AllNovelCollector(aIntervalMillis: Long) extends HasLogger {
-  private val mLimit = 500
+  private val mLimit   = 500
   private val mMaxSkip = 2000
 
   def collect(aBuilder: NarouClientBuilder): Iterator[Novel] = {
     val tAdjuster = new IntervalAdjuster(aIntervalMillis)
-    val tCounter = new AtomicInteger(0)
-    val tFormat = NumberFormat.getNumberInstance()
+    val tCounter  = new AtomicInteger(0)
+    val tFormat   = NumberFormat.getNumberInstance()
 
     def collectOne(aMinLength: Int, aSkip: Int, aRemainRetry: Int = 4): Vector[Novel] = {
       tAdjuster.adjust()
@@ -32,7 +32,10 @@ class AllNovelCollector(aIntervalMillis: Long) extends HasLogger {
           .length(Some(aMinLength), None)
           .skipLim(aSkip, mLimit)
           .buildFromEmpty
-          .getNovels.asScala.tail.toVector // 先頭はallcountだけが入っているデータなので削る
+          .getNovels
+          .asScala
+          .tail
+          .toVector // 先頭はallcountだけが入っているデータなので削る
       } catch {
         case e: Throwable if 0 < aRemainRetry =>
           logger.warn(s"[retry] 例外が発生したため、リトライを行います。 remain = ${aRemainRetry}: ${e.getMessage}")
@@ -46,11 +49,13 @@ class AllNovelCollector(aIntervalMillis: Long) extends HasLogger {
     }
 
     def collectAll(aMinLength: Int = 0, aSkip: Int = 0): Iterator[Novel] = {
-      val tCollected = collectOne(aMinLength, aSkip)
+      val tCollected  = collectOne(aMinLength, aSkip)
       val tHeadLength = tCollected.head.getNumberOfChar
       val tLastLength = tCollected.last.getNumberOfChar
 
-      logger.debug(s"found ${tCollected.size}, minLength=${aMinLength}, aSkip=${aSkip}, head=${tHeadLength}, last=${tLastLength}")
+      logger.debug(
+        s"found ${tCollected.size}, minLength=${aMinLength}, aSkip=${aSkip}, head=${tHeadLength}, last=${tLastLength}"
+      )
 
       if (tCollected.size < mLimit) {
         // 終端に達したので探索終了

@@ -2,12 +2,9 @@ package jp.seraphr.narou.model
 
 import java.util.Date
 
-/**
- *
- * @param conditionDirs データが格納されているディレクトリ列
- */
+/** @param conditionDirs データが格納されているディレクトリ列 */
 case class ExtractedNarouNovelsMeta(
-  conditionDirs: Seq[String]
+    conditionDirs: Seq[String]
 )
 
 /**
@@ -19,8 +16,8 @@ case class ExtractedNarouNovelsMeta(
  * @param novelFiles 小説情報を格納しているファイル名の列
  */
 case class NarouNovelsMeta(
-  name: String,
-  createdAt: Date,
-  novelCount: Int,
-  novelFiles: Seq[String]
+    name: String,
+    createdAt: Date,
+    novelCount: Int,
+    novelFiles: Seq[String]
 )

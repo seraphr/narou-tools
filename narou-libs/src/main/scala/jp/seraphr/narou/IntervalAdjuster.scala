@@ -10,4 +10,5 @@ class IntervalAdjuster(aIntervalMillis: Long) {
     if (0 < tSleep) Thread.sleep(tSleep)
     mLast = System.currentTimeMillis()
   }
+
 }

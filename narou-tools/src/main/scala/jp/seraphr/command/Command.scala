@@ -10,8 +10,8 @@ trait Command { self =>
   val version: String
   def run(aArgs: Seq[String]): Try[Unit]
 
-  protected abstract class CommandArgParser[ArgType] extends scopt.OptionParser[ArgType](self.name) {
-    override def errorOnUnknownArgument: Boolean = true
+  abstract protected class CommandArgParser[ArgType] extends scopt.OptionParser[ArgType](self.name) {
+    override def errorOnUnknownArgument: Boolean   = true
     override def showUsageOnError: Option[Boolean] = Some(true)
     head(self.name, self.version)
 

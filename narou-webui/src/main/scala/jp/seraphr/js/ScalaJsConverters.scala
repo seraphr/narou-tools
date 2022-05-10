@@ -9,7 +9,7 @@ object ScalaJsConverters {
 
   implicit class AnyOops[A](a: A) {
     def asDefined: js.UndefOr[A] = a
-    def cast[B]: B = a.asInstanceOf[B]
-    def asAny: js.Any = a.asInstanceOf[js.Any]
+    def cast[B]: B               = a.asInstanceOf[B]
+    def asAny: js.Any            = a.asInstanceOf[js.Any]
   }
 }

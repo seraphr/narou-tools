@@ -1,8 +1,8 @@
 package jp.seraphr.command
 
-import jp.seraphr.command.ParentCommand.ParentCommandArg
-
 import scala.util.Try
+
+import jp.seraphr.command.ParentCommand.ParentCommandArg
 
 /**
  */
@@ -18,9 +18,7 @@ trait ParentCommand extends Command { self =>
     note("")
 
     subCommands.foreach { tSub =>
-      cmd(tSub.name)
-        .text(tSub.description)
-        .action { (_, c) => c.copy(subCommand = Some(tSub)) }
+      cmd(tSub.name).text(tSub.description).action { (_, c) => c.copy(subCommand = Some(tSub)) }
     }
   }
 }

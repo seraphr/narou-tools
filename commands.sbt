@@ -1,2 +1,1 @@
-
 addCommandAlias("makeAndPushSite", "makeSite;ghpagesPushSite")

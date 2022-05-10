@@ -15,7 +15,11 @@ object AxisData {
     def option: Option[A] = Option(a)
   }
   val bookmark = AxisData(_.bookmarkCount.option, "bookmark")
-  val evaluationPoint = AxisData(_.evaluationPoint.option, "評価ポイント", "pt")
-  val globalPoint = AxisData(_.globalPoint.option, "総合ポイント", "pt")
-  val evaluationPerBookmark = AxisData(n => if (n.bookmarkCount == 0) None else (n.evaluationPoint * 1000 / n.bookmarkCount).option, "評価ポイント/ブックマーク")
+  val evaluationPoint       = AxisData(_.evaluationPoint.option, "評価ポイント", "pt")
+  val globalPoint           = AxisData(_.globalPoint.option, "総合ポイント", "pt")
+  val evaluationPerBookmark = AxisData(
+    n => if (n.bookmarkCount == 0) None else (n.evaluationPoint * 1000 / n.bookmarkCount).option,
+    "評価ポイント/ブックマーク"
+  )
+
 }

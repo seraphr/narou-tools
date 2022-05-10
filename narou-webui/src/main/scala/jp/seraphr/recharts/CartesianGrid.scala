@@ -6,7 +6,7 @@ import typings.recharts.mod
 
 object CartesianGrid {
   type Props = cartesianGridMod.Props
-  val Props = cartesianGridMod.Props
-  private val component = JsComponent[Props, Children.None, Null](mod.CartesianGrid.^)
+  val Props                                               = cartesianGridMod.Props
+  private val component                                   = JsComponent[Props, Children.None, Null](mod.CartesianGrid.^)
   def apply(p: Props): JsComponent.Unmounted[Props, Null] = component(p)
 }

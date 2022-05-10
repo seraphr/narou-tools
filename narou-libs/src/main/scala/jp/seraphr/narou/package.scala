@@ -11,5 +11,6 @@ package object narou {
     def compare[A](l: A, r: A)(implicit ordering: Ordering[A]): Int = {
       ordering.compare(l, r)
     }
+
   }
 }

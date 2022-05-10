@@ -16,25 +16,27 @@ case class NarouClientBuilder(build: Narou => Narou) {
   def opt[A](f: NarouClientBuilder => A => NarouClientBuilder)(aOptA: Option[A]): NarouClientBuilder = {
     aOptA.fold(this)(f(this))
   }
+
   def seq[A](f: NarouClientBuilder => A => NarouClientBuilder)(aSeq: Seq[A]): NarouClientBuilder = {
     aSeq.foldLeft(this)((builder, a) => f(builder)(a))
   }
 
-  def order(aOrder: OutputOrder) = this.n(_.setOrder(aOrder))
+  def order(aOrder: OutputOrder)       = this.n(_.setOrder(aOrder))
   def skipLim(aSkip: Int, aLimit: Int) = {
     val tSkipped = if (aSkip == 0) this else this.n(_.setSt(aSkip))
     tSkipped.n(_.setLim(aLimit))
   }
 
-  def pickup(aIsPickup: Boolean) = this.n(_.setPickup(aIsPickup))
-  def genre(aGenre: NovelGenre) = this.n(_.setGenre(aGenre))
-  def bigGenre(aGenre: NovelBigGenre) = this.n(_.setBigGenre(aGenre))
+  def pickup(aIsPickup: Boolean)                   = this.n(_.setPickup(aIsPickup))
+  def genre(aGenre: NovelGenre)                    = this.n(_.setGenre(aGenre))
+  def bigGenre(aGenre: NovelBigGenre)              = this.n(_.setBigGenre(aGenre))
   def length(aMin: Option[Int], aMax: Option[Int]) = {
     val tMin = aMin.getOrElse(0)
     val tMax = aMax.getOrElse(Int.MaxValue)
 
     this.n(_.setCharacterLength(tMin, tMax))
   }
+
 }
 
 object NarouClientBuilder {
