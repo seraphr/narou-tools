@@ -1,24 +1,28 @@
 import Dependencies._
-import sbtcrossproject.CrossPlugin.autoImport.{CrossType, crossProject}
+import sbtcrossproject.CrossPlugin.autoImport.{ crossProject, CrossType }
 
-name := "narou-tools"
+name                     := "narou-tools"
 ThisBuild / organization := "jp.seraphr"
 //enablePlugins(WorkbenchPlugin)
 //localUrl := ("0.0.0.0", 12345)
 
 val commonDependencies = Def.settings(
   libraryDependencies ++= Seq(
-    scalajs.scalatest.value % "test",
+    scalajs.scalatest.value  % "test",
     scalajs.scalacheck.value % "test"
   )
 )
+
 val isCI = Option(System.getenv("CI")).contains("true")
 
 val commonSettings = Def.settings(
   scalacOptions ++= {
     val tBase = Seq(
-      "-encoding", "UTF-8",
-      "-feature", "-deprecation", "-unchecked",
+      "-encoding",
+      "UTF-8",
+      "-feature",
+      "-deprecation",
+      "-unchecked",
       // byname-implicitは https://github.com/scala/bug/issues/12072 の問題の抑止のため削る
       "-Xlint:_,-missing-interpolator,-byname-implicit",
       "-Ywarn-dead-code",
@@ -28,10 +32,8 @@ val commonSettings = Def.settings(
       "-Werror"
     )
 
-    if(isCI) tBase ++ tInCI else tBase
-  }
-  ,
-
+    if (isCI) tBase ++ tInCI else tBase
+  },
   Compile / console / scalacOptions ~= {
     _.filterNot(Set("-Werror"))
   }
@@ -58,8 +60,9 @@ lazy val `narou-libs-model` = crossProject(JVMPlatform, JSPlatform)
       scalajs.scalajsDom.value
     )
   )
+
 lazy val modelJVM = `narou-libs-model`.jvm
-lazy val modelJS = `narou-libs-model`.js
+lazy val modelJS  = `narou-libs-model`.js
 
 lazy val `narou-libs` = (project in file("narou-libs"))
   .settings(
@@ -80,10 +83,11 @@ lazy val `narou-tools` = (project in file("narou-tools"))
     libraryDependencies ++= Seq(
       jvm.logback,
       jvm.scopt
-    ))
+    )
+  )
   .enablePlugins(PackPlugin)
   .settings(
-    packMain := Map("narou" -> "jp.seraphr.narou.commands.narou.NarouCommand"),
+    packMain    := Map("narou" -> "jp.seraphr.narou.commands.narou.NarouCommand"),
     packJvmOpts := Map("narou" -> Seq("-Xmx4g"))
   )
   .settings(commonSettings)
@@ -92,14 +96,12 @@ lazy val `narou-tools` = (project in file("narou-tools"))
     modelJVM
   )
 
-lazy val `narou-rank` = (project in file("narou-rank"))
-  .settings(commonSettings)
-  .dependsOn(`narou-libs`)
+lazy val `narou-rank` = (project in file("narou-rank")).settings(commonSettings).dependsOn(`narou-libs`)
 
 // -----------------------
 
 val buildResult = settingKey[File]("")
-val build = taskKey[File]("")
+val build       = taskKey[File]("")
 
 lazy val `narou-webui` = (project in file("narou-webui"))
   .enablePlugins(ScalaJSPlugin)
@@ -108,7 +110,7 @@ lazy val `narou-webui` = (project in file("narou-webui"))
   .enablePlugins(GhpagesPlugin)
   .settings(commonSettings)
   .settings(
-    scalaJSUseMainModuleInitializer := true,
+    scalaJSUseMainModuleInitializer  := true,
     libraryDependencies ++= Seq(
       scalajs.reactjs.value,
       scalajs.reactjsExtra.value
@@ -120,30 +122,30 @@ lazy val `narou-webui` = (project in file("narou-webui"))
       js.recharts,
       js.antd
     ),
-    stFlavour := Flavour.ScalajsReact,
+    stFlavour                        := Flavour.ScalajsReact,
     stIgnore ++= List(
     ),
     // css-load設定 fileとかurlは要らんが、scalablytypedデモプロジェクトからそのまま持ってきた
-    webpackConfigFile := Some(baseDirectory.value / "custom-scalajs.webpack.config"),
+    webpackConfigFile                := Some(baseDirectory.value / "custom-scalajs.webpack.config"),
     Compile / npmDevDependencies ++= Seq(
       js.`css-loader`,
       js.`style-loader`,
       js.`file-loader`,
       js.`url-loader`
     ),
-    git.remoteRepo := "git@github.com:seraphr/narou-tools.git",
-    buildResult := target.value / "scalajs-generated",
-    siteSourceDirectory := buildResult.value,
-    makeSite := makeSite.dependsOn(build).value,
-    build := {
-      val tTargetDir = buildResult.value
-      val tHtmlFile = baseDirectory.value / "index-fastopt.html"
+    git.remoteRepo                   := "git@github.com:seraphr/narou-tools.git",
+    buildResult                      := target.value / "scalajs-generated",
+    siteSourceDirectory              := buildResult.value,
+    makeSite                         := makeSite.dependsOn(build).value,
+    build                            := {
+      val tTargetDir      = buildResult.value
+      val tHtmlFile       = baseDirectory.value / "index-fastopt.html"
       val tTargetHtmlFile = tTargetDir / "index.html"
       sbt.IO.delete(tTargetDir)
-      val tJsDir = tTargetDir / "js"
-      val tWebpackFiles = (Compile / fastOptJS / webpack).value
+      val tJsDir          = tTargetDir / "js"
+      val tWebpackFiles   = (Compile / fastOptJS / webpack).value
       tJsDir.mkdirs()
-      val tMapping = tWebpackFiles.map(f => f.data -> tJsDir / f.data.name)
+      val tMapping        = tWebpackFiles.map(f => f.data -> tJsDir / f.data.name)
       sbt.IO.copy(tMapping)
 
       sbt.IO.copyFile(tHtmlFile, tTargetDir / "index.html")

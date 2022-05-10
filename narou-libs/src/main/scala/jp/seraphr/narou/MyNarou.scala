@@ -15,28 +15,37 @@ class MyNarou extends Narou {
     val client = new NarouApiClient
 
     val response: Response = client.getNovelBody(ncode, page)
-    val html: String = response.body.string
+    val html: String       = response.body.string
     if (html.isEmpty) {
       throw new RuntimeException("empty body")
     }
 
-    val result: NovelBody = new NovelBody
+    val result: NovelBody  = new NovelBody
     result.setNcode(ncode)
     result.setPage(page)
     val document: Document = Jsoup.parse(html)
-    val title: String = document.select(".novel_subtitle").first.ownText
+    val title: String      = document.select(".novel_subtitle").first.ownText
     result.setTitle(title)
-    val element: Element = document.getElementById("novel_honbun")
-    var body: String = element.html
+    val element: Element   = document.getElementById("novel_honbun")
+    var body: String       = element.html
 
     //    if(page <= 3)
     //      FileUtils.write(new File(s"./orig_${ncode}_${page}"), body, "UTF-8")
 
     body = body.replaceAll("\n", "")
     body = body.replaceAll("\r", "")
-    body = body.replaceAll("<ruby>", "").replaceAll("</ruby>", "").replaceAll("<rb>", "").replaceAll("</rb>", "").replaceAll("<rt>", "").replaceAll("</rt>", "").replaceAll("<rp>", "").replaceAll("</rp>", "")
+    body = body
+      .replaceAll("<ruby>", "")
+      .replaceAll("</ruby>", "")
+      .replaceAll("<rb>", "")
+      .replaceAll("</rb>", "")
+      .replaceAll("<rt>", "")
+      .replaceAll("</rt>", "")
+      .replaceAll("<rp>", "")
+      .replaceAll("</rp>", "")
     body = body.replaceAll("<br>", "\n")
     result.setBody(body)
     return result
   }
+
 }

@@ -4,8 +4,8 @@ import jp.seraphr.narou.model.{ NarouNovel, NarouNovelsMeta }
 import jp.seraphr.narou.webui.action.{ Actions, NopActions }
 
 case class NarouWebAppStore(
-  actions: Actions,
-  state: AppState
+    actions: Actions,
+    state: AppState
 )
 
 object NarouWebAppStore {
@@ -13,8 +13,8 @@ object NarouWebAppStore {
 }
 
 case class AppState(
-  allMeta: Map[String, NarouNovelsMeta],
-  selected: Selected
+    allMeta: Map[String, NarouNovelsMeta],
+    selected: Selected
 )
 
 object AppState {
@@ -22,7 +22,7 @@ object AppState {
 }
 
 case class Selected(
-  meta: Option[String],
-  novels: Seq[NarouNovel],
-  novel: Option[NarouNovel]
+    meta: Option[String],
+    novels: Seq[NarouNovel],
+    novel: Option[NarouNovel]
 )

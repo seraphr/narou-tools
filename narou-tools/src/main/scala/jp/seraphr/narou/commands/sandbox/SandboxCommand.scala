@@ -3,20 +3,21 @@ package jp.seraphr.narou.commands.sandbox
 import java.io.File
 import java.util.concurrent.atomic.AtomicInteger
 
-import com.fasterxml.jackson.databind.ObjectMapper
-import jp.seraphr.command.Command
-import jp.seraphr.narou.{ HasLogger, DefaultNarouNovelsWriter }
-import narou4j.entities.Novel
-
 import scala.annotation.nowarn
 import scala.io.Source
 import scala.util.{ Failure, Try, Using }
 
+import jp.seraphr.command.Command
+import jp.seraphr.narou.{ DefaultNarouNovelsWriter, HasLogger }
+
+import com.fasterxml.jackson.databind.ObjectMapper
+import narou4j.entities.Novel
+
 class SandboxCommand(aDefaultArg: SandboxCommandArg) extends Command with HasLogger {
-  private val mParser = new OptionParser(aDefaultArg)
-  override val name = "sandbox"
-  override val description = "適当に色々やるための入り口"
-  override val version = "0.1.0"
+  private val mParser                             = new OptionParser(aDefaultArg)
+  override val name                               = "sandbox"
+  override val description                        = "適当に色々やるための入り口"
+  override val version                            = "0.1.0"
   override def run(aArgs: Seq[String]): Try[Unit] = {
     mParser.parse(aArgs) match {
       case Some(tArgs) => runSandbox(tArgs)
@@ -25,7 +26,7 @@ class SandboxCommand(aDefaultArg: SandboxCommandArg) extends Command with HasLog
   }
 
   implicit class FileOps(file: File) {
-    def /(aChild: String) = new File(file, aChild)
+    def /(aChild: String)            = new File(file, aChild)
     def modName(f: String => String) = new File(file.getParentFile, f(file.getName))
   }
 
@@ -50,14 +51,23 @@ class SandboxCommand(aDefaultArg: SandboxCommandArg) extends Command with HasLog
     logger.info(s"全短編数 = ${aNovels.filter(_.getNovelType == 2).size}")
     logger.info(s"短編 = ${tFiltered.filter(_.getNovelType == 2).size}")
     logger.info(s"長編 = ${tFiltered.filter(_.getNovelType == 1).size}")
-    tFiltered.filter(_.getNovelType == 1).take(10).foreach(n => logger.info(s"ncode=${n.getNcode}, length=${n.getNumberOfChar}"))
+    tFiltered
+      .filter(_.getNovelType == 1)
+      .take(10)
+      .foreach(n => logger.info(s"ncode=${n.getNcode}, length=${n.getNumberOfChar}"))
   }
 
   @nowarn("cat=unused")
   private def showKeywords(aNovels: Vector[Novel]): Unit = {
     logger.info(s"keyword情報取得")
-    val tSortedKeywords = aNovels.flatMap(_.getKeyword.split(" ")).groupBy(identity).view.mapValues(_.size).toSeq.sortBy(-_._2)
-    val tKeywordCount = tSortedKeywords.size
+    val tSortedKeywords = aNovels
+      .flatMap(_.getKeyword.split(" "))
+      .groupBy(identity)
+      .view
+      .mapValues(_.size)
+      .toSeq
+      .sortBy(-_._2)
+    val tKeywordCount   = tSortedKeywords.size
     logger.info(s"総キーワード数: ${tKeywordCount}")
 
     logger.info(s"上位10件")

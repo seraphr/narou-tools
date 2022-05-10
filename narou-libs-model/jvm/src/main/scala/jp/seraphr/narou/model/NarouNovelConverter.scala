@@ -51,5 +51,6 @@ object NarouNovelConverter {
         n.getUpdatedAt
       )
     }
+
   }
 }

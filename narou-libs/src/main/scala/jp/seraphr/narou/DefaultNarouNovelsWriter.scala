@@ -7,11 +7,13 @@ import java.util.Date
 import java.util.concurrent.atomic.AtomicInteger
 
 import jp.seraphr.narou.model.{ NarouNovel, NarouNovelsMeta }
+
 import org.apache.commons.io.IOUtils
 
 class DefaultNarouNovelsWriter(aResultName: String, aDir: File, aNovelPerFile: Int) extends NarouNovelsWriter {
-  import FileUtils._
   import jp.seraphr.narou.json.NarouNovelFormats._
+
+  import FileUtils._
   import io.circe.syntax._
 
   if (aDir.exists()) {
@@ -19,22 +21,24 @@ class DefaultNarouNovelsWriter(aResultName: String, aDir: File, aNovelPerFile: I
   }
   aDir.mkdirs()
 
-  private val mMetaFile = aDir / NovelFileNames.metaFile
-  private def fileName(aIndex: Int) = NovelFileNames.novelFile(aIndex)
+  private val mMetaFile              = aDir / NovelFileNames.metaFile
+  private def fileName(aIndex: Int)  = NovelFileNames.novelFile(aIndex)
   private def novelFile(aIndex: Int) = aDir / fileName(aIndex)
-  private def fileCount = {
+  private def fileCount              = {
     val tCount = mNovelCount.get() / aNovelPerFile
     if (mNovelCount.get() % aNovelPerFile == 0) tCount
     else tCount + 1
   }
-  private def novelList = (0 until fileCount).map(fileName).toList
+
+  private def novelList   = (0 until fileCount).map(fileName).toList
   private val mNovelCount = new AtomicInteger(0)
 
-  private var mWriter: BufferedWriter = null
+  private var mWriter: BufferedWriter     = null
   private def newWriter(): BufferedWriter = {
     val tFile = novelFile((mNovelCount.get + 1) / aNovelPerFile)
     Files.newBufferedWriter(tFile.toPath, StandardOpenOption.WRITE, StandardOpenOption.CREATE_NEW)
   }
+
   private def writer(): BufferedWriter = {
     if (mWriter == null) {
       mWriter = newWriter()
@@ -62,6 +66,13 @@ class DefaultNarouNovelsWriter(aResultName: String, aDir: File, aNovelPerFile: I
     }
 
     val tMetaStr = NarouNovelsMeta(aResultName, new Date(), mNovelCount.get(), novelList).asJson.spaces2
-    Files.write(mMetaFile.toPath, tMetaStr.getBytes(StandardCharsets.UTF_8), StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.CREATE, StandardOpenOption.WRITE)
+    Files.write(
+      mMetaFile.toPath,
+      tMetaStr.getBytes(StandardCharsets.UTF_8),
+      StandardOpenOption.TRUNCATE_EXISTING,
+      StandardOpenOption.CREATE,
+      StandardOpenOption.WRITE
+    )
   }
+
 }

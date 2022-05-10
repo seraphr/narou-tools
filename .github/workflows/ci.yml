@@ -25,4 +25,4 @@ jobs:
         restore-keys: |
           ${{ runner.os }}-scalablytyped-v0-${{ hashFiles('project/project/ScalablyTyped.scala') }}-
     - name: Build and Test
-      run: ./sbt-batch test
+      run: ./sbt-batch reformatCheck test

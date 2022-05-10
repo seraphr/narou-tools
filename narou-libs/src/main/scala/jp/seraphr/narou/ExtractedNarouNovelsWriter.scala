@@ -5,9 +5,11 @@ import java.nio.charset.StandardCharsets
 import java.nio.file.{ Files, StandardOpenOption }
 
 import jp.seraphr.narou.model.{ ExtractedNarouNovelsMeta, NarouNovel, NovelCondition }
+
 import org.apache.commons.io.IOUtils
 
-class ExtractedNarouNovelsWriter(aBaseDir: File, aConditions: Seq[NovelCondition], aNovelsPerFile: Int) extends NarouNovelsWriter {
+class ExtractedNarouNovelsWriter(aBaseDir: File, aConditions: Seq[NovelCondition], aNovelsPerFile: Int)
+    extends NarouNovelsWriter {
   import FileUtils._
   private val mConditions = {
     if (aConditions.contains(NovelCondition.all)) aConditions
@@ -35,11 +37,17 @@ class ExtractedNarouNovelsWriter(aBaseDir: File, aConditions: Seq[NovelCondition
     import jp.seraphr.narou.json.NarouNovelFormats._
     import io.circe.syntax._
 
-    val tMetaStr = ExtractedNarouNovelsMeta(aConditions.map(_.id)).asJson.spaces2
+    val tMetaStr  = ExtractedNarouNovelsMeta(aConditions.map(_.id)).asJson.spaces2
     val tMetaFile = aBaseDir / NovelFileNames.extractedMetaFile
-    Files.write(tMetaFile.toPath, tMetaStr.getBytes(StandardCharsets.UTF_8), StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.CREATE, StandardOpenOption.WRITE)
+    Files.write(
+      tMetaFile.toPath,
+      tMetaStr.getBytes(StandardCharsets.UTF_8),
+      StandardOpenOption.TRUNCATE_EXISTING,
+      StandardOpenOption.CREATE,
+      StandardOpenOption.WRITE
+    )
 
     mDefaultWriters.foreach(w => IOUtils.closeQuietly(w))
   }
-}
 
+}

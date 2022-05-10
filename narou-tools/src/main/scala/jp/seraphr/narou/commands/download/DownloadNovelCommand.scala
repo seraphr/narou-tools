@@ -3,25 +3,26 @@ package jp.seraphr.narou.commands.download
 import java.io.File
 import java.util.concurrent.atomic.AtomicBoolean
 
-import com.fasterxml.jackson.databind.ObjectMapper
-import jp.seraphr.command.Command
-import jp.seraphr.narou.NovelDownloader.DownloadResult
-import jp.seraphr.narou.{ HasLogger, NovelDownloader }
-import jp.seraphr.narou.commands.download.DownloadNovelCommand.DownloadNovelCommandArg
-import narou4j.entities.Novel
-
 import scala.concurrent.Future
 import scala.io.{ Source, StdIn }
-import scala.util.control.NonFatal
 import scala.util.{ Failure, Try }
+import scala.util.control.NonFatal
+
+import jp.seraphr.command.Command
+import jp.seraphr.narou.{ HasLogger, NovelDownloader }
+import jp.seraphr.narou.NovelDownloader.DownloadResult
+import jp.seraphr.narou.commands.download.DownloadNovelCommand.DownloadNovelCommandArg
+
+import com.fasterxml.jackson.databind.ObjectMapper
+import narou4j.entities.Novel
 
 /**
  */
 class DownloadNovelCommand(aDefaultArg: DownloadNovelCommandArg) extends Command with HasLogger {
-  private val mParser = new OptionParser(aDefaultArg)
-  override val name = "download"
-  override val description = "collectコマンドにより収集した小説一覧を元に、小説をダウンロードし、ファイルに保存します"
-  override val version = "0.1.0"
+  private val mParser                             = new OptionParser(aDefaultArg)
+  override val name                               = "download"
+  override val description                        = "collectコマンドにより収集した小説一覧を元に、小説をダウンロードし、ファイルに保存します"
+  override val version                            = "0.1.0"
   override def run(aArgs: Seq[String]): Try[Unit] = {
     mParser.parse(aArgs) match {
       case Some(tArgs) => download(tArgs)
@@ -32,10 +33,14 @@ class DownloadNovelCommand(aDefaultArg: DownloadNovelCommandArg) extends Command
   implicit class LoanPattern[A <: { def close(): Unit }](a: A) extends HasLogger {
     import scala.language.reflectiveCalls
     def loan[B](f: A => B): B = {
-      try f(a) finally try a.close() catch {
-        case NonFatal(e) => logger.warn("[skip] リソースのクローズに失敗しました。 この例外を無視します。 ", e)
-      }
+      try f(a)
+      finally
+        try a.close()
+        catch {
+          case NonFatal(e) => logger.warn("[skip] リソースのクローズに失敗しました。 この例外を無視します。 ", e)
+        }
     }
+
   }
 
   implicit class IteratorOps[A](itr: Iterator[A]) {
@@ -45,7 +50,7 @@ class DownloadNovelCommand(aDefaultArg: DownloadNovelCommandArg) extends Command
   import scala.concurrent.ExecutionContext.Implicits.global
   private def download(aArgs: DownloadNovelCommandArg): Try[Unit] = Try {
     import com.fasterxml.jackson.core.`type`.TypeReference
-    val tDownloader = new NovelDownloader(aArgs.output, aArgs.intervalMillis)
+    val tDownloader  = new NovelDownloader(aArgs.output, aArgs.intervalMillis)
     val tStopBoolean = new AtomicBoolean(false)
 
     logger.info("ダウンロードを中断する場合は、エンターキーを押してください。")
@@ -57,25 +62,34 @@ class DownloadNovelCommand(aDefaultArg: DownloadNovelCommandArg) extends Command
     val tMapper: ObjectMapper = new ObjectMapper
 
     val tResult =
-      Source.fromFile(aArgs.input, "UTF-8").loan { tLines =>
-        val tNovels =
-          tLines.getLines().map(tMapper.readValue[Novel](_, new TypeReference[Novel]() {}))
+      Source
+        .fromFile(aArgs.input, "UTF-8")
+        .loan { tLines =>
+          val tNovels =
+            tLines.getLines().map(tMapper.readValue[Novel](_, new TypeReference[Novel]() {}))
 
-        var tLastResult = DownloadResult(0, 0)
-        import jp.seraphr.narou.IteratorUtils._
-        tDownloader.downloadNovels(tNovels, aArgs.overwrite)
-          .takeWhileOne(_.novelCount < aArgs.maxNovels && !tStopBoolean.get())
-          .tee(r => if (tLastResult != r) { tLastResult = r; logger.info(s"${r.novelCount} / ${aArgs.maxNovels} (${r.pageCount} pages)") })
-          .foldLeft(DownloadResult(0, 0))((_, r) => r)
-      }
+          var tLastResult = DownloadResult(0, 0)
+          import jp.seraphr.narou.IteratorUtils._
+          tDownloader
+            .downloadNovels(tNovels, aArgs.overwrite)
+            .takeWhileOne(_.novelCount < aArgs.maxNovels && !tStopBoolean.get())
+            .tee(r =>
+              if (tLastResult != r) {
+                tLastResult = r; logger.info(s"${r.novelCount} / ${aArgs.maxNovels} (${r.pageCount} pages)")
+              }
+            )
+            .foldLeft(DownloadResult(0, 0))((_, r) => r)
+        }
 
     logger.info(s"${tResult.novelCount} 小説 合計${tResult.pageCount}話のダウンロードを行いました")
   }
 
   private def readStdInput(): Future[String] = Future {
-    scala.concurrent.blocking {
-      StdIn.readLine()
-    }
+    scala
+      .concurrent
+      .blocking {
+        StdIn.readLine()
+      }
   }
 
   class OptionParser(aDefaultArg: DownloadNovelCommandArg) extends CommandArgParser[DownloadNovelCommandArg] {
@@ -112,10 +126,10 @@ class DownloadNovelCommand(aDefaultArg: DownloadNovelCommandArg) extends Command
 
 object DownloadNovelCommand {
   case class DownloadNovelCommandArg(
-    input: File,
-    output: File,
-    overwrite: Boolean,
-    intervalMillis: Long,
-    maxNovels: Int
+      input: File,
+      output: File,
+      overwrite: Boolean,
+      intervalMillis: Long,
+      maxNovels: Int
   )
 }

@@ -6,7 +6,7 @@ case class Genre(id: Int, text: String)
 
 sealed abstract class NovelType(val id: Int)
 object NovelType {
-  case object Serially extends NovelType(1)
+  case object Serially   extends NovelType(1)
   case object ShortStory extends NovelType(2)
   case class Etc(i: Int) extends NovelType(i)
 }
@@ -14,15 +14,14 @@ object NovelType {
 sealed trait UploadType
 object UploadType {
   case object CellularPhone extends UploadType
-  case object PC extends UploadType
-  case object Both extends UploadType
+  case object PC            extends UploadType
+  case object Both          extends UploadType
 
   /** 更新されてない、古い小説で0になっているものがあるっぽい */
   case class Etc(i: Int) extends UploadType
 }
 
 /**
- *
  * @param title
  * @param ncode
  * @param userId ユーザId
@@ -56,34 +55,34 @@ object UploadType {
  */
 @JSExportAll
 case class NarouNovel(
-  title: String,
-  ncode: String,
-  userId: String,
-  writer: String,
-  story: String,
-  genre: Genre,
-  gensaku: String,
-  keywords: Seq[String],
-  firstUpload: String,
-  lastUpload: String,
-  novelType: NovelType,
-  isFinished: Boolean,
-  chapterCount: Int,
-  length: Int,
-  readTimeMinutes: Int,
-  isR15: Boolean,
-  isBL: Boolean,
-  isGL: Boolean,
-  isZankoku: Boolean,
-  isTensei: Boolean,
-  isTenni: Boolean,
-  uploadType: UploadType,
-  globalPoint: Int,
-  bookmarkCount: Int,
-  reviewCount: Int,
-  evaluationPoint: Int,
-  evaluationCount: Int,
-  illustrationCount: Int,
-  novelUpdatedAt: String,
-  updatedAt: String
+    title: String,
+    ncode: String,
+    userId: String,
+    writer: String,
+    story: String,
+    genre: Genre,
+    gensaku: String,
+    keywords: Seq[String],
+    firstUpload: String,
+    lastUpload: String,
+    novelType: NovelType,
+    isFinished: Boolean,
+    chapterCount: Int,
+    length: Int,
+    readTimeMinutes: Int,
+    isR15: Boolean,
+    isBL: Boolean,
+    isGL: Boolean,
+    isZankoku: Boolean,
+    isTensei: Boolean,
+    isTenni: Boolean,
+    uploadType: UploadType,
+    globalPoint: Int,
+    bookmarkCount: Int,
+    reviewCount: Int,
+    evaluationPoint: Int,
+    evaluationCount: Int,
+    illustrationCount: Int,
+    novelUpdatedAt: String,
+    updatedAt: String
 )

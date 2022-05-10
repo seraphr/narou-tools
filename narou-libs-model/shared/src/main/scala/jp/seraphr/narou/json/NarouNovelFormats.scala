@@ -2,21 +2,21 @@ package jp.seraphr.narou.json
 
 import java.util.Date
 
-import io.circe.Decoder.Result
+import jp.seraphr.narou.model.{ ExtractedNarouNovelsMeta, Genre, NarouNovel, NarouNovelsMeta, NovelType, UploadType }
+
 import io.circe.{ Codec, HCursor, Json }
-import io.circe.generic.extras.semiauto._
+import io.circe.Decoder.Result
 import io.circe.generic.extras.Configuration
-import jp.seraphr.narou.model.{ Genre, ExtractedNarouNovelsMeta, NarouNovel, NarouNovelsMeta, NovelType, UploadType }
+import io.circe.generic.extras.semiauto._
 
 object NarouNovelFormats {
   implicit val customConfig: Configuration =
-    Configuration.default
-      .withDiscriminator("__type")
+    Configuration.default.withDiscriminator("__type")
 
-  implicit val GenreCodec: Codec[Genre] = deriveConfiguredCodec
-  implicit val NovelTypeCodec: Codec[NovelType] = deriveConfiguredCodec
+  implicit val GenreCodec: Codec[Genre]           = deriveConfiguredCodec
+  implicit val NovelTypeCodec: Codec[NovelType]   = deriveConfiguredCodec
   implicit val UploadTypeCodec: Codec[UploadType] = deriveConfiguredCodec
-  implicit val ModelCodec: Codec[NarouNovel] = deriveConfiguredCodec
+  implicit val ModelCodec: Codec[NarouNovel]      = deriveConfiguredCodec
 
   implicit val dateCodec: Codec[Date] = new Codec[Date] {
     import io.circe.syntax._
@@ -24,6 +24,7 @@ object NarouNovelFormats {
 
     override def apply(a: Date): Json = a.getTime.asJson
   }
-  implicit val MetaCodec: Codec[NarouNovelsMeta] = deriveConfiguredCodec
+
+  implicit val MetaCodec: Codec[NarouNovelsMeta]                   = deriveConfiguredCodec
   implicit val ExtractedMetaCodec: Codec[ExtractedNarouNovelsMeta] = deriveConfiguredCodec
 }
