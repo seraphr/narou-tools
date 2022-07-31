@@ -6,7 +6,7 @@ import org.portablescala.sbtplatformdeps.PlatformDepsPlugin.autoImport._
 
 object Dependencies {
   val reactVersion         = "17.0.2"
-  val scalatestVersion     = "3.2.12"
+  val scalatestVersion     = "3.2.13"
   val scalatestplusVersion = s"${scalatestVersion}.0"
   val circeVersion         = "0.14.1"
   val monixVersion         = "3.4.1"
