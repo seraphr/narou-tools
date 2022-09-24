@@ -7,7 +7,7 @@ import org.scalajs.dom.RequestInit
 import monix.eval.Task
 import scalajs.js
 
-class AjaxNovelDataAccessor(aBaseUrl: URI) extends NovelDataAccessor {
+class AjaxNovelDataReader(aBaseUrl: URI) extends NovelDataReader {
   private val mExtractedMetaUrl                     = aBaseUrl.resolve(NovelFileNames.extractedMetaFile)
   private def metaUrl(aDir: String)                 = aBaseUrl.resolve(s"${aDir}/").resolve(NovelFileNames.metaFile)
   private def novelUrl(aDir: String, aFile: String) = aBaseUrl.resolve(s"${aDir}/").resolve(aFile)

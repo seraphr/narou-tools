@@ -6,7 +6,7 @@ import org.scalajs.dom
 import scala.util.Random
 
 import jp.seraphr.narou.{
-  AjaxNovelDataAccessor,
+  AjaxNovelDataReader,
   DefaultExtractedNovelLoader,
   DummyExtractedNovelLoader,
   DummyNovelLoader
@@ -27,7 +27,7 @@ object Main {
   private val mLoader = if (isLocal) {
     LocalDummyData.dummyLoader
   } else {
-    new DefaultExtractedNovelLoader(new AjaxNovelDataAccessor(mCurrentURI))
+    new DefaultExtractedNovelLoader(new AjaxNovelDataReader(mCurrentURI))
   }
 
   def main(aArgs: Array[String]): Unit = {

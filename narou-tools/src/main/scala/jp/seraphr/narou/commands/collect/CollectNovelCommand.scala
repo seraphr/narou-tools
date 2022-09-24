@@ -13,7 +13,7 @@ import jp.seraphr.narou.{
   AllNovelCollector,
   DefaultExtractedNovelLoader,
   ExtractedNarouNovelsWriter,
-  FileNovelDataAccessor,
+  FileNovelDataReader,
   HasLogger,
   NarouClientBuilder
 }
@@ -52,7 +52,7 @@ class CollectNovelCommand(aDefaultArg: CollectNovelCommandArg) extends Command w
 
   private def collect(aArg: CollectNovelCommandArg): Try[Unit] = Try {
     def loadFrom(aDir: File): Map[String, NarouNovel] = {
-      val tNovelsObs = new DefaultExtractedNovelLoader(new FileNovelDataAccessor(aDir)).loadAll
+      val tNovelsObs = new DefaultExtractedNovelLoader(new FileNovelDataReader(aDir)).loadAll
 
       import monix.execution.Scheduler.Implicits.global
       val tFuture = tNovelsObs.foldLeftL(Map.empty[String, NarouNovel])((map, n) => map.updated(n.ncode, n)).runToFuture

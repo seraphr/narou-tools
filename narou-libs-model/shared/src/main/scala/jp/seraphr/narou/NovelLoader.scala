@@ -13,9 +13,28 @@ object NovelFileNames {
   def novelFile(aIndex: Int) = s"novel_list_${aIndex}.jsonl"
 }
 
-trait NovelDataAccessor {
+/**
+ * NarouNovelの文字列表現の読み込みを行う
+ * 文字列化した情報の読み込み元の抽象化を行うためのレイヤー
+ */
+trait NovelDataReader {
+
+  /**
+   * [[metadata]]や[[getNovel]]の引数情報を保持する情報を取得する
+   * [[ExtractedNarouNovelsMeta]]の文字列表現を想定している
+   */
   val extractedMeta: Task[String]
+
+  /**
+   * aDirに存在する小説のメタデータ情報を取得する
+   * [[NarouNovelsMeta]]の文字列表現を想定している
+   */
   def metadata(aDir: String): Task[String]
+
+  /**
+   * aDir/aFileに存在する小説情報を取得する
+   * [[NarouNovel]]の[[Seq]]の文字列表現を想定している
+   */
   def getNovel(aDir: String, aFile: String): Task[String]
 }
 
@@ -39,7 +58,7 @@ import jp.seraphr.narou.json.NarouNovelFormats._
 
 import io.circe.parser.decode
 
-class DefaultExtractedNovelLoader(aAccessor: NovelDataAccessor) extends ExtractedNovelLoader {
+class DefaultExtractedNovelLoader(aAccessor: NovelDataReader) extends ExtractedNovelLoader {
   override val metadata: Task[ExtractedNarouNovelsMeta] = aAccessor
     .extractedMeta
     .flatMap(s => Task.fromEither(decode[ExtractedNarouNovelsMeta](s)))
@@ -63,7 +82,7 @@ trait NovelLoader {
   val novels: Observable[NarouNovel]
 }
 
-class DefaultNovelLoader(aAccessor: NovelDataAccessor, aExtractedDir: String) extends NovelLoader {
+class DefaultNovelLoader(aAccessor: NovelDataReader, aExtractedDir: String) extends NovelLoader {
 
   val dir                                      = aExtractedDir
   override val metadata: Task[NarouNovelsMeta] = aAccessor

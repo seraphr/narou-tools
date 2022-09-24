@@ -6,7 +6,7 @@ import java.nio.file.Files
 
 import monix.eval.Task
 
-class FileNovelDataAccessor(aNovelDir: File) extends NovelDataAccessor {
+class FileNovelDataReader(aNovelDir: File) extends NovelDataReader {
   import FileUtils._
 
   override val extractedMeta: Task[String] = Task {
