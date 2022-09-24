@@ -1,7 +1,5 @@
 package jp.seraphr.narou
 
-import scala.collection.immutable.ArraySeq
-
 import jp.seraphr.narou.model.{ ExtractedNarouNovelsMeta, NarouNovel, NarouNovelsMeta }
 
 import monix.eval.Task
@@ -59,7 +57,7 @@ trait NovelLoader {
 
 class DefaultNovelLoader(aAccessor: NovelDataReader, aExtractedDir: String) extends NovelLoader {
 
-  val dir                                      = aExtractedDir
+  private val dir                              = aExtractedDir
   override val metadata: Task[NarouNovelsMeta] = aAccessor
     .metadata(aExtractedDir)
     .flatMap(s => Task.fromEither(decode[NarouNovelsMeta](s)))
@@ -69,9 +67,8 @@ class DefaultNovelLoader(aAccessor: NovelDataReader, aExtractedDir: String) exte
   override val novels: Observable[NarouNovel] = {
     Observable
       .fromTask(metadata)
-      .flatMap(meta => Observable(meta.novelFiles: _*))
-      .mapEval(aAccessor.getNovel(aExtractedDir, _))
-      .flatMap(tFileBody => Observable(ArraySeq.unsafeWrapArray(tFileBody.split("\n")): _*))
+      .flatMap(meta => Observable.fromIterable(meta.novelFiles))
+      .flatMap(aAccessor.getNovel(aExtractedDir, _))
       .mapEvalF(decode[NarouNovel])
   }
 

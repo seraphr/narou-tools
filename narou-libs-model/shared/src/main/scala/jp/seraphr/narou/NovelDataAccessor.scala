@@ -1,6 +1,7 @@
 package jp.seraphr.narou
 
 import monix.eval.Task
+import monix.reactive.Observable
 
 trait NovelDataAccessor extends NovelDataReader with NovelDataWriter
 
@@ -24,9 +25,9 @@ trait NovelDataReader {
 
   /**
    * aDir/aFileに存在する小説情報を取得する
-   * [[jp.seraphr.narou.model.NarouNovel]]の[[Seq]]の文字列表現を想定している
+   * 個別の要素は改行を含まない[[jp.seraphr.narou.model.NarouNovel]]の文字列表現を想定している
    */
-  def getNovel(aDir: String, aFile: String): Task[String]
+  def getNovel(aDir: String, aFile: String): Observable[String]
 }
 
 trait NovelDataWriter {
@@ -55,8 +56,8 @@ trait NovelDataWriter {
    *
    * @param aDir
    * @param aFile
-   * @param aNovelString
-   * @return
+   * @param aNovelString 保存するデータ 個別の要素は改行を含まない[[jp.seraphr.narou.model.NarouNovel]]の文字列表現を想定している
+   * @return 書き込んだノベル数
    */
-  def writeNovel(aDir: String, aFile: String, aNovelString: String): Task[Unit]
+  def writeNovel(aDir: String, aFile: String, aNovelStrings: Observable[String]): Task[Int]
 }

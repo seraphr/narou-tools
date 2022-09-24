@@ -5,6 +5,7 @@ import java.net.URI
 import org.scalajs.dom.RequestInit
 
 import monix.eval.Task
+import monix.reactive.Observable
 import scalajs.js
 
 class AjaxNovelDataReader(aBaseUrl: URI) extends NovelDataReader {
@@ -29,7 +30,13 @@ class AjaxNovelDataReader(aBaseUrl: URI) extends NovelDataReader {
       .flatMap(_.text().toTask)
   }
 
-  override val extractedMeta: Task[String]                         = get(mExtractedMetaUrl)
-  override def metadata(aDir: String): Task[String]                = get(metaUrl(aDir))
-  override def getNovel(aDir: String, aFile: String): Task[String] = get(novelUrl(aDir, aFile))
+  override val extractedMeta: Task[String]                               = get(mExtractedMetaUrl)
+  override def metadata(aDir: String): Task[String]                      = get(metaUrl(aDir))
+  override def getNovel(aDir: String, aFile: String): Observable[String] = {
+    for {
+      tString <- Observable.fromTask(get(novelUrl(aDir, aFile)))
+      tLine   <- Observable.fromIterable(tString.split('\n'))
+    } yield tLine
+  }
+
 }

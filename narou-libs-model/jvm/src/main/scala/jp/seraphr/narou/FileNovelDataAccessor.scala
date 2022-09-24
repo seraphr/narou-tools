@@ -1,10 +1,11 @@
 package jp.seraphr.narou
 
-import java.io.File
+import java.io.{ BufferedWriter, File }
 import java.nio.charset.StandardCharsets
 import java.nio.file.Files
 
 import monix.eval.Task
+import monix.reactive.Observable
 
 class FileNovelDataAccessor(aNovelDir: File) extends NovelDataAccessor {
   import FileUtils._
@@ -33,14 +34,31 @@ class FileNovelDataAccessor(aNovelDir: File) extends NovelDataAccessor {
 
   private def novelPath(aDir: String, aFile: String) = (aNovelDir / aDir / aFile).toPath
 
-  override def writeNovel(aDir: String, aFile: String, aNovelString: String): Task[Unit] = Task {
-    Files.write(novelPath(aDir, aFile), aNovelString.getBytes(StandardCharsets.UTF_8))
+  override def writeNovel(aDir: String, aFile: String, aNovelStrings: Observable[String]): Task[Int] = {
+    def newWriter(): BufferedWriter = {
+      val tPath = novelPath(aDir, aFile)
+      Files.newBufferedWriter(tPath)
+    }
+
+    for {
+      tWriter <- Task.eval(newWriter())
+      tCount  <- {
+        aNovelStrings
+          .map { tLine =>
+            tWriter.write(tLine)
+            tWriter.write("\n")
+          }
+          .countL
+          .guarantee(Task.eval(tWriter.close()))
+      }
+    } yield tCount.toInt
   }
 
-  override def getNovel(aDir: String, aFile: String): Task[String] = Task {
-    val tFile  = aNovelDir / aDir / aFile
-    val tBytes = Files.readAllBytes(tFile.toPath)
-    new String(tBytes, StandardCharsets.UTF_8)
+  override def getNovel(aDir: String, aFile: String): Observable[String] = Observable.defer {
+    val tFile   = novelPath(aDir, aFile)
+    val tReader = Task.eval(Files.newBufferedReader(tFile))
+
+    Observable.fromLinesReader(tReader)
   }
 
 }
