@@ -25,7 +25,7 @@ class DefaultNarouNovelsWriter(aResultName: String, aWriter: NovelDataWriter, aD
         Observable.fromTask(mWriter.writeNovel(aDirName, tFileName, tObs.map(_.asJson.noSpaces))).map((tFileName, _))
       }
       .toListL
-      .foreachL { tList =>
+      .flatMap { tList =>
         val (tFiles, tCounts) = tList.unzip
         val tMetaStr          = NarouNovelsMeta(aResultName, new Date(), tCounts.sum, tFiles).asJson.spaces2
         mWriter.writeMetadata(aDirName, tMetaStr)
