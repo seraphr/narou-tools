@@ -7,7 +7,7 @@ import scala.io.Source
 import scala.util.{ Failure, Try, Using }
 
 import jp.seraphr.command.Command
-import jp.seraphr.narou.{ DefaultNarouNovelsWriter, HasLogger }
+import jp.seraphr.narou.{ DefaultNarouNovelsWriter, FileNovelDataAccessor, HasLogger }
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import monix.execution.Scheduler.Implicits.global
@@ -49,9 +49,9 @@ class SandboxCommand(aDefaultArg: SandboxCommandArg) extends Command with HasLog
   private def findUploadType0(aNovels: Vector[Novel]): Unit = {
     val tFiltered = aNovels.filter(_.getUploadType == 0)
     logger.info(s"count = ${tFiltered.size}")
-    logger.info(s"全短編数 = ${aNovels.filter(_.getNovelType == 2).size}")
-    logger.info(s"短編 = ${tFiltered.filter(_.getNovelType == 2).size}")
-    logger.info(s"長編 = ${tFiltered.filter(_.getNovelType == 1).size}")
+    logger.info(s"全短編数 = ${aNovels.count(_.getNovelType == 2)}")
+    logger.info(s"短編 = ${tFiltered.count(_.getNovelType == 2)}")
+    logger.info(s"長編 = ${tFiltered.count(_.getNovelType == 1)}")
     tFiltered
       .filter(_.getNovelType == 1)
       .take(10)
@@ -97,7 +97,8 @@ class SandboxCommand(aDefaultArg: SandboxCommandArg) extends Command with HasLog
         tNovel.asScala
       }
 
-    new DefaultNarouNovelsWriter("all", aOutputDir, 50000).write(tNovels).runSyncUnsafe()
+    val tDataWriter = new FileNovelDataAccessor(aOutputDir.getParentFile)
+    new DefaultNarouNovelsWriter("all", tDataWriter, aOutputDir.getName, 50000).write(tNovels).runSyncUnsafe()
     logger.info(s"novelの変換が完了しました")
   }
 

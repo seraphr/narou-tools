@@ -104,7 +104,8 @@ class CollectNovelCommand(aDefaultArg: CollectNovelCommandArg)(implicit schedule
       )
 
       val tNovels = Observable.fromIterable(tResultMap.values)
-      new ExtractedNarouNovelsWriter(tTempOutputDir, tConditions, aArg.novelsPerFile).write(tNovels).runSyncUnsafe()
+      val tWriter = new FileNovelDataAccessor(tTempOutputDir)
+      new ExtractedNarouNovelsWriter(tWriter, tConditions, aArg.novelsPerFile).write(tNovels).runSyncUnsafe()
       logger.info(s"一時ファイルへの書き込みを完了しました。")
       logger.info(s"出力ファイルの差し替えを行います。")
       if (tOutput.exists()) {

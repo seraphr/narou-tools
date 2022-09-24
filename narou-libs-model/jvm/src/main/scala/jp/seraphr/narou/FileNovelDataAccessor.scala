@@ -37,6 +37,11 @@ class FileNovelDataAccessor(aNovelDir: File) extends NovelDataAccessor {
   override def writeNovel(aDir: String, aFile: String, aNovelStrings: Observable[String]): Task[Int] = {
     def newWriter(): BufferedWriter = {
       val tPath = novelPath(aDir, aFile)
+      if (Files.exists(tPath)) {
+        org.apache.commons.io.FileUtils.deleteQuietly(tPath.toFile)
+      }
+      Files.createDirectories(tPath.getParent)
+
       Files.newBufferedWriter(tPath)
     }
 

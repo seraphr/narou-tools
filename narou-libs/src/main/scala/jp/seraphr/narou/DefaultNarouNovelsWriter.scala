@@ -1,6 +1,5 @@
 package jp.seraphr.narou
 
-import java.io.File
 import java.util.Date
 
 import jp.seraphr.narou.model.{ NarouNovel, NarouNovelsMeta }
@@ -8,18 +7,13 @@ import jp.seraphr.narou.model.{ NarouNovel, NarouNovelsMeta }
 import monix.eval.Task
 import monix.reactive.Observable
 
-class DefaultNarouNovelsWriter(aResultName: String, aDir: File, aNovelPerFile: Int) extends NarouNovelsWriter {
+class DefaultNarouNovelsWriter(aResultName: String, aWriter: NovelDataWriter, aDirName: String, aNovelPerFile: Int)
+    extends NarouNovelsWriter {
   import jp.seraphr.narou.json.NarouNovelFormats._
 
   import io.circe.syntax._
 
-  if (aDir.exists()) {
-    org.apache.commons.io.FileUtils.deleteQuietly(aDir)
-  }
-  aDir.mkdirs()
-
-  // TODO NovelDataWriterは外からもらうようにする
-  private val mWriter: NovelDataWriter = new FileNovelDataAccessor(aDir.getParentFile)
+  private val mWriter: NovelDataWriter = aWriter
   private def fileName(aIndex: Int)    = NovelFileNames.novelFile(aIndex)
 
   override def write(aNovels: Observable[NarouNovel]): Task[Unit] = {
@@ -28,13 +22,13 @@ class DefaultNarouNovelsWriter(aResultName: String, aDir: File, aNovelPerFile: I
       .grouped(aNovelPerFile)
       .mergeMap { case (tKey, tObs) =>
         val tFileName = fileName(tKey.toInt)
-        Observable.fromTask(mWriter.writeNovel(aDir.getName, tFileName, tObs.map(_.asJson.noSpaces))).map((tFileName, _))
+        Observable.fromTask(mWriter.writeNovel(aDirName, tFileName, tObs.map(_.asJson.noSpaces))).map((tFileName, _))
       }
       .toListL
       .foreachL { tList =>
         val (tFiles, tCounts) = tList.unzip
         val tMetaStr          = NarouNovelsMeta(aResultName, new Date(), tCounts.sum, tFiles).asJson.spaces2
-        mWriter.writeMetadata(aDir.getName, tMetaStr)
+        mWriter.writeMetadata(aDirName, tMetaStr)
       }
   }
 
