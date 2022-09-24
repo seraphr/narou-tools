@@ -1,0 +1,62 @@
+package jp.seraphr.narou
+
+import monix.eval.Task
+
+trait NovelDataAccessor extends NovelDataReader with NovelDataWriter
+
+/**
+ * NarouNovelの文字列表現の読み込みを行う
+ * 文字列化した情報の読み込み元の抽象化を行うためのレイヤー
+ */
+trait NovelDataReader {
+
+  /**
+   * [[metadata]]や[[getNovel]]の引数情報を保持する情報を取得する
+   * [[jp.seraphr.narou.model.ExtractedNarouNovelsMeta]]の文字列表現を想定している
+   */
+  val extractedMeta: Task[String]
+
+  /**
+   * aDirに存在する小説のメタデータ情報を取得する
+   * [[NarouNovelsMeta]]の文字列表現を想定している
+   */
+  def metadata(aDir: String): Task[String]
+
+  /**
+   * aDir/aFileに存在する小説情報を取得する
+   * [[jp.seraphr.narou.model.NarouNovel]]の[[Seq]]の文字列表現を想定している
+   */
+  def getNovel(aDir: String, aFile: String): Task[String]
+}
+
+trait NovelDataWriter {
+
+  /**
+   * [[writeMetadata]]や[[writeNovel]]の引数情報を保持する情報を保存する
+   * [[jp.seraphr.narou.model.ExtractedNarouNovelsMeta]]の文字列表現を想定している
+   *
+   * @param aMetaString
+   * @return
+   */
+  def writeExtractedMeta(aMetaString: String): Task[Unit]
+
+  /**
+   * aDirに説のメタデータ情報を保存する
+   * [[jp.seraphr.narou.model.NarouNovelsMeta]]の文字列表現を想定している
+   *
+   * @param aDir
+   * @param aMetaString
+   * @return
+   */
+  def writeMetadata(aDir: String, aMetaString: String): Task[Unit]
+
+  /**
+   * aDir/aFileに小説情報を保存する
+   *
+   * @param aDir
+   * @param aFile
+   * @param aNovelString
+   * @return
+   */
+  def writeNovel(aDir: String, aFile: String, aNovelString: String): Task[Unit]
+}
