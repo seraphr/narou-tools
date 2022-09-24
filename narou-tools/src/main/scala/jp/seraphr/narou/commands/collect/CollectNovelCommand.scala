@@ -20,12 +20,16 @@ import jp.seraphr.narou.{
 import jp.seraphr.narou.commands.collect.CollectNovelCommand._
 import jp.seraphr.narou.model.{ NarouNovel, NovelCondition }
 
+import monix.execution.Scheduler
+import monix.reactive.Observable
 import org.apache.commons.io.FileUtils
 import scopt.Read
 
 /**
  */
-class CollectNovelCommand(aDefaultArg: CollectNovelCommandArg) extends Command with HasLogger {
+class CollectNovelCommand(aDefaultArg: CollectNovelCommandArg)(implicit scheduler: Scheduler)
+    extends Command
+    with HasLogger {
   private val mParser                             = new OptionParser(aDefaultArg)
   override val name                               = "collect"
   override val description                        = "なろう小説の一覧を収集し、ファイルに保存します"
@@ -54,7 +58,6 @@ class CollectNovelCommand(aDefaultArg: CollectNovelCommandArg) extends Command w
     def loadFrom(aDir: File): Map[String, NarouNovel] = {
       val tNovelsObs = new DefaultExtractedNovelLoader(new FileNovelDataAccessor(aDir)).loadAll
 
-      import monix.execution.Scheduler.Implicits.global
       val tFuture = tNovelsObs.foldLeftL(Map.empty[String, NarouNovel])((map, n) => map.updated(n.ncode, n)).runToFuture
       Await.result(tFuture, Duration.Inf)
     }
@@ -100,13 +103,8 @@ class CollectNovelCommand(aDefaultArg: CollectNovelCommandArg) extends Command w
         NovelCondition.length100k and NovelCondition.bookmark1000
       )
 
-      new ExtractedNarouNovelsWriter(tTempOutputDir, tConditions, aArg.novelsPerFile).loan { tWriter =>
-        tResultMap
-          .values
-          .foreach { tNovel =>
-            tWriter.write(tNovel)
-          }
-      }
+      val tNovels = Observable.fromIterable(tResultMap.values)
+      new ExtractedNarouNovelsWriter(tTempOutputDir, tConditions, aArg.novelsPerFile).write(tNovels).runSyncUnsafe()
       logger.info(s"一時ファイルへの書き込みを完了しました。")
       logger.info(s"出力ファイルの差し替えを行います。")
       if (tOutput.exists()) {

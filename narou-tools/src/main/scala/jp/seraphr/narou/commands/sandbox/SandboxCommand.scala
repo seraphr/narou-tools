@@ -1,7 +1,6 @@
 package jp.seraphr.narou.commands.sandbox
 
 import java.io.File
-import java.util.concurrent.atomic.AtomicInteger
 
 import scala.annotation.nowarn
 import scala.io.Source
@@ -11,6 +10,8 @@ import jp.seraphr.command.Command
 import jp.seraphr.narou.{ DefaultNarouNovelsWriter, HasLogger }
 
 import com.fasterxml.jackson.databind.ObjectMapper
+import monix.execution.Scheduler.Implicits.global
+import monix.reactive.Observable
 import narou4j.entities.Novel
 
 class SandboxCommand(aDefaultArg: SandboxCommandArg) extends Command with HasLogger {
@@ -85,15 +86,18 @@ class SandboxCommand(aDefaultArg: SandboxCommandArg) extends Command with HasLog
     logger.info(s"novelの変換を行います: Novel数=${aNovels.size}")
     import jp.seraphr.narou.model.NarouNovelConverter._
 
-    val tCounter = new AtomicInteger()
-    Using(new DefaultNarouNovelsWriter("all", aOutputDir, 50000)) { tStream =>
-      aNovels.foreach { n =>
-        if (tCounter.incrementAndGet() % 5000 == 0) {
-          logger.info(s"変換: ${tCounter.get()}")
+    val tNovels = Observable
+      .fromIterable(aNovels)
+      .zipWithIndex
+      .map { case (tNovel, tIndex) =>
+        val tCount = tIndex + 1
+        if (tCount % 5000 == 0) {
+          logger.info(s"変換: ${tCount}")
         }
-        tStream.write(n.asScala)
+        tNovel.asScala
       }
-    }.get
+
+    new DefaultNarouNovelsWriter("all", aOutputDir, 50000).write(tNovels).runSyncUnsafe()
     logger.info(s"novelの変換が完了しました")
   }
 

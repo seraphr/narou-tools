@@ -1,19 +1,16 @@
 package jp.seraphr.narou
 
-import java.io.{ BufferedWriter, File }
-import java.nio.charset.StandardCharsets
-import java.nio.file.{ Files, StandardOpenOption }
+import java.io.File
 import java.util.Date
-import java.util.concurrent.atomic.AtomicInteger
 
 import jp.seraphr.narou.model.{ NarouNovel, NarouNovelsMeta }
 
-import org.apache.commons.io.IOUtils
+import monix.eval.Task
+import monix.reactive.Observable
 
 class DefaultNarouNovelsWriter(aResultName: String, aDir: File, aNovelPerFile: Int) extends NarouNovelsWriter {
   import jp.seraphr.narou.json.NarouNovelFormats._
 
-  import FileUtils._
   import io.circe.syntax._
 
   if (aDir.exists()) {
@@ -21,58 +18,24 @@ class DefaultNarouNovelsWriter(aResultName: String, aDir: File, aNovelPerFile: I
   }
   aDir.mkdirs()
 
-  private val mMetaFile              = aDir / NovelFileNames.metaFile
-  private def fileName(aIndex: Int)  = NovelFileNames.novelFile(aIndex)
-  private def novelFile(aIndex: Int) = aDir / fileName(aIndex)
-  private def fileCount              = {
-    val tCount = mNovelCount.get() / aNovelPerFile
-    if (mNovelCount.get() % aNovelPerFile == 0) tCount
-    else tCount + 1
-  }
+  // TODO NovelDataWriterは外からもらうようにする
+  private val mWriter: NovelDataWriter = new FileNovelDataAccessor(aDir.getParentFile)
+  private def fileName(aIndex: Int)    = NovelFileNames.novelFile(aIndex)
 
-  private def novelList   = (0 until fileCount).map(fileName).toList
-  private val mNovelCount = new AtomicInteger(0)
-
-  private var mWriter: BufferedWriter     = null
-  private def newWriter(): BufferedWriter = {
-    val tFile = novelFile((mNovelCount.get + 1) / aNovelPerFile)
-    Files.newBufferedWriter(tFile.toPath, StandardOpenOption.WRITE, StandardOpenOption.CREATE_NEW)
-  }
-
-  private def writer(): BufferedWriter = {
-    if (mWriter == null) {
-      mWriter = newWriter()
-      return mWriter
-    }
-
-    if (mNovelCount.get() % aNovelPerFile == 0) {
-      IOUtils.closeQuietly(mWriter)
-      mWriter = newWriter()
-    }
-
-    mWriter
-  }
-
-  def write(aNovel: NarouNovel): Unit = {
-    val tWriter = writer()
-    tWriter.write(aNovel.asJson.noSpaces)
-    tWriter.write("\n")
-    mNovelCount.getAndIncrement()
-  }
-
-  override def close(): Unit = {
-    if (mWriter != null) {
-      mWriter.close()
-    }
-
-    val tMetaStr = NarouNovelsMeta(aResultName, new Date(), mNovelCount.get(), novelList).asJson.spaces2
-    Files.write(
-      mMetaFile.toPath,
-      tMetaStr.getBytes(StandardCharsets.UTF_8),
-      StandardOpenOption.TRUNCATE_EXISTING,
-      StandardOpenOption.CREATE,
-      StandardOpenOption.WRITE
-    )
+  override def write(aNovels: Observable[NarouNovel]): Task[Unit] = {
+    import jp.seraphr.narou.reactive.ObservableUtils._
+    aNovels
+      .grouped(aNovelPerFile)
+      .mergeMap { case (tKey, tObs) =>
+        val tFileName = fileName(tKey.toInt)
+        Observable.fromTask(mWriter.writeNovel(aDir.getName, tFileName, tObs.map(_.asJson.noSpaces))).map((tFileName, _))
+      }
+      .toListL
+      .foreachL { tList =>
+        val (tFiles, tCounts) = tList.unzip
+        val tMetaStr          = NarouNovelsMeta(aResultName, new Date(), tCounts.sum, tFiles).asJson.spaces2
+        mWriter.writeMetadata(aDir.getName, tMetaStr)
+      }
   }
 
 }

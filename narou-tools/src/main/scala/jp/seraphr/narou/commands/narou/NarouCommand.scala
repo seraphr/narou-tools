@@ -30,6 +30,8 @@ class NarouCommand(aSubCommands: Seq[Command]) extends ParentCommand with HasLog
 }
 
 object NarouCommand extends HasLogger {
+  import monix.execution.Scheduler.Implicits.global
+
   private val mSubCommands = Seq(
     new CollectNovelCommand(
       CollectNovelCommandArg(

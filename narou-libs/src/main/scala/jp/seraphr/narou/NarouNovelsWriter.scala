@@ -2,6 +2,9 @@ package jp.seraphr.narou
 
 import jp.seraphr.narou.model.NarouNovel
 
-trait NarouNovelsWriter extends AutoCloseable {
-  def write(aNovel: NarouNovel): Unit
+import monix.eval.Task
+import monix.reactive.Observable
+
+trait NarouNovelsWriter {
+  def write(aNovels: Observable[NarouNovel]): Task[Unit]
 }

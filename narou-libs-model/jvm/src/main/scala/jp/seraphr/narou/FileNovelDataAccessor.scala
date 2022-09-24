@@ -10,14 +10,14 @@ import monix.reactive.Observable
 class FileNovelDataAccessor(aNovelDir: File) extends NovelDataAccessor {
   import FileUtils._
 
-  private def extractedMetaDataPath = (aNovelDir / NovelFileNames.extractedMetaFile).toPath
+  private def extractedMetadataPath = (aNovelDir / NovelFileNames.extractedMetaFile).toPath
 
   override def writeExtractedMeta(aMetaString: String): Task[Unit] = Task {
-    Files.write(extractedMetaDataPath, aMetaString.getBytes(StandardCharsets.UTF_8))
+    Files.write(extractedMetadataPath, aMetaString.getBytes(StandardCharsets.UTF_8))
   }
 
   override val extractedMeta: Task[String] = Task {
-    val tBytes = Files.readAllBytes(extractedMetaDataPath)
+    val tBytes = Files.readAllBytes(extractedMetadataPath)
     new String(tBytes, StandardCharsets.UTF_8)
   }
 
