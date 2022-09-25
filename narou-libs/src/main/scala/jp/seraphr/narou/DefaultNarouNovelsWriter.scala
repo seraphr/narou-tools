@@ -27,7 +27,7 @@ class DefaultNarouNovelsWriter(aResultName: String, aWriter: NovelDataWriter, aD
       .toListL
       .flatMap { tList =>
         val (tFiles, tCounts) = tList.unzip
-        val tMetaStr          = NarouNovelsMeta(aResultName, new Date(), tCounts.sum, tFiles).asJson.spaces2
+        val tMetaStr          = NarouNovelsMeta(aResultName, new Date(), tCounts.sum, tFiles.sorted).asJson.spaces2
         mWriter.writeMetadata(aDirName, tMetaStr)
       }
   }
