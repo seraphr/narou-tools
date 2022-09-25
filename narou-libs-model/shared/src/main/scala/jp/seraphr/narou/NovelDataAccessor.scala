@@ -11,6 +11,9 @@ trait NovelDataAccessor extends NovelDataReader with NovelDataWriter
  */
 trait NovelDataReader {
 
+  /** このreaderが読もうとしているデータが存在しているかどうかを返します */
+  def exists(): Task[Boolean]
+
   /**
    * [[metadata]]や[[getNovel]]の引数情報を保持する情報を取得する
    * [[jp.seraphr.narou.model.ExtractedNarouNovelsMeta]]の文字列表現を想定している

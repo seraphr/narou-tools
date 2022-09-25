@@ -37,6 +37,11 @@ class DropboxNovelDataAccessor(aClient: DbxClientV2, aRootPath: String) extends 
     tByteArrayOutput.toString(StandardCharsets.UTF_8)
   }
 
+  override def exists(): Task[Boolean] = Task.eval {
+    import scala.jdk.CollectionConverters._
+    aClient.files().listFolder(mRootPath).getEntries.asScala.exists(_.getName == NovelFileNames.extractedMetaFile)
+  }
+
   override def writeExtractedMeta(aMetaString: String): Task[Unit] = {
     uploadString(extractedMetadataPath, aMetaString)
   }

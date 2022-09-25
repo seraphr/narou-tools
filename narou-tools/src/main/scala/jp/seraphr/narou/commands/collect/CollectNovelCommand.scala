@@ -15,7 +15,8 @@ import jp.seraphr.narou.{
   ExtractedNarouNovelsWriter,
   FileNovelDataAccessor,
   HasLogger,
-  NarouClientBuilder
+  NarouClientBuilder,
+  NovelDataReader
 }
 import jp.seraphr.narou.commands.collect.CollectNovelCommand._
 import jp.seraphr.narou.model.{ NarouNovel, NovelCondition }
@@ -55,19 +56,20 @@ class CollectNovelCommand(aDefaultArg: CollectNovelCommandArg)(implicit schedule
   }
 
   private def collect(aArg: CollectNovelCommandArg): Try[Unit] = Try {
-    def loadFrom(aDir: File): Map[String, NarouNovel] = {
-      val tNovelsObs = new DefaultExtractedNovelLoader(new FileNovelDataAccessor(aDir)).loadAll
+    def loadFrom(aReader: NovelDataReader): Map[String, NarouNovel] = {
+      val tNovelsObs = new DefaultExtractedNovelLoader(aReader).loadAll
 
       val tFuture = tNovelsObs.foldLeftL(Map.empty[String, NarouNovel])((map, n) => map.updated(n.ncode, n)).runToFuture
       Await.result(tFuture, Duration.Inf)
     }
 
-    val tOutput = aArg.output
+    val tOutput             = aArg.output
     if (!tOutput.getParentFile.exists()) {
       tOutput.getParentFile.mkdirs()
     }
+    val tOutputDataAccessor = new FileNovelDataAccessor(tOutput)
 
-    val tInitMap = (tOutput.exists(), aArg.overwrite) match {
+    val tInitMap = (tOutputDataAccessor.exists().runSyncUnsafe(), aArg.overwrite) match {
       case (false, _)       => Map.empty[String, NarouNovel]
       case (true, Fail)     => throw new RuntimeException(s"出力先がすでに存在します: ${tOutput.getCanonicalPath}")
       case (true, Recreate) =>
@@ -75,7 +77,7 @@ class CollectNovelCommand(aDefaultArg: CollectNovelCommandArg)(implicit schedule
         Map.empty[String, NarouNovel]
       case (true, Update)   =>
         logger.info("既存の出力ファイルに情報を追加します")
-        loadFrom(tOutput)
+        loadFrom(tOutputDataAccessor)
     }
 
     //    val tCollector = new NovelCollector(aArg.intervalMillis)

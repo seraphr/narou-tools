@@ -23,6 +23,8 @@ class FileNovelDataAccessor(aNovelDir: File) extends NovelDataAccessor {
 
   private def metadataPath(aDir: String) = (aNovelDir / aDir / NovelFileNames.metaFile).toPath
 
+  override def exists(): Task[Boolean] = Task.eval(extractedMetadataPath.toFile.exists())
+
   override def writeMetadata(aDir: String, aMetaString: String): Task[Unit] = Task {
     Files.write(metadataPath(aDir), aMetaString.getBytes(StandardCharsets.UTF_8))
   }
