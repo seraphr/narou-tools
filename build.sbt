@@ -42,6 +42,9 @@ val commonSettings = Def.settings(
 lazy val `narou-libs-model` = crossProject(JVMPlatform, JSPlatform)
   .crossType(CrossType.Full)
   .in(file("narou-libs-model"))
+  .jsConfigure(
+    _.enablePlugins(ScalaJSBundlerPlugin).enablePlugins(ScalablyTypedConverterPlugin)
+  )
   .settings(
     libraryDependencies ++= scalajs.circe.value,
     libraryDependencies ++= Seq(
@@ -61,6 +64,9 @@ lazy val `narou-libs-model` = crossProject(JVMPlatform, JSPlatform)
   .jsSettings(
     libraryDependencies ++= Seq(
       scalajs.scalajsDom.value
+    ),
+    Compile / npmDependencies ++= Seq(
+      js.dropbox
     )
   )
 

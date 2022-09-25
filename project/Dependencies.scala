@@ -70,6 +70,7 @@ object Dependencies {
     val reactDomType = "@types/react-dom" -> "16.9.13"
     val recharts     = "recharts"         -> "2.0.9"
     val antd         = "antd"             -> "4.16.6"
+    val dropbox      = "dropbox"          -> "10.32.0"
 
     val `css-loader`   = "css-loader"   -> "3.4.2"
     val `style-loader` = "style-loader" -> "1.1.3"
