@@ -40,7 +40,7 @@ class DropboxNovelDataAccessor(aClient: DbxClientV2, aRootPath: String) extends 
   override def exists(): Task[Boolean] = Task.eval {
     import scala.jdk.CollectionConverters._
     aClient.files().listFolder(mRootPath).getEntries.asScala.exists(_.getName == NovelFileNames.extractedMetaFile)
-  }
+  }.onErrorHandle(_ => false) // 存在しないディレクトリにlistFolderをすると例外が返る
 
   override def writeExtractedMeta(aMetaString: String): Task[Unit] = {
     uploadString(extractedMetadataPath, aMetaString)

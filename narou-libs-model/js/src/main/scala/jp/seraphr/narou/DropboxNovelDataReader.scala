@@ -39,7 +39,7 @@ class DropboxNovelDataReader(aClient: Dropbox, aRootPath: String) extends NovelD
       tListFolder <- Task.deferFuture(aClient.filesListFolder(ListFolderArg(mRootPath)).toFuture)
       tExists      = tListFolder.result.entries.exists(_.asInstanceOf[Metadata].name == NovelFileNames.extractedMetaFile)
     } yield tExists
-  }
+  }.onErrorHandle(_ => false) // 存在しないディレクトリにlistFolderをすると例外が返る
 
   override val extractedMeta: Task[String] = {
     downloadString(extractedMetadataPath)
