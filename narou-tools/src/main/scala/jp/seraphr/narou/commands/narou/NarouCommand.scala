@@ -35,7 +35,7 @@ object NarouCommand extends HasLogger {
   private val mSubCommands = Seq(
     new CollectNovelCommand(
       CollectNovelCommandArg(
-        new File("./narou_novels"),
+        CollectNovelCommand.Dropbox(None),
         CollectNovelCommand.Update,
         1000,
         limit = Int.MaxValue,

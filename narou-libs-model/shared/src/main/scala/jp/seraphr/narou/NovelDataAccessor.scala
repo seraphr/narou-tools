@@ -34,6 +34,11 @@ trait NovelDataReader {
 }
 
 trait NovelDataWriter {
+  /** 
+   * 出力先ディレクトリが存在する場合、suffixを付加してrenameします
+   * @return 作成されたバックアップのパス。バックアップが行われなかった場合None。 パスは人間可読な値でありこれを機械的な入力にしてはならない
+   */
+  def backup(suffix: String): Task[Option[String]]
 
   /**
    * [[writeMetadata]]や[[writeNovel]]の引数情報を保持する情報を保存する

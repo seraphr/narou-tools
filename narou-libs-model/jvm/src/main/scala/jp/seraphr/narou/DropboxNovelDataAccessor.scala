@@ -15,26 +15,43 @@ import org.apache.commons.io.IOUtils
  * @param aRootPath 書き込み先ディレクトリのパス名。 "/"終わりでも終わりじゃなくても良い
  */
 class DropboxNovelDataAccessor(aClient: DbxClientV2, aRootPath: String) extends NovelDataAccessor {
-  private val mRootPath = if (aRootPath.endsWith("/")) aRootPath.init else aRootPath
+  import jp.seraphr.narou.eval.TaskUtils._
+  
+  private val mRootPath = {
+    val tPath = if (aRootPath.endsWith("/")) aRootPath.init else aRootPath
+    if(tPath.startsWith("/")) tPath else "/" + tPath 
+  }
 
   private def extractedMetadataPath                  = s"${mRootPath}/${NovelFileNames.extractedMetaFile}"
   private def metadataPath(aDir: String)             = s"${mRootPath}/${aDir}/${NovelFileNames.metaFile}"
   private def novelPath(aDir: String, aFile: String) = s"${mRootPath}/${aDir}/${aFile}"
 
-  private def uploadString(aPath: String, aData: String): Task[Unit] = Task.eval {
+  private def uploadString(aPath: String, aData: String): Task[Unit] = Task.eval[Unit] {
     aClient
       .files()
       .uploadBuilder(aPath)
       .withMode(WriteMode.ADD)
       .withAutorename(false)
       .uploadAndFinish(new ByteArrayInputStream(aData.getBytes(StandardCharsets.UTF_8)))
-  }
+  }.retryBackoff()
 
   private def downloadString(aPath: String): Task[String] = Task.eval {
     val tByteArrayOutput = new ByteArrayOutputStream()
     aClient.files().download(aPath).download(tByteArrayOutput)
 
     tByteArrayOutput.toString(StandardCharsets.UTF_8)
+  }.retryBackoff()
+
+  override def backup(suffix: String): Task[Option[String]] = {
+    for {
+      tExists <- this.exists()
+      tDestPath = mRootPath + suffix
+      _ <- Task.when(tExists) {
+        Task.eval[Unit] {
+          aClient.files().moveV2(mRootPath, tDestPath)
+        }.retryBackoff()
+      }
+    } yield Option.when(tExists)(tDestPath)
   }
 
   override def exists(): Task[Boolean] = Task.eval {
@@ -43,14 +60,17 @@ class DropboxNovelDataAccessor(aClient: DbxClientV2, aRootPath: String) extends 
   }.onErrorHandle(_ => false) // 存在しないディレクトリにlistFolderをすると例外が返る
 
   override def writeExtractedMeta(aMetaString: String): Task[Unit] = {
+    println(s"extractedMetadataPath = ${extractedMetadataPath}")
     uploadString(extractedMetadataPath, aMetaString)
   }
 
   override def writeMetadata(aDir: String, aMetaString: String): Task[Unit] = {
+    println(s"metadataPath(aDir) = ${metadataPath(aDir)}")
     uploadString(metadataPath(aDir), aMetaString)
   }
 
   override def writeNovel(aDir: String, aFile: String, aNovelStrings: Observable[String]): Task[Int] = Task.defer {
+    println(s"novelPath(aDir, aFile) = ${novelPath(aDir, aFile)}")
     val tOutputStream = aClient
       .files()
       .uploadBuilder(novelPath(aDir, aFile))
@@ -67,7 +87,7 @@ class DropboxNovelDataAccessor(aClient: DbxClientV2, aRootPath: String) extends 
       .countL
       .map(_.toInt)
       .guarantee(Task.eval(IOUtils.closeQuietly(tOutputStream)))
-  }
+  }.retryBackoff()
 
   override val extractedMeta: Task[String] = {
     downloadString(extractedMetadataPath)
@@ -86,5 +106,4 @@ class DropboxNovelDataAccessor(aClient: DbxClientV2, aRootPath: String) extends 
 
     Observable.fromLinesReader(tReaderTask)
   }
-
 }
