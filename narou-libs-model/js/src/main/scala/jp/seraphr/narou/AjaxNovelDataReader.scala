@@ -30,7 +30,7 @@ class AjaxNovelDataReader(aBaseUrl: URI) extends NovelDataReader {
       .flatMap(_.text().toTask)
   }
 
-  override def exists(): Task[Boolean]     = Task.raiseError(new RuntimeException("AjaxNovelDataReaderでは、existsは現状未実装です"))
+  override def exists(): Task[Boolean] = Task.raiseError(new RuntimeException("AjaxNovelDataReaderでは、existsは現状未実装です"))
 
   override val extractedMeta: Task[String]                               = get(mExtractedMetaUrl)
   override def metadata(aDir: String): Task[String]                      = get(metaUrl(aDir))
