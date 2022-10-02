@@ -129,10 +129,14 @@ lazy val `narou-webui` = (project in file("narou-webui"))
       js.reactDom,
       js.reactDomType,
       js.recharts,
-      js.antd
+      js.antd,
+      js.dropbox,
+      js.`node-polyfill-webpack-plugin`
     ),
     stFlavour                        := Flavour.ScalajsReact,
+    stTypescriptVersion              := "4.8.4",
     stIgnore ++= List(
+      "type-fest" // なんかエラーになるので、とりあえず取り除いておく
     ),
     // css-load設定 fileとかurlは要らんが、scalablytypedデモプロジェクトからそのまま持ってきた
     webpackConfigFile                := Some(baseDirectory.value / "custom-scalajs.webpack.config"),

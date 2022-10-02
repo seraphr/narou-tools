@@ -13,17 +13,17 @@ object StoreProvider {
   val context                  = React.createContext(NarouWebAppStore.emptyStore)
   val component                =
     ScalaComponent
-      .builder[(AppState, ExtractedNovelLoader)]("StoreProvider")
+      .builder[(AppState, Map[String, ExtractedNovelLoader])]("StoreProvider")
       .initialStateFromProps(_._1)
       .noBackend
-      .renderPC { case (scope, (_, loader), children) =>
+      .renderPC { case (scope, (_, loaders), children) =>
         if (actions == null) {
           val tStateApi = new DefaultStateApi[AppState](
             () => scope.state,
             f => scope.modState(f).flatMap(_ => scope.mountedPure.state).runNow()
           )
           actions = new DefaultActions(
-            loader,
+            loaders,
             { f =>
               import monix.execution.Scheduler.Implicits.global
               f(tStateApi).foreach { _ => }
@@ -35,8 +35,8 @@ object StoreProvider {
       }
       .build
 
-  def apply(initialState: AppState, loader: ExtractedNovelLoader)(aChildren: CtorType.ChildArg) = {
-    component((initialState, loader))(aChildren)
+  def apply(initialState: AppState, loaders: Map[String, ExtractedNovelLoader])(aChildren: CtorType.ChildArg) = {
+    component((initialState, loaders))(aChildren)
   }
 
 }

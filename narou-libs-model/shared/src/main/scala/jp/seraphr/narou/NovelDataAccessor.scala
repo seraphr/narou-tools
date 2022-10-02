@@ -34,7 +34,8 @@ trait NovelDataReader {
 }
 
 trait NovelDataWriter {
-  /** 
+
+  /**
    * 出力先ディレクトリが存在する場合、suffixを付加してrenameします
    * @return 作成されたバックアップのパス。バックアップが行われなかった場合None。 パスは人間可読な値でありこれを機械的な入力にしてはならない
    */

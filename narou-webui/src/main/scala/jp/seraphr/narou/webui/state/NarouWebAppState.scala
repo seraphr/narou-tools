@@ -13,15 +13,17 @@ object NarouWebAppStore {
 }
 
 case class AppState(
+    dirNames: Seq[String],
     allMeta: Map[String, NarouNovelsMeta],
     selected: Selected
 )
 
 object AppState {
-  val emptyState = AppState(Map.empty, Selected(None, Seq.empty, None))
+  val emptyState = AppState(Seq.empty, Map.empty, Selected(None, None, Seq.empty, None))
 }
 
 case class Selected(
+    dir: Option[String],
     meta: Option[String],
     novels: Seq[NarouNovel],
     novel: Option[NarouNovel]

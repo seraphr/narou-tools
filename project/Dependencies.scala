@@ -65,12 +65,13 @@ object Dependencies {
   }
 
   object js {
-    val react        = "react"            -> reactVersion
-    val reactDom     = "react-dom"        -> reactVersion
-    val reactDomType = "@types/react-dom" -> "16.9.13"
-    val recharts     = "recharts"         -> "2.0.9"
-    val antd         = "antd"             -> "4.16.6"
-    val dropbox      = "dropbox"          -> "10.32.0"
+    val react                          = "react"                        -> reactVersion
+    val reactDom                       = "react-dom"                    -> reactVersion
+    val reactDomType                   = "@types/react-dom"             -> "16.9.13"
+    val recharts                       = "recharts"                     -> "2.0.9"
+    val antd                           = "antd"                         -> "4.16.6"
+    val dropbox                        = "dropbox"                      -> "10.32.0"
+    val `node-polyfill-webpack-plugin` = "node-polyfill-webpack-plugin" -> "2.0.1"
 
     val `css-loader`   = "css-loader"   -> "3.4.2"
     val `style-loader` = "style-loader" -> "1.1.3"
