@@ -1,10 +1,9 @@
 package jp.seraphr.narou
 
-import java.io.{BufferedInputStream, BufferedReader, ByteArrayInputStream, ByteArrayOutputStream}
+import java.io.{BufferedInputStream, BufferedReader, ByteArrayInputStream, ByteArrayOutputStream, InputStreamReader}
 import java.nio.charset.StandardCharsets
 import com.dropbox.core.v2.DbxClientV2
 import com.dropbox.core.v2.files.WriteMode
-import jdk.internal.org.jline.utils.InputStreamReader
 import monix.eval.Task
 import monix.reactive.Observable
 import org.apache.commons.io.IOUtils

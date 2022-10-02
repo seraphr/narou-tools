@@ -39,7 +39,8 @@ object NarouCommand extends HasLogger {
         CollectNovelCommand.Update,
         1000,
         limit = Int.MaxValue,
-        novelsPerFile = 10000
+        novelsPerFile = 10000,
+        withAll = false
       )
     ),
     new DownloadNovelCommand(DownloadNovelCommandArg(new File("./novel_list"), new File("./novels"), false, 1000, 100)),

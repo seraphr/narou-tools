@@ -112,12 +112,13 @@ class CollectNovelCommand(aDefaultArg: CollectNovelCommandArg)(implicit schedule
     logger.info(s"収集が完了しました。 最終ノベル数: ${tResultSize}  増加ノベル数: ${tResultSize - tInitSize}")
 
     val tConditions = Seq(
-      NovelCondition.all,
       NovelCondition.length100k,
       NovelCondition.length300k and NovelCondition.bookmark1000,
       NovelCondition.length500k and NovelCondition.bookmark1000,
       NovelCondition.length100k and NovelCondition.bookmark1000
-    )
+    ).map(Some(_))
+      .prepended(Option.when(aArg.withAll)(NovelCondition.all))
+      .flatten
     val tNovels     = Observable.fromIterable(tResultMap.values)
 
     val tTask = for {
@@ -133,29 +134,6 @@ class CollectNovelCommand(aDefaultArg: CollectNovelCommandArg)(implicit schedule
 
     tTask.runSyncUnsafe()
   }
-
-//  private def outputToLocal(aNovels: Observable[NarouNovel], aOutputDir: File, createNovelsWriter: NovelDataWriter => NarouNovelsWriter): Unit = {
-//    val tTempOutputDir = Files.createTempDirectory("novel_list").toFile
-//    try {
-//      logger.info(s"一時ファイルへの書き込みを開始します")
-//      val tWriter = new FileNovelDataAccessor(tTempOutputDir)
-//      createNovelsWriter(tWriter).write(aNovels).runSyncUnsafe()
-//      logger.info(s"一時ファイルへの書き込みを完了しました。")
-//      logger.info(s"出力ファイルの差し替えを行います。")
-//      if (aOutputDir.exists()) {
-//        val tBackupDir = new File(aOutputDir.getParentFile, s"${aOutputDir.getName}.bak")
-//        if (tBackupDir.exists()) {
-//          FileUtils.deleteQuietly(tBackupDir)
-//        }
-//        FileUtils.moveDirectory(aOutputDir, tBackupDir)
-//        logger.info(s"旧出力ファイルを、バックアップしました: ${tBackupDir.getCanonicalPath}")
-//      }
-//      FileUtils.moveDirectory(tTempOutputDir, aOutputDir)
-//      logger.info(s"出力が完了しました。")
-//    } finally {
-//      FileUtils.deleteQuietly(tTempOutputDir)
-//    }
-//  }
 
   class OptionParser(aDefaultArg: CollectNovelCommandArg) extends CommandArgParser[CollectNovelCommandArg] {
     def parse(aArgs: Seq[String]): Option[CollectNovelCommandArg] = this.parse(aArgs, aDefaultArg)
@@ -215,6 +193,11 @@ class CollectNovelCommand(aDefaultArg: CollectNovelCommandArg)(implicit schedule
       .valueName("recreate | update | fail")
       .text(s"出力先ファイルが既にある場合の動作を指定します。 省略した場合は、${aDefaultArg.overwrite.text}です")
       .action((o, c) => c.copy(overwrite = o))
+    
+    opt[Boolean]('a', "withAll")
+      .optional()
+      .text("指定した場合、全ノベルデータを出力に加えます")
+      .action((o, c) => c.copy(withAll = o))
   }
 }
 
@@ -255,6 +238,7 @@ object CollectNovelCommand {
       overwrite: OverwriteOption,
       intervalMillis: Long,
       limit: Int,
-      novelsPerFile: Int
+      novelsPerFile: Int,
+      withAll: Boolean
   )
 }

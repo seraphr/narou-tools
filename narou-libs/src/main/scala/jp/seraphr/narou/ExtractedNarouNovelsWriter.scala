@@ -7,10 +7,7 @@ import monix.reactive.Observable
 
 class ExtractedNarouNovelsWriter(aDataWriter: NovelDataWriter, aConditions: Seq[NovelCondition], aNovelsPerFile: Int)
     extends NarouNovelsWriter {
-  private val mConditions = {
-    if (aConditions.contains(NovelCondition.all)) aConditions
-    else NovelCondition.all +: aConditions
-  }
+  private val mConditions = aConditions
 
   class ConditionWriter(aCondition: NovelCondition) extends NarouNovelsWriter {
     private val mWriter = new DefaultNarouNovelsWriter(aCondition.name, aDataWriter, aCondition.id, aNovelsPerFile)
