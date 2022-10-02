@@ -2,6 +2,12 @@
 
 https://seraphr.github.io/narou-tools/
 
+## update ghsite
+
+```
+./sbt clean makeSite ghpagesPushSite
+```
+
 ## preview webui（dummy data）
 
 ```
