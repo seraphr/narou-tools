@@ -58,8 +58,21 @@ class CollectNovelCommand(aDefaultArg: CollectNovelCommandArg)(implicit schedule
   }
 
   private def collect(aArg: CollectNovelCommandArg): Try[Unit] = Try {
+    val tConditions = Seq(
+      NovelCondition.length100k,
+      NovelCondition.length300k and NovelCondition.bookmark1000,
+      NovelCondition.length500k and NovelCondition.bookmark1000,
+      NovelCondition.length100k and NovelCondition.bookmark1000
+    ).map(Some(_)).prepended(Option.when(aArg.withAll)(NovelCondition.all)).flatten
+
+    val tNovelPredicate: NarouNovel => Boolean = if (tConditions.contains(NovelCondition.all)) { _ =>
+      true
+    } else { tNovel =>
+      tConditions.exists(_.predicate(tNovel))
+    }
+
     def loadFrom(aReader: NovelDataReader): Map[String, NarouNovel] = {
-      val tNovelsObs = new DefaultExtractedNovelLoader(aReader).loadAll
+      val tNovelsObs = new DefaultExtractedNovelLoader(aReader).loadAll.filter(tNovelPredicate)
 
       val tFuture = tNovelsObs.foldLeftL(Map.empty[String, NarouNovel])((map, n) => map.updated(n.ncode, n)).runToFuture
       Await.result(tFuture, Duration.Inf)
@@ -101,25 +114,19 @@ class CollectNovelCommand(aDefaultArg: CollectNovelCommandArg)(implicit schedule
     val tInitSize  = tInitMap.size
     logger.info(s"小説リストの収集を開始します。 初期ノベル数: ${tInitSize}")
 
+    import jp.seraphr.narou.model.NarouNovelConverter._
     val tResultMap  = tCollector
       .collect(NarouClientBuilder.init)
+      .map(_.asScala)
+      .filter(tNovelPredicate)
       .take(aArg.limit)
-      .foldLeft(tInitMap) {
-        import jp.seraphr.narou.model.NarouNovelConverter._
-        (m, n) => m.updated(n.getNcode, n.asScala)
+      .foldLeft(tInitMap) { (m, n) =>
+        m.updated(n.ncode, n)
       }
     val tResultSize = tResultMap.size
     logger.info(s"収集が完了しました。 最終ノベル数: ${tResultSize}  増加ノベル数: ${tResultSize - tInitSize}")
 
-    val tConditions = Seq(
-      NovelCondition.length100k,
-      NovelCondition.length300k and NovelCondition.bookmark1000,
-      NovelCondition.length500k and NovelCondition.bookmark1000,
-      NovelCondition.length100k and NovelCondition.bookmark1000
-    ).map(Some(_))
-      .prepended(Option.when(aArg.withAll)(NovelCondition.all))
-      .flatten
-    val tNovels     = Observable.fromIterable(tResultMap.values)
+    val tNovels = Observable.fromIterable(tResultMap.values)
 
     val tTask = for {
       tBackup      <- tOutputDataAccessor.backup(".bak")
@@ -193,11 +200,8 @@ class CollectNovelCommand(aDefaultArg: CollectNovelCommandArg)(implicit schedule
       .valueName("recreate | update | fail")
       .text(s"出力先ファイルが既にある場合の動作を指定します。 省略した場合は、${aDefaultArg.overwrite.text}です")
       .action((o, c) => c.copy(overwrite = o))
-    
-    opt[Boolean]('a', "withAll")
-      .optional()
-      .text("指定した場合、全ノベルデータを出力に加えます")
-      .action((o, c) => c.copy(withAll = o))
+
+    opt[Boolean]('a', "withAll").optional().text("指定した場合、全ノベルデータを出力に加えます").action((o, c) => c.copy(withAll = o))
   }
 }
 
