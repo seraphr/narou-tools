@@ -1,14 +1,15 @@
 package jp.seraphr.narou
 
-import java.io.{ BufferedReader, ByteArrayInputStream, ByteArrayOutputStream }
+import java.io.{BufferedInputStream, BufferedReader, ByteArrayInputStream, ByteArrayOutputStream}
 import java.nio.charset.StandardCharsets
-
 import com.dropbox.core.v2.DbxClientV2
 import com.dropbox.core.v2.files.WriteMode
 import jdk.internal.org.jline.utils.InputStreamReader
 import monix.eval.Task
 import monix.reactive.Observable
 import org.apache.commons.io.IOUtils
+
+import java.nio.file.{Files, Path}
 
 /**
  * @param aClient
@@ -70,24 +71,46 @@ class DropboxNovelDataAccessor(aClient: DbxClientV2, aRootPath: String) extends 
   }
 
   override def writeNovel(aDir: String, aFile: String, aNovelStrings: Observable[String]): Task[Int] = Task.defer {
-    println(s"novelPath(aDir, aFile) = ${novelPath(aDir, aFile)}")
-    val tOutputStream = aClient
-      .files()
-      .uploadBuilder(novelPath(aDir, aFile))
-      .withMode(WriteMode.ADD)
-      .withAutorename(false)
-      .start()
-      .getOutputStream()
-
-    aNovelStrings
-      .map { tLine =>
-        tOutputStream.write(tLine.getBytes(StandardCharsets.UTF_8))
-        tOutputStream.write('\n')
+    val tTempFileTask = Task.eval(Files.createTempFile(aFile, ".jsonl"))
+    def newWriter(aPath: Path) = Task.eval(Files.newBufferedWriter(aPath, StandardCharsets.UTF_8))
+    def upload(aPath: Path): Task[Unit] = Task.eval[Unit] {
+      val tInputStream = new BufferedInputStream(Files.newInputStream(aPath))
+      
+      try {
+        aClient
+          .files()
+          .uploadBuilder(novelPath(aDir, aFile))
+          .withMode(WriteMode.ADD)
+          .withAutorename(false)
+          .uploadAndFinish(tInputStream)
+      } finally {
+        IOUtils.closeQuietly(tInputStream)
       }
-      .countL
-      .map(_.toInt)
-      .guarantee(Task.eval(IOUtils.closeQuietly(tOutputStream)))
-  }.retryBackoff()
+    }.retryBackoff()
+    
+    // dropboxのuploadAndFinishの代わりに getOutputStreamしてそこに書き込んだら、歯抜けにファイルが作られてしまった
+    // 原因はわかっていないが、とりあえずtemp fileに書き込んでからそれをアップロードするようにした
+    // もしエラーがあっても、これならretryが出来るのでちょっと安心
+    val tWriteTempFileTask = for {
+      tTempFile <- tTempFileTask
+      tWriter <- newWriter(tTempFile)
+      tCount <- {
+        aNovelStrings
+          .map { tLine =>
+            tWriter.write(tLine)
+            tWriter.write("\n")
+          }
+          .countL
+          .guarantee(Task.eval(tWriter.close()))
+      }
+    } yield (tTempFile, tCount.toInt)
+    
+    for {
+      tTempFileAndCount <- tWriteTempFileTask
+      (tTempFile, tCount) = tTempFileAndCount
+      _ <- upload(tTempFile).guarantee(Task.eval(Files.deleteIfExists(tTempFile)))
+    } yield tCount
+  }
 
   override val extractedMeta: Task[String] = {
     downloadString(extractedMetadataPath)

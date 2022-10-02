@@ -6,7 +6,7 @@ object TaskUtils {
   implicit class TaskOps[A](private val t: Task[A]) extends AnyVal {
     def retryBackoff(maxRetry: Int = 5, initSleepMillis: Int = 400): Task[A] = {
       t.onErrorRecoverWith {
-        case _ if 0 < maxRetry =>
+        case e if 0 < maxRetry =>
           import scala.concurrent.duration._
           val tSleep = (initSleepMillis / 2) + (math.random() * initSleepMillis / 2).toInt
           Task.sleep(tSleep.millis).flatMap { _ =>
