@@ -10,7 +10,7 @@ object Dependencies {
   val scalatestplusVersion = s"${scalatestVersion}.0"
   val circeVersion         = "0.14.2"
   val monixVersion         = "3.4.1"
-  val monocleVersion       = "3.1.0"
+  val monocleVersion       = "3.2.0"
 
   object jvm {
     val scalaTest     = "org.scalatest"    %% "scalatest"        % scalatestVersion
