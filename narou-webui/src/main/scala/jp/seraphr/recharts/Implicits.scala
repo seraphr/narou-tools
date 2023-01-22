@@ -48,17 +48,26 @@ object Implicits {
       components.Legend(
         js.undefined.asInstanceOf[(js.UndefOr[Double | String]) with js.UndefOr[Double]],
         js.undefined
-          .asInstanceOf[(js.UndefOr[js.Function1[ /* event */ ReactMouseEventFrom[Element], Unit]]) with (js.UndefOr[
-            AdaptChildMouseEventHandler[Any, japgolly.scalajs.react.facade.React.Element]
-          ])],
+          .asInstanceOf[
+            (js.UndefOr[js.Function1[ /* event */ ReactMouseEventFrom[Element], Unit]])
+              with (js.UndefOr[
+                AdaptChildMouseEventHandler[Any, japgolly.scalajs.react.facade.React.Element]
+              ])
+          ],
         js.undefined
-          .asInstanceOf[(js.UndefOr[js.Function1[ /* event */ ReactMouseEventFrom[Element], Unit]]) with (js.UndefOr[
-            AdaptChildMouseEventHandler[Any, japgolly.scalajs.react.facade.React.Element]
-          ])],
+          .asInstanceOf[
+            (js.UndefOr[js.Function1[ /* event */ ReactMouseEventFrom[Element], Unit]])
+              with (js.UndefOr[
+                AdaptChildMouseEventHandler[Any, japgolly.scalajs.react.facade.React.Element]
+              ])
+          ],
         js.undefined
-          .asInstanceOf[(js.UndefOr[js.Function1[ /* event */ ReactMouseEventFrom[Element], Unit]]) with (js.UndefOr[
-            AdaptChildMouseEventHandler[Any, japgolly.scalajs.react.facade.React.Element]
-          ])],
+          .asInstanceOf[
+            (js.UndefOr[js.Function1[ /* event */ ReactMouseEventFrom[Element], Unit]])
+              with (js.UndefOr[
+                AdaptChildMouseEventHandler[Any, japgolly.scalajs.react.facade.React.Element]
+              ])
+          ],
         js.undefined.asInstanceOf[(js.UndefOr[Double | String]) with js.UndefOr[Double]]
       )
     }
