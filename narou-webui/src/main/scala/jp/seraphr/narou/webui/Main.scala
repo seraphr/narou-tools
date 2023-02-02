@@ -16,8 +16,8 @@ import jp.seraphr.narou.model.{ Genre, NarouNovel, NovelType, UploadType }
 import jp.seraphr.narou.webui.state.AppState
 
 import monix.eval.Task
-import typings.dropbox.dropboxTypesMod.files.{ ListFolderArg, Metadata }
 import typings.dropbox.mod.{ Dropbox, DropboxOptions }
+import typings.dropbox.typesDropboxTypesMod.files.{ ListFolderArg, Metadata }
 
 object Main {
   import jp.seraphr.js.ScalaJsConverters._

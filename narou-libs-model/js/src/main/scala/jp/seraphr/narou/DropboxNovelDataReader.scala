@@ -5,8 +5,8 @@ import scala.scalajs.js
 
 import monix.eval.Task
 import monix.reactive.Observable
-import typings.dropbox.dropboxTypesMod.files.{ DownloadArg, FileMetadata, ListFolderArg, Metadata }
 import typings.dropbox.mod.Dropbox
+import typings.dropbox.typesDropboxTypesMod.files.{ DownloadArg, FileMetadata, ListFolderArg, Metadata }
 
 @js.native
 trait DropboxDownloadFileMetadata extends FileMetadata {

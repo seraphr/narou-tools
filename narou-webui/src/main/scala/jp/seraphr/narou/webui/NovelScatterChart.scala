@@ -11,9 +11,9 @@ import japgolly.scalajs.react.{ BackendScope, Callback, Reusability, ScalaCompon
 import japgolly.scalajs.react.CtorType.ChildArg
 import japgolly.scalajs.react.extra.Px
 import typings.react.mod.SVGProps
-import typings.recharts.{ rechartsStrings, scatterMod }
+import typings.recharts.{ rechartsStrings, typesCartesianScatterMod => scatterMod }
 import typings.recharts.components.Scatter
-import typings.recharts.utilTypesMod.Margin
+import typings.recharts.typesUtilTypesMod.Margin
 
 object NovelScatterChart {
   import jp.seraphr.recharts.Implicits._
@@ -90,8 +90,8 @@ object NovelScatterChart {
             .scatters
             .map { tScatterData =>
               scatterMod
-                .Props
-                .create(tScatterData.name, js.undefined)
+                .Props()
+                .setName(tScatterData.name)
                 .setData(tScatterData.points.map(a => a: Any).toJSArray)
                 .setFill(tScatterData.color)
                 .setIsAnimationActive(false)

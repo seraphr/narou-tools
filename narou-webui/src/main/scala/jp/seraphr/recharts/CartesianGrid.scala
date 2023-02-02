@@ -1,7 +1,7 @@
 package jp.seraphr.recharts
 
 import japgolly.scalajs.react.{ Children, JsComponent }
-import typings.recharts.cartesianGridMod
+import typings.recharts.{ typesCartesianCartesianGridMod => cartesianGridMod }
 import typings.recharts.mod
 
 object CartesianGrid {
