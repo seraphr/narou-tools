@@ -6,15 +6,23 @@ import org.scalajs.dom
 import scala.util.Random
 
 import jp.seraphr.narou.{
-  AjaxNovelDataAccessor,
   DefaultExtractedNovelLoader,
+  DropboxNovelDataReader,
   DummyExtractedNovelLoader,
-  DummyNovelLoader
+  DummyNovelLoader,
+  ExtractedNovelLoader
 }
 import jp.seraphr.narou.model.{ Genre, NarouNovel, NovelType, UploadType }
-import jp.seraphr.narou.webui.state.AppState
+import jp.seraphr.narou.webui.state.{ AppState, LazyLoad }
+
+import monix.eval.Task
+import typings.dropbox.mod.{ Dropbox, DropboxOptions }
+import typings.dropbox.typesDropboxTypesMod.files.{ ListFolderArg, Metadata }
 
 object Main {
+  import jp.seraphr.js.ScalaJsConverters._
+  import jp.seraphr.narou.eval.TaskUtils._
+
   import monix.execution.Scheduler.Implicits.global
 
   private val mCurrentURI = new URI("./narou_novels/")
@@ -24,20 +32,55 @@ object Main {
     tLocation.hostname == "localhost" || new dom.URLSearchParams(tLocation.search).has("local")
   }
 
-  private val mLoader = if (isLocal) {
-    LocalDummyData.dummyLoader
-  } else {
-    new DefaultExtractedNovelLoader(new AjaxNovelDataAccessor(mCurrentURI))
+  private lazy val mDropboxClient = {
+    // NOTE: ここに clientSecret / refreshTokenを埋め込んでいるのは意図的
+    // Dropboxは、Client Credentials Flowを実装していないため、clientId / clientSecretだけでは何もできない
+    // この refreshToken で取得可能なアクセストークンは、筆者が認めたサブディレクトリへのreadアクセス以外何もできない
+    val tOptions = DropboxOptions()
+      .setClientId("4gpor2ahiidljm7")
+      .setClientSecret("ylkfh2uk5duzcmi")
+      .setRefreshToken("ph7DRDr3uEEAAAAAAAAAAeSmlFTSAGZBQcI5JXCv0Bvvevdba6NQT0UknPxIm0a2")
+
+    new Dropbox(tOptions)
   }
+
+  private val mLoaders: Task[Map[String, ExtractedNovelLoader]] = {
+    if (isLocal) {
+      Task.pure(Map(("dummy", LocalDummyData.dummyLoader)))
+    } else {
+      for {
+        tChildren         <- mDropboxClient.filesListFolder(ListFolderArg("")).asTask
+        tReaders           = tChildren
+                               .result
+                               .entries
+                               .toSeq
+                               .map { e =>
+                                 val tName = e.asInstanceOf[Metadata].name
+                                 tName -> new DropboxNovelDataReader(mDropboxClient, tName)
+                               }
+        tAvailableReaders <- Task.filter(tReaders)(_._2.exists())
+        tLoaders           = tAvailableReaders
+                               .map { case (n, r) =>
+                                 (n, new DefaultExtractedNovelLoader(r))
+                               }
+                               .toMap
+      } yield tLoaders
+    }
+  }
+
+//  private val mLoader = if (isLocal) {
+//    LocalDummyData.dummyLoader
+//  } else {
+//    new DefaultExtractedNovelLoader(new AjaxNovelDataReader(mCurrentURI))
+//  }
 
   def main(aArgs: Array[String]): Unit = {
     val tNode = dom.document.getElementById("main")
 
-    mLoader
-      .allMetadata
-      .foreach { tMetas =>
-        StoreProvider(AppState.emptyState.copy(allMeta = tMetas), mLoader)(RootView()).renderIntoDOM(tNode)
-      }
+    mLoaders.foreach { tLoaders =>
+      StoreProvider(AppState.emptyState.copy(dirNames = LazyLoad.Loaded(tLoaders.keys.toSeq)), tLoaders)(RootView())
+        .renderIntoDOM(tNode)
+    }
   }
 
 }

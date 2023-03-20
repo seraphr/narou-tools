@@ -1,16 +1,17 @@
 package jp.seraphr.narou.commands.sandbox
 
 import java.io.File
-import java.util.concurrent.atomic.AtomicInteger
 
 import scala.annotation.nowarn
 import scala.io.Source
 import scala.util.{ Failure, Try, Using }
 
 import jp.seraphr.command.Command
-import jp.seraphr.narou.{ DefaultNarouNovelsWriter, HasLogger }
+import jp.seraphr.narou.{ DefaultNarouNovelsWriter, FileNovelDataAccessor, HasLogger }
 
 import com.fasterxml.jackson.databind.ObjectMapper
+import monix.execution.Scheduler.Implicits.global
+import monix.reactive.Observable
 import narou4j.entities.Novel
 
 class SandboxCommand(aDefaultArg: SandboxCommandArg) extends Command with HasLogger {
@@ -48,9 +49,9 @@ class SandboxCommand(aDefaultArg: SandboxCommandArg) extends Command with HasLog
   private def findUploadType0(aNovels: Vector[Novel]): Unit = {
     val tFiltered = aNovels.filter(_.getUploadType == 0)
     logger.info(s"count = ${tFiltered.size}")
-    logger.info(s"全短編数 = ${aNovels.filter(_.getNovelType == 2).size}")
-    logger.info(s"短編 = ${tFiltered.filter(_.getNovelType == 2).size}")
-    logger.info(s"長編 = ${tFiltered.filter(_.getNovelType == 1).size}")
+    logger.info(s"全短編数 = ${aNovels.count(_.getNovelType == 2)}")
+    logger.info(s"短編 = ${tFiltered.count(_.getNovelType == 2)}")
+    logger.info(s"長編 = ${tFiltered.count(_.getNovelType == 1)}")
     tFiltered
       .filter(_.getNovelType == 1)
       .take(10)
@@ -85,15 +86,19 @@ class SandboxCommand(aDefaultArg: SandboxCommandArg) extends Command with HasLog
     logger.info(s"novelの変換を行います: Novel数=${aNovels.size}")
     import jp.seraphr.narou.model.NarouNovelConverter._
 
-    val tCounter = new AtomicInteger()
-    Using(new DefaultNarouNovelsWriter("all", aOutputDir, 50000)) { tStream =>
-      aNovels.foreach { n =>
-        if (tCounter.incrementAndGet() % 5000 == 0) {
-          logger.info(s"変換: ${tCounter.get()}")
+    val tNovels = Observable
+      .fromIterable(aNovels)
+      .zipWithIndex
+      .map { case (tNovel, tIndex) =>
+        val tCount = tIndex + 1
+        if (tCount % 5000 == 0) {
+          logger.info(s"変換: ${tCount}")
         }
-        tStream.write(n.asScala)
+        tNovel.asScala
       }
-    }.get
+
+    val tDataWriter = new FileNovelDataAccessor(aOutputDir.getParentFile)
+    new DefaultNarouNovelsWriter("all", tDataWriter, aOutputDir.getName, 50000).write(tNovels).runSyncUnsafe()
     logger.info(s"novelの変換が完了しました")
   }
 

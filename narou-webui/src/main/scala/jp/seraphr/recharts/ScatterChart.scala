@@ -1,8 +1,8 @@
 package jp.seraphr.recharts
 
 import japgolly.scalajs.react._
-import typings.recharts.generateCategoricalChartMod.CategoricalChartProps
 import typings.recharts.mod
+import typings.recharts.typesChartGenerateCategoricalChartMod.CategoricalChartProps
 
 object ScatterChart {
 

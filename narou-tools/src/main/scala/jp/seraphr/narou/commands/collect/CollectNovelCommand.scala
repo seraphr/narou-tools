@@ -1,7 +1,7 @@
 package jp.seraphr.narou.commands.collect
 
 import java.io.File
-import java.nio.file.Files
+import java.time.LocalDate
 
 import scala.concurrent.Await
 import scala.concurrent.duration.Duration
@@ -12,24 +12,32 @@ import jp.seraphr.command.Command
 import jp.seraphr.narou.{
   AllNovelCollector,
   DefaultExtractedNovelLoader,
+  DropboxNovelDataAccessor,
   ExtractedNarouNovelsWriter,
   FileNovelDataAccessor,
   HasLogger,
-  NarouClientBuilder
+  NarouClientBuilder,
+  NovelDataReader
 }
 import jp.seraphr.narou.commands.collect.CollectNovelCommand._
 import jp.seraphr.narou.model.{ NarouNovel, NovelCondition }
 
-import org.apache.commons.io.FileUtils
+import com.dropbox.core.DbxRequestConfig
+import com.dropbox.core.v2.DbxClientV2
+import monix.execution.Scheduler
+import monix.reactive.Observable
 import scopt.Read
 
 /**
  */
-class CollectNovelCommand(aDefaultArg: CollectNovelCommandArg) extends Command with HasLogger {
-  private val mParser                             = new OptionParser(aDefaultArg)
-  override val name                               = "collect"
-  override val description                        = "なろう小説の一覧を収集し、ファイルに保存します"
-  override val version                            = "0.1.0"
+class CollectNovelCommand(aDefaultArg: CollectNovelCommandArg)(implicit scheduler: Scheduler)
+    extends Command
+    with HasLogger {
+  override val name        = "collect"
+  override val description = "なろう小説の一覧を収集し、ファイル or Dropboxに保存します"
+  override val version     = "0.1.0"
+  private val mParser      = new OptionParser(aDefaultArg)
+
   override def run(aArgs: Seq[String]): Try[Unit] = {
     mParser.parse(aArgs) match {
       case Some(tArgs) => collect(tArgs)
@@ -51,85 +59,119 @@ class CollectNovelCommand(aDefaultArg: CollectNovelCommandArg) extends Command w
   }
 
   private def collect(aArg: CollectNovelCommandArg): Try[Unit] = Try {
-    def loadFrom(aDir: File): Map[String, NarouNovel] = {
-      val tNovelsObs = new DefaultExtractedNovelLoader(new FileNovelDataAccessor(aDir)).loadAll
+    val tConditions = Seq(
+      NovelCondition.length100k,
+      NovelCondition.length300k and NovelCondition.bookmark1000,
+      NovelCondition.length500k and NovelCondition.bookmark1000,
+      NovelCondition.length100k and NovelCondition.bookmark1000
+    ).map(Some(_)).prepended(Option.when(aArg.withAll)(NovelCondition.all)).flatten
 
-      import monix.execution.Scheduler.Implicits.global
+    val tNovelPredicate: NarouNovel => Boolean = if (tConditions.contains(NovelCondition.all)) { _ =>
+      true
+    } else { tNovel =>
+      tConditions.exists(_.predicate(tNovel))
+    }
+
+    def loadFrom(aReader: NovelDataReader): Map[String, NarouNovel] = {
+      val tNovelsObs = new DefaultExtractedNovelLoader(aReader).loadAll.filter(tNovelPredicate)
+
       val tFuture = tNovelsObs.foldLeftL(Map.empty[String, NarouNovel])((map, n) => map.updated(n.ncode, n)).runToFuture
       Await.result(tFuture, Duration.Inf)
     }
 
-    val tOutput = aArg.output
-    if (!tOutput.getParentFile.exists()) {
-      tOutput.getParentFile.mkdirs()
+    lazy val tDropboxClient = {
+      val tConfig = DbxRequestConfig
+        .newBuilder("narou-tool-collector/0.1")
+        .withUserLocale("ja-JP")
+        .withAutoRetryEnabled()
+        .build()
+      new DbxClientV2(tConfig, DropboxApp.newCredential())
     }
 
-    val tInitMap = (tOutput.exists(), aArg.overwrite) match {
+    val tOutput             = aArg.output
+    val tOutputDataAccessor = tOutput match {
+      case Local(file)   =>
+        logger.info(s"ローカルファイルシステムへの出力を行います: ${file}")
+        new FileNovelDataAccessor(file)
+      case Dropbox(path) =>
+        val tPath = path.getOrElse(LocalDate.now().toString)
+        logger.info(s"Dropboxへの出力を行います: ${tPath}")
+        new DropboxNovelDataAccessor(tDropboxClient, tPath)
+    }
+
+    val tInitMap = (tOutputDataAccessor.exists().runSyncUnsafe(), aArg.overwrite) match {
       case (false, _)       => Map.empty[String, NarouNovel]
-      case (true, Fail)     => throw new RuntimeException(s"出力先がすでに存在します: ${tOutput.getCanonicalPath}")
+      case (true, Fail)     => throw new RuntimeException(s"出力先がすでに存在します: ${tOutput}")
       case (true, Recreate) =>
         logger.info("既存の出力ファイルを消して再生成します")
         Map.empty[String, NarouNovel]
       case (true, Update)   =>
         logger.info("既存の出力ファイルに情報を追加します")
-        loadFrom(tOutput)
+        loadFrom(tOutputDataAccessor)
     }
 
     //    val tCollector = new NovelCollector(aArg.intervalMillis)
-    val tCollector     = new AllNovelCollector(aArg.intervalMillis)
-    val tTempOutputDir = Files.createTempDirectory("novel_list").toFile
-    val tInitSize      = tInitMap.size
+    val tCollector = new AllNovelCollector(aArg.intervalMillis)
+    val tInitSize  = tInitMap.size
     logger.info(s"小説リストの収集を開始します。 初期ノベル数: ${tInitSize}")
-    try {
-      val tResultMap  = tCollector
-        .collect(NarouClientBuilder.init)
-        .take(aArg.limit)
-        .foldLeft(tInitMap) {
-          import jp.seraphr.narou.model.NarouNovelConverter._
-          (m, n) => m.updated(n.getNcode, n.asScala)
-        }
-      val tResultSize = tResultMap.size
-      logger.info(s"収集が完了しました。 最終ノベル数: ${tResultSize}  増加ノベル数: ${tResultSize - tInitSize}")
-      logger.info(s"一時ファイルへの書き込みを開始します")
 
-      val tConditions = Seq(
-        NovelCondition.all,
-        NovelCondition.length100k,
-        NovelCondition.length300k and NovelCondition.bookmark1000,
-        NovelCondition.length500k and NovelCondition.bookmark1000,
-        NovelCondition.length100k and NovelCondition.bookmark1000
-      )
+    import jp.seraphr.narou.model.NarouNovelConverter._
+    val tResultMap  = tCollector
+      .collect(NarouClientBuilder.init)
+      .map(_.asScala)
+      .filter(tNovelPredicate)
+      .take(aArg.limit)
+      .foldLeft(tInitMap) { (m, n) =>
+        m.updated(n.ncode, n)
+      }
+    val tResultSize = tResultMap.size
+    logger.info(s"収集が完了しました。 最終ノベル数: ${tResultSize}  増加ノベル数: ${tResultSize - tInitSize}")
 
-      new ExtractedNarouNovelsWriter(tTempOutputDir, tConditions, aArg.novelsPerFile).loan { tWriter =>
-        tResultMap
-          .values
-          .foreach { tNovel =>
-            tWriter.write(tNovel)
-          }
-      }
-      logger.info(s"一時ファイルへの書き込みを完了しました。")
-      logger.info(s"出力ファイルの差し替えを行います。")
-      if (tOutput.exists()) {
-        val tBackupDir = new File(tOutput.getParentFile, s"${tOutput.getName}.bak")
-        if (tBackupDir.exists()) {
-          FileUtils.deleteQuietly(tBackupDir)
-        }
-        FileUtils.moveDirectory(tOutput, tBackupDir)
-        logger.info(s"旧出力ファイルを、バックアップしました: ${tBackupDir.getCanonicalPath}")
-      }
-      FileUtils.moveDirectory(tTempOutputDir, tOutput)
-      logger.info(s"出力が完了しました。")
-    } finally {
-      FileUtils.deleteQuietly(tTempOutputDir)
-    }
+    val tNovels = Observable.fromIterable(tResultMap.values)
+
+    val tTask = for {
+      tBackup      <- tOutputDataAccessor.backup(".bak")
+      _             = tBackup.foreach { tBackupPath =>
+                        logger.info(s"既存データをバックアップしました: ${tBackupPath}")
+                      }
+      tNovelsWriter = new ExtractedNarouNovelsWriter(tOutputDataAccessor, tConditions, aArg.novelsPerFile)
+      _             = logger.info(s"出力を開始します。")
+      _            <- tNovelsWriter.write(tNovels)
+      _             = logger.info(s"出力が完了しました。")
+    } yield ()
+
+    tTask.runSyncUnsafe()
   }
 
   class OptionParser(aDefaultArg: CollectNovelCommandArg) extends CommandArgParser[CollectNovelCommandArg] {
     def parse(aArgs: Seq[String]): Option[CollectNovelCommandArg] = this.parse(aArgs, aDefaultArg)
 
-    opt[File]('o', "out")
+    implicit private val mReadOutput: Read[OutputOption] = {
+      val tLocalPrefix   = "local:"
+      val tDropboxPrefix = "dropbox:"
+      Read.reads { tInput =>
+        if (tInput.startsWith(tLocalPrefix)) {
+          val tPath = tInput.substring(tLocalPrefix.length)
+          if (tPath.isEmpty) throw new RuntimeException("pathは指定できません")
+          Local(new File(tPath))
+        } else if (tInput.startsWith(tDropboxPrefix)) {
+          val tPath = tInput.substring(tDropboxPrefix.length)
+          if (tPath.isEmpty) throw new RuntimeException("pathは指定できません")
+          Dropbox(Some(tPath))
+        } else if (tInput == "dropbox") {
+          Dropbox(None)
+        } else {
+          throw new RuntimeException(s"invalid input(=${tInput}) for out")
+        }
+      }
+    }
+
+    opt[OutputOption]('o', "out")
       .optional()
-      .text(s"出力先ファイルパスを指定します。 省略した場合は、${aDefaultArg.output}です")
+      .valueName(s"<local:$${path} | dropbox[:$${path}]>")
+      .text(s"""出力先ファイルパスを指定します。 省略した場合は、${aDefaultArg.output}です。
+           |dropboxのパスを省略した場合、実行日の日付のディレクトリを使用します。
+           |""".stripMargin)
       .action((f, c) => c.copy(output = f))
 
     opt[Long]('i', "interval")
@@ -159,6 +201,8 @@ class CollectNovelCommand(aDefaultArg: CollectNovelCommandArg) extends Command w
       .valueName("recreate | update | fail")
       .text(s"出力先ファイルが既にある場合の動作を指定します。 省略した場合は、${aDefaultArg.overwrite.text}です")
       .action((o, c) => c.copy(overwrite = o))
+
+    opt[Boolean]('a', "withAll").optional().text("指定した場合、全ノベルデータを出力に加えます").action((o, c) => c.copy(withAll = o))
   }
 }
 
@@ -182,11 +226,24 @@ object CollectNovelCommand {
     override val text: String = "fail"
   }
 
+  sealed trait OutputOption
+  case class Local(file: File)             extends OutputOption {
+    override def toString = s"local:${file}"
+  }
+  case class Dropbox(path: Option[String]) extends OutputOption {
+    override def toString: String = {
+      val tPath = path.fold("")(":" + _)
+      s"dropbox${tPath}"
+    }
+
+  }
+
   case class CollectNovelCommandArg(
-      output: File,
+      output: OutputOption,
       overwrite: OverwriteOption,
       intervalMillis: Long,
       limit: Int,
-      novelsPerFile: Int
+      novelsPerFile: Int,
+      withAll: Boolean
   )
 }

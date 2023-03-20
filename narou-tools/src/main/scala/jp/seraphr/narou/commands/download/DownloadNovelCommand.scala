@@ -19,10 +19,11 @@ import narou4j.entities.Novel
 /**
  */
 class DownloadNovelCommand(aDefaultArg: DownloadNovelCommandArg) extends Command with HasLogger {
-  private val mParser                             = new OptionParser(aDefaultArg)
-  override val name                               = "download"
-  override val description                        = "collectコマンドにより収集した小説一覧を元に、小説をダウンロードし、ファイルに保存します"
-  override val version                            = "0.1.0"
+  override val name        = "download"
+  override val description = "collectコマンドにより収集した小説一覧を元に、小説をダウンロードし、ファイルに保存します"
+  override val version     = "0.1.0"
+  private val mParser      = new OptionParser(aDefaultArg)
+
   override def run(aArgs: Seq[String]): Try[Unit] = {
     mParser.parse(aArgs) match {
       case Some(tArgs) => download(tArgs)

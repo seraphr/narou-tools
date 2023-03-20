@@ -8,6 +8,7 @@ import jp.seraphr.narou.model.{ NarouNovel, NarouNovelsMeta, NovelCondition }
 import jp.seraphr.narou.webui.ScatterData.{ RangeFilter, RepresentativeData }
 import jp.seraphr.narou.webui.action.Actions
 import jp.seraphr.narou.webui.component.NovelDrawer
+import jp.seraphr.narou.webui.state.LazyLoad
 
 import japgolly.scalajs.react._
 import japgolly.scalajs.react.vdom.html_<^._
@@ -23,11 +24,12 @@ object RootView {
   @JSExportAll
   case class Props(
       actions: Actions,
-      allMeta: Map[String, NarouNovelsMeta],
+      allDirs: LazyLoad[Seq[String]],
+      selectedDir: Option[String],
+      allMeta: LazyLoad[Map[String, NarouNovelsMeta]],
       selectedNovels: Seq[NarouNovel],
       selectedNovel: Option[NarouNovel]
   )
-  case class State(novels: Seq[NarouNovel])
 
   def apply() = component()
 
@@ -73,11 +75,20 @@ object RootView {
     ScalaComponent
       .builder[Props]("RootView")
       .stateless
-      .render_P { case Props(actions, allMeta, novels, selectedNovel) =>
+      .render_P { case Props(actions, dirNames, _, allMeta, novels, selectedNovel) =>
         import typings.antd.components._
         import typings.antd.components.Select.Option
 
-        val tSelectOptions = allMeta
+        val tSelectDirOptions = dirNames
+          .getOrElse(Seq.empty)
+          .sorted
+          .reverse
+          .map { tName =>
+            Option(tName)(tName).build
+          }
+
+        val tSelectMetaOptions = allMeta
+          .getOrElse(Map.empty)
           .toSeq
           .sortBy(_._2.novelCount)
           .map { case (tId, tMeta) =>
@@ -87,8 +98,15 @@ object RootView {
         <.div(
           Select[String]()
             .dropdownMatchSelectWidth(false)
+            .loading(dirNames.isLoading)
+            .onSelect((tValue, _) => Callback(actions.selectDir(tValue)))(
+              tSelectDirOptions: _*
+            ),
+          Select[String]()
+            .dropdownMatchSelectWidth(false)
+            .loading(allMeta.isLoading)
             .onSelect((tValue, _) => Callback(actions.selectMeta(tValue)))(
-              tSelectOptions: _*
+              tSelectMetaOptions: _*
             ),
           <.div(s"loaded novel count = ${novels.size}"),
           <.div("サンプリング"),
@@ -111,7 +129,14 @@ object RootView {
       .build
 
   val storeWrapper = new StoreWrapper(StoreProvider.context)(s =>
-    Props(s.actions, s.state.allMeta, s.state.selected.novels, s.state.selected.novel)
+    Props(
+      s.actions,
+      s.state.dirNames,
+      s.state.selected.dir,
+      s.state.allMeta,
+      s.state.selected.novels,
+      s.state.selected.novel
+    )
   )
 
   val component = storeWrapper.wrap(innerComponent)

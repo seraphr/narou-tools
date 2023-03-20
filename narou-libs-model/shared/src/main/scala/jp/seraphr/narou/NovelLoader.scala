@@ -1,7 +1,5 @@
 package jp.seraphr.narou
 
-import scala.collection.immutable.ArraySeq
-
 import jp.seraphr.narou.model.{ ExtractedNarouNovelsMeta, NarouNovel, NarouNovelsMeta }
 
 import monix.eval.Task
@@ -10,13 +8,7 @@ import monix.reactive.Observable
 object NovelFileNames {
   val extractedMetaFile      = "extracted_novel_list.meta.json"
   val metaFile               = "novel_list.meta.json"
-  def novelFile(aIndex: Int) = s"novel_list_${aIndex}.jsonl"
-}
-
-trait NovelDataAccessor {
-  val extractedMeta: Task[String]
-  def metadata(aDir: String): Task[String]
-  def getNovel(aDir: String, aFile: String): Task[String]
+  def novelFile(aIndex: Int) = f"novel_list_${aIndex}%05d.jsonl"
 }
 
 trait ExtractedNovelLoader {
@@ -39,7 +31,7 @@ import jp.seraphr.narou.json.NarouNovelFormats._
 
 import io.circe.parser.decode
 
-class DefaultExtractedNovelLoader(aAccessor: NovelDataAccessor) extends ExtractedNovelLoader {
+class DefaultExtractedNovelLoader(aAccessor: NovelDataReader) extends ExtractedNovelLoader {
   override val metadata: Task[ExtractedNarouNovelsMeta] = aAccessor
     .extractedMeta
     .flatMap(s => Task.fromEither(decode[ExtractedNarouNovelsMeta](s)))
@@ -63,9 +55,9 @@ trait NovelLoader {
   val novels: Observable[NarouNovel]
 }
 
-class DefaultNovelLoader(aAccessor: NovelDataAccessor, aExtractedDir: String) extends NovelLoader {
+class DefaultNovelLoader(aAccessor: NovelDataReader, aExtractedDir: String) extends NovelLoader {
 
-  val dir                                      = aExtractedDir
+  private val dir                              = aExtractedDir
   override val metadata: Task[NarouNovelsMeta] = aAccessor
     .metadata(aExtractedDir)
     .flatMap(s => Task.fromEither(decode[NarouNovelsMeta](s)))
@@ -75,9 +67,8 @@ class DefaultNovelLoader(aAccessor: NovelDataAccessor, aExtractedDir: String) ex
   override val novels: Observable[NarouNovel] = {
     Observable
       .fromTask(metadata)
-      .flatMap(meta => Observable(meta.novelFiles: _*))
-      .mapEval(aAccessor.getNovel(aExtractedDir, _))
-      .flatMap(tFileBody => Observable(ArraySeq.unsafeWrapArray(tFileBody.split("\n")): _*))
+      .flatMap(meta => Observable.fromIterable(meta.novelFiles))
+      .flatMap(aAccessor.getNovel(aExtractedDir, _))
       .mapEvalF(decode[NarouNovel])
   }
 

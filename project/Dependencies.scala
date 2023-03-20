@@ -13,14 +13,15 @@ object Dependencies {
   val monocleVersion       = "3.1.0"
 
   object jvm {
-    val scalaTest     = "org.scalatest"    %% "scalatest"       % scalatestVersion
-    val narou4j       = "net.nashihara"     % "narou4j"         % "1.2.6"
-    val commonsIO     = "commons-io"        % "commons-io"      % "2.11.0"
-    val scopt         = "com.github.scopt" %% "scopt"           % "4.1.0"
-    val slf4j         = "org.slf4j"         % "slf4j-api"       % "1.7.+"
-    val logback       = "ch.qos.logback"    % "logback-classic" % "1.4.3"
-    val monix         = "io.monix"         %% "monix"           % monixVersion
-    val monixReactive = "io.monix"         %% "monix-reactive"  % monixVersion
+    val scalaTest     = "org.scalatest"    %% "scalatest"        % scalatestVersion
+    val narou4j       = "net.nashihara"     % "narou4j"          % "1.2.6"
+    val commonsIO     = "commons-io"        % "commons-io"       % "2.11.0"
+    val scopt         = "com.github.scopt" %% "scopt"            % "4.1.0"
+    val slf4j         = "org.slf4j"         % "slf4j-api"        % "1.7.+"
+    val logback       = "ch.qos.logback"    % "logback-classic"  % "1.4.3"
+    val monix         = "io.monix"         %% "monix"            % monixVersion
+    val monixReactive = "io.monix"         %% "monix-reactive"   % monixVersion
+    val dropbox       = "com.dropbox.core"  % "dropbox-core-sdk" % "5.3.0"
 
     val circe = Seq(
       "io.circe" %% "circe-core",
@@ -44,6 +45,7 @@ object Dependencies {
     val reactjs       = Def.setting("com.github.japgolly.scalajs-react" %%% "core" % "2.1.1")
     val reactjsExtra  = Def.setting("com.github.japgolly.scalajs-react" %%% "extra" % "2.1.1")
     val monixReactive = Def.setting("io.monix" %%% "monix-reactive" % monixVersion)
+    val monoids       = Def.setting("org.typelevel" %%% "monoids" % "0.2.0")
     val circe         = Def.setting(
       Seq(
         "io.circe" %%% "circe-core",
@@ -63,11 +65,13 @@ object Dependencies {
   }
 
   object js {
-    val react        = "react"            -> reactVersion
-    val reactDom     = "react-dom"        -> reactVersion
-    val reactDomType = "@types/react-dom" -> "16.9.13"
-    val recharts     = "recharts"         -> "2.0.9"
-    val antd         = "antd"             -> "4.16.6"
+    val react                          = "react"                        -> reactVersion
+    val reactDom                       = "react-dom"                    -> reactVersion
+    val reactDomType                   = "@types/react-dom"             -> "16.9.13"
+    val recharts                       = "recharts"                     -> "2.0.9"
+    val antd                           = "antd"                         -> "4.16.6"
+    val dropbox                        = "dropbox"                      -> "10.32.0"
+    val `node-polyfill-webpack-plugin` = "node-polyfill-webpack-plugin" -> "2.0.1"
 
     val `css-loader`   = "css-loader"   -> "3.4.2"
     val `style-loader` = "style-loader" -> "1.1.3"

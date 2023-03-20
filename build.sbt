@@ -42,22 +42,31 @@ val commonSettings = Def.settings(
 lazy val `narou-libs-model` = crossProject(JVMPlatform, JSPlatform)
   .crossType(CrossType.Full)
   .in(file("narou-libs-model"))
+  .jsConfigure(
+    _.enablePlugins(ScalaJSBundlerPlugin).enablePlugins(ScalablyTypedConverterPlugin)
+  )
   .settings(
     libraryDependencies ++= scalajs.circe.value,
     libraryDependencies ++= Seq(
-      scalajs.monixReactive.value
+      scalajs.monixReactive.value,
+      scalajs.monoids.value
     )
   )
   .settings(commonSettings)
   .jvmSettings(
     libraryDependencies ++= Seq(
       jvm.narou4j,
-      jvm.scalajsStubs
+      jvm.commonsIO,
+      jvm.scalajsStubs,
+      jvm.dropbox
     )
   )
   .jsSettings(
     libraryDependencies ++= Seq(
       scalajs.scalajsDom.value
+    ),
+    Compile / npmDependencies ++= Seq(
+      js.dropbox
     )
   )
 
@@ -120,10 +129,14 @@ lazy val `narou-webui` = (project in file("narou-webui"))
       js.reactDom,
       js.reactDomType,
       js.recharts,
-      js.antd
+      js.antd,
+      js.dropbox,
+      js.`node-polyfill-webpack-plugin`
     ),
     stFlavour                        := Flavour.ScalajsReact,
+    stTypescriptVersion              := "4.8.4",
     stIgnore ++= List(
+      "type-fest" // なんかエラーになるので、とりあえず取り除いておく
     ),
     // css-load設定 fileとかurlは要らんが、scalablytypedデモプロジェクトからそのまま持ってきた
     webpackConfigFile                := Some(baseDirectory.value / "custom-scalajs.webpack.config"),

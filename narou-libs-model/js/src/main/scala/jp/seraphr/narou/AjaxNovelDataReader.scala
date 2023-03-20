@@ -5,9 +5,10 @@ import java.net.URI
 import org.scalajs.dom.RequestInit
 
 import monix.eval.Task
+import monix.reactive.Observable
 import scalajs.js
 
-class AjaxNovelDataAccessor(aBaseUrl: URI) extends NovelDataAccessor {
+class AjaxNovelDataReader(aBaseUrl: URI) extends NovelDataReader {
   private val mExtractedMetaUrl                     = aBaseUrl.resolve(NovelFileNames.extractedMetaFile)
   private def metaUrl(aDir: String)                 = aBaseUrl.resolve(s"${aDir}/").resolve(NovelFileNames.metaFile)
   private def novelUrl(aDir: String, aFile: String) = aBaseUrl.resolve(s"${aDir}/").resolve(aFile)
@@ -29,7 +30,15 @@ class AjaxNovelDataAccessor(aBaseUrl: URI) extends NovelDataAccessor {
       .flatMap(_.text().toTask)
   }
 
-  override val extractedMeta: Task[String]                         = get(mExtractedMetaUrl)
-  override def metadata(aDir: String): Task[String]                = get(metaUrl(aDir))
-  override def getNovel(aDir: String, aFile: String): Task[String] = get(novelUrl(aDir, aFile))
+  override def exists(): Task[Boolean] = Task.raiseError(new RuntimeException("AjaxNovelDataReaderでは、existsは現状未実装です"))
+
+  override val extractedMeta: Task[String]                               = get(mExtractedMetaUrl)
+  override def metadata(aDir: String): Task[String]                      = get(metaUrl(aDir))
+  override def getNovel(aDir: String, aFile: String): Observable[String] = {
+    for {
+      tString <- Observable.fromTask(get(novelUrl(aDir, aFile)))
+      tLine   <- Observable.fromIterable(tString.split('\n'))
+    } yield tLine
+  }
+
 }
