@@ -12,14 +12,28 @@ object NarouWebAppStore {
   val emptyStore = NarouWebAppStore(NopActions, AppState.emptyState)
 }
 
+sealed trait LazyLoad[+A] {
+  def getOrElse[B >: A](emptyValue: => B): B = this match {
+    case LazyLoad.Init | LazyLoad.Loading => emptyValue
+    case LazyLoad.Loaded(value)           => value
+  }
+
+  lazy val isLoading: Boolean = this == LazyLoad.Loading
+}
+object LazyLoad           {
+  case object Init               extends LazyLoad[Nothing]
+  case object Loading            extends LazyLoad[Nothing]
+  case class Loaded[A](value: A) extends LazyLoad[A]
+}
+
 case class AppState(
-    dirNames: Seq[String],
-    allMeta: Map[String, NarouNovelsMeta],
+    dirNames: LazyLoad[Seq[String]],
+    allMeta: LazyLoad[Map[String, NarouNovelsMeta]],
     selected: Selected
 )
 
 object AppState {
-  val emptyState = AppState(Seq.empty, Map.empty, Selected(None, None, Seq.empty, None))
+  val emptyState = AppState(LazyLoad.Init, LazyLoad.Init, Selected(None, None, Seq.empty, None))
 }
 
 case class Selected(

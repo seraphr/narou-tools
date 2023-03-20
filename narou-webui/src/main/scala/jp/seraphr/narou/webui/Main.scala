@@ -13,7 +13,7 @@ import jp.seraphr.narou.{
   ExtractedNovelLoader
 }
 import jp.seraphr.narou.model.{ Genre, NarouNovel, NovelType, UploadType }
-import jp.seraphr.narou.webui.state.AppState
+import jp.seraphr.narou.webui.state.{ AppState, LazyLoad }
 
 import monix.eval.Task
 import typings.dropbox.mod.{ Dropbox, DropboxOptions }
@@ -78,7 +78,8 @@ object Main {
     val tNode = dom.document.getElementById("main")
 
     mLoaders.foreach { tLoaders =>
-      StoreProvider(AppState.emptyState.copy(dirNames = tLoaders.keys.toSeq), tLoaders)(RootView()).renderIntoDOM(tNode)
+      StoreProvider(AppState.emptyState.copy(dirNames = LazyLoad.Loaded(tLoaders.keys.toSeq)), tLoaders)(RootView())
+        .renderIntoDOM(tNode)
     }
   }
 

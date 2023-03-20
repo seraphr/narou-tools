@@ -1,6 +1,9 @@
 package jp.seraphr.narou
 
 import java.util.Date
+import java.util.concurrent.TimeUnit
+
+import scala.concurrent.duration.FiniteDuration
 
 import jp.seraphr.narou.model.{ ExtractedNarouNovelsMeta, NarouNovel, NarouNovelsMeta }
 
@@ -17,6 +20,7 @@ class DummyExtractedNovelLoader(data: Map[String, NovelLoader]) extends Extracte
       tLoader.metadata.map(tDir -> _)
     }
     .map(_.toMap)
+    .guarantee(Task.sleep(FiniteDuration(2, TimeUnit.SECONDS)))
 
   override def loader(aDir: String): Task[NovelLoader] = Task.pure(data(aDir))
 }

@@ -2,7 +2,7 @@ package jp.seraphr.narou.webui.action
 
 import jp.seraphr.narou.ExtractedNovelLoader
 import jp.seraphr.narou.model.NarouNovel
-import jp.seraphr.narou.webui.state.{ AppState, Selected }
+import jp.seraphr.narou.webui.state.{ AppState, LazyLoad, Selected }
 import jp.seraphr.util.StateApi
 
 import cats.data.OptionT
@@ -39,21 +39,19 @@ class DefaultActions(loaders: Map[String, ExtractedNovelLoader], runStateApi: (S
   }
 
   override def selectDir(aDirName: String): Unit = runStateApi { stateApi =>
-    val tLoader = loaders(aDirName)
-    tLoader
-      .allMetadata
-      .flatMap { tAllMeta =>
-        val tSetDir     = Lens.selectedDir.replace(Some(aDirName))
-        val tSetAllMeta = Lens.allMeta.replace(tAllMeta)
-
-        stateApi.modState(tSetDir andThen tSetAllMeta)
-      }
+    for {
+      _          <- stateApi.modState(Lens.allMeta.replace(LazyLoad.Loading))
+      tAllMeta   <- loaders(aDirName).allMetadata
+      tSetDir     = Lens.selectedDir.replace(Some(aDirName))
+      tSetAllMeta = Lens.allMeta.replace(LazyLoad.Loaded(tAllMeta))
+      _          <- stateApi.modState(tSetDir andThen tSetAllMeta)
+    } yield ()
   }
 
   override def selectMeta(aId: String): Unit = runStateApi { stateApi =>
     stateApi
       .modStateTaskOpt { tState =>
-        val tMeta    = tState.allMeta.get(aId)
+        val tMeta    = tState.allMeta.getOrElse(Map.empty).get(aId)
         val tLoader  = tState.selected.dir.flatMap(loaders.get)
         val tTaskOpt = (tLoader zip tMeta).traverse { case (tLoader, _) =>
           tLoader.load(aId).toListL.map(Lens.selectedNovels.replace(_))
