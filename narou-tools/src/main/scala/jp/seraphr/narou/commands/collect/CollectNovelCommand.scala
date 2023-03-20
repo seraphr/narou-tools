@@ -33,10 +33,11 @@ import scopt.Read
 class CollectNovelCommand(aDefaultArg: CollectNovelCommandArg)(implicit scheduler: Scheduler)
     extends Command
     with HasLogger {
-  private val mParser                             = new OptionParser(aDefaultArg)
-  override val name                               = "collect"
-  override val description                        = "なろう小説の一覧を収集し、ファイルに保存します"
-  override val version                            = "0.1.0"
+  override val name        = "collect"
+  override val description = "なろう小説の一覧を収集し、ファイル or Dropboxに保存します"
+  override val version     = "0.1.0"
+  private val mParser      = new OptionParser(aDefaultArg)
+
   override def run(aArgs: Seq[String]): Try[Unit] = {
     mParser.parse(aArgs) match {
       case Some(tArgs) => collect(tArgs)

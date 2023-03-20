@@ -14,6 +14,7 @@ trait Command { self =>
     override def errorOnUnknownArgument: Boolean   = true
     override def showUsageOnError: Option[Boolean] = Some(true)
     head(self.name, self.version)
+    note(self.description)
 
     help("help").abbr("h")
   }
