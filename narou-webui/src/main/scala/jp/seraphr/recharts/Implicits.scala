@@ -1,7 +1,6 @@
 package jp.seraphr.recharts
 
 import scala.scalajs.js
-import scala.scalajs.js.|
 
 import typings.recharts.{ components, typesCartesianScatterMod => scatterMod }
 import typings.recharts.typesCartesianScatterMod.ScatterPointItem
