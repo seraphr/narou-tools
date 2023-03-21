@@ -86,7 +86,7 @@ object RootView {
           .sorted
           .reverse
           .map { tName =>
-            Option(tName)(tName).build
+            Option.value(tName)(tName).build
           }
 
         val tSelectMetaOptions = allMeta
@@ -94,20 +94,20 @@ object RootView {
           .toSeq
           .sortBy(_._2.novelCount)
           .map { case (tId, tMeta) =>
-            Option(tId)(s"${tMeta.name}(${tMeta.novelCount})").build
+            Option.value(tId)(s"${tMeta.name}(${tMeta.novelCount})").build
           }
 
         <.div(
-          Select[String]()
+          Select()
             .dropdownMatchSelectWidth(false)
             .loading(dirNames.isLoading)
-            .onSelect((tValue, _) => Callback(actions.selectDir(tValue)))(
+            .onSelect((tValue, _) => Callback(actions.selectDir(tValue.toString)))(
               tSelectDirOptions: _*
             ),
-          Select[String]()
+          Select()
             .dropdownMatchSelectWidth(false)
             .loading(allMeta.isLoading)
-            .onSelect((tValue, _) => Callback(actions.selectMeta(tValue)))(
+            .onSelect((tValue, _) => Callback(actions.selectMeta(tValue.toString)))(
               tSelectMetaOptions: _*
             ),
           <.div(s"loaded novel count = ${novels.size}"),
