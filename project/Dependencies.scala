@@ -9,7 +9,6 @@ object Dependencies {
   val scalatestVersion     = "3.2.15"
   val scalatestplusVersion = s"${scalatestVersion}.0"
   val circeVersion         = "0.14.5"
-  val circeExtrasVersion   = "0.14.3"
   val monixVersion         = "3.4.1"
   val monocleVersion       = "3.2.0"
 
@@ -28,9 +27,7 @@ object Dependencies {
       "io.circe" %% "circe-core",
       "io.circe" %% "circe-generic",
       "io.circe" %% "circe-parser"
-    ).map(_ % circeVersion) ++ Seq(
-      "io.circe" %% "circe-generic-extras" % circeExtrasVersion
-    )
+    ).map(_ % circeVersion)
 
     val scalajsStubs = "org.scala-js" %% "scalajs-stubs" % "1.1.0" % "provided"
     val monocle      = Seq(
@@ -53,9 +50,7 @@ object Dependencies {
         "io.circe" %%% "circe-core",
         "io.circe" %%% "circe-generic",
         "io.circe" %%% "circe-parser"
-      ).map(_ % circeVersion) ++ Seq(
-        "io.circe" %%% "circe-generic-extras" % circeExtrasVersion
-      )
+      ).map(_ % circeVersion)
     )
 
     val monocle = Def.setting(

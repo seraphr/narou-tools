@@ -32,7 +32,7 @@ class DownloadNovelCommand(aDefaultArg: DownloadNovelCommandArg) extends Command
   }
 
   implicit class LoanPattern[A <: { def close(): Unit }](a: A) extends HasLogger {
-    import scala.language.reflectiveCalls
+    import scala.reflect.Selectable.reflectiveSelectable
     def loan[B](f: A => B): B = {
       try f(a)
       finally
@@ -45,7 +45,10 @@ class DownloadNovelCommand(aDefaultArg: DownloadNovelCommandArg) extends Command
   }
 
   implicit class IteratorOps[A](itr: Iterator[A]) {
-    def tee[U](f: A => U): Iterator[A] = itr.map { a => f(a); a }
+    def tee[U](f: A => U): Iterator[A] = itr.map { a =>
+      f(a); a
+    }
+
   }
 
   import scala.concurrent.ExecutionContext.Implicits.global

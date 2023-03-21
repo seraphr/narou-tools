@@ -46,7 +46,7 @@ class CollectNovelCommand(aDefaultArg: CollectNovelCommandArg)(implicit schedule
   }
 
   implicit class LoanPattern[A <: { def close(): Unit }](a: A) extends HasLogger {
-    import scala.language.reflectiveCalls
+    import scala.reflect.Selectable.reflectiveSelectable
     def loan[B](f: A => B): B = {
       try f(a)
       finally

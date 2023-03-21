@@ -24,7 +24,7 @@ class ExtractedNarouNovelsWriter(aDataWriter: NovelDataWriter, aConditions: Seq[
       .publishSelector { tHotObservable =>
         Observable(mDefaultWriters.map { tWriter =>
           Observable.fromTask(tWriter.write(tHotObservable))
-        }: _*).merge
+        }: _*).mergeMap(identity) // mergeと等価なんだけど、scala 3.2.2 にしたら何故かコンパイルが通らん…
       }
       .completedL
       .doOnFinish {
