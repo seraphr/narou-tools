@@ -66,7 +66,8 @@ lazy val `narou-libs-model` = crossProject(JVMPlatform, JSPlatform)
     Compile / npmDependencies ++= Seq(
       js.dropbox
     ),
-    webpack / version := Dependencies.js.webpack
+    webpack / version   := Dependencies.js.webpack,
+    stTypescriptVersion := Dependencies.js.typescript
   )
 
 lazy val modelJVM = `narou-libs-model`.jvm
@@ -133,7 +134,7 @@ lazy val `narou-webui` = (project in file("narou-webui"))
       js.`node-polyfill-webpack-plugin`
     ),
     stFlavour                        := Flavour.ScalajsReact,
-    stTypescriptVersion              := "4.8.4",
+    stTypescriptVersion              := Dependencies.js.typescript,
     stIgnore ++= List(
       "type-fest" // なんかエラーになるので、とりあえず取り除いておく
     ),

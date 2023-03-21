@@ -67,7 +67,7 @@ object Dependencies {
     val reactDom                       = "react-dom"                    -> reactVersion
     val reactDomType                   = "@types/react-dom"             -> "17.0.11"
     val recharts                       = "recharts"                     -> "2.5.0"
-    val antd                           = "antd"                         -> "4.16.6"
+    val antd                           = "antd"                         -> "4.24.8"
     val dropbox                        = "dropbox"                      -> "10.34.0"
     val `node-polyfill-webpack-plugin` = "node-polyfill-webpack-plugin" -> "2.0.1"
 
@@ -76,6 +76,7 @@ object Dependencies {
     val `file-loader`  = "file-loader"  -> "6.2.0"
     val `url-loader`   = "url-loader"   -> "4.1.1"
 
-    val webpack = "5.76.2"
+    val webpack    = "5.76.2"
+    val typescript = "5.0.2"
   }
 }
