@@ -6,9 +6,9 @@ import monix.eval.Task
 import monix.reactive.Observable
 
 object NovelFileNames {
-  val extractedMetaFile      = "extracted_novel_list.meta.json"
-  val metaFile               = "novel_list.meta.json"
-  def novelFile(aIndex: Int) = f"novel_list_${aIndex}%05d.jsonl"
+  val extractedMetaFile              = "extracted_novel_list.meta.json"
+  val metaFile                       = "novel_list.meta.json"
+  def novelFile(aIndex: Int): String = f"novel_list_${aIndex}%05d.jsonl"
 }
 
 trait ExtractedNovelLoader {

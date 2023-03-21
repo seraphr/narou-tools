@@ -45,7 +45,8 @@ class SandboxCommand(aDefaultArg: SandboxCommandArg) extends Command with HasLog
     //    findUploadType0(tNovels)
   }
 
-  @nowarn("cat=unused")
+  // unusedは scala 3.3で復活する
+  //  @nowarn("cat=unused")
   private def findUploadType0(aNovels: Vector[Novel]): Unit = {
     val tFiltered = aNovels.filter(_.getUploadType == 0)
     logger.info(s"count = ${tFiltered.size}")
@@ -58,7 +59,8 @@ class SandboxCommand(aDefaultArg: SandboxCommandArg) extends Command with HasLog
       .foreach(n => logger.info(s"ncode=${n.getNcode}, length=${n.getNumberOfChar}"))
   }
 
-  @nowarn("cat=unused")
+  // unusedは scala 3.3で復活する
+  //  @nowarn("cat=unused")
   private def showKeywords(aNovels: Vector[Novel]): Unit = {
     logger.info(s"keyword情報取得")
     val tSortedKeywords = aNovels

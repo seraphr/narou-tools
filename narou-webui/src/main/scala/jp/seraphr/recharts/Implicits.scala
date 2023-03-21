@@ -47,9 +47,10 @@ object Implicits {
 
   }
 
-  implicit class RefOpts[B](private val b: B)                         extends AnyVal {
-    def withOps[A](v: js.UndefOr[A])(set: B => A => B): B = v.fold(b)(set(b))
+  implicit class RefOpts[B](private val b: B) extends AnyVal {
+    inline def withOps[A](v: js.UndefOr[A])(set: (B, A) => B): B = v.fold(b)(set(b, _))
   }
+
   implicit class ReferenceDotOps(val d: components.ReferenceDot.type) extends AnyVal {
     def create(
         className: js.UndefOr[String],
@@ -57,7 +58,7 @@ object Implicits {
         cy: js.UndefOr[Double | String],
         r: js.UndefOr[Double | String]
     ) = {
-      d().withOps(className)(_.className).withOps(cx)(_.cx).withOps(cy)(_.cy).withOps(r)(_.r)
+      d().withOps(className)(_.className(_)).withOps(cx)(_.cx(_)).withOps(cy)(_.cy(_)).withOps(r)(_.r(_))
     }
 
   }

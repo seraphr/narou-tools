@@ -22,11 +22,9 @@ val commonSettings = Def.settings(
       "UTF-8",
       "-feature",
       "-deprecation",
-      "-unchecked",
-      // byname-implicitは https://github.com/scala/bug/issues/12072 の問題の抑止のため削る
-      "-Xlint:_,-missing-interpolator,-byname-implicit",
-      "-Ywarn-dead-code",
-      "-Ywarn-unused:patvars"
+      "-unchecked"
+      // -Wunused scala 3.3.0 から対応されそう。 patvarsはunsafe-warn-patvars になりそうかな？
+//      "-Wunused:patvars,imports,locals,privates,params"
     )
     val tInCI = Seq(
       "-Werror"

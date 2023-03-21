@@ -4,21 +4,19 @@ import scala.scalajs.js.annotation.JSExportAll
 
 case class Genre(id: Int, text: String)
 
-sealed abstract class NovelType(val id: Int)
-object NovelType {
-  case object Serially   extends NovelType(1)
-  case object ShortStory extends NovelType(2)
-  case class Etc(i: Int) extends NovelType(i)
+enum NovelType(val id: Int) {
+  case Serially    extends NovelType(1)
+  case ShortStory  extends NovelType(2)
+  case Etc(i: Int) extends NovelType(i)
 }
 
-sealed trait UploadType
-object UploadType {
-  case object CellularPhone extends UploadType
-  case object PC            extends UploadType
-  case object Both          extends UploadType
+enum UploadType {
+  case CellularPhone extends UploadType
+  case PC            extends UploadType
+  case Both          extends UploadType
 
   /** 更新されてない、古い小説で0になっているものがあるっぽい */
-  case class Etc(i: Int) extends UploadType
+  case Etc(i: Int) extends UploadType
 }
 
 /**

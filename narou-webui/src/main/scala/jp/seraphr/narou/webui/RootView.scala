@@ -18,7 +18,8 @@ import japgolly.scalajs.react.vdom.html_<^._
 object CSS extends js.Any
 
 object RootView {
-  @nowarn("cat=unused")
+  // unusedは scala 3.3で復活する
+  //  @nowarn("cat=unused")
   private val css = CSS
 
   @JSExportAll
@@ -75,6 +76,7 @@ object RootView {
     ScalaComponent
       .builder[Props]("RootView")
       .stateless
+      .noBackend
       .render_P { case Props(actions, dirNames, _, allMeta, novels, selectedNovel) =>
         import typings.antd.components._
         import typings.antd.components.Select.Option

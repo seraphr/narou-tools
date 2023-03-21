@@ -14,7 +14,11 @@ class ObservableUtilsTest extends AsyncFreeSpec with Matchers {
     "grouped" - {
       "n個ずつの要素をもつObservableになること" in {
         val tBaseList = List.iterate(0, 10)(_ + 1)
-        val tObs      = Observable.fromIterable(tBaseList).map { i => println(s"gen: ${i}"); i }
+        val tObs      = Observable
+          .fromIterable(tBaseList)
+          .map { i =>
+            println(s"gen: ${i}"); i
+          }
 
         val tActualFuture = tObs.grouped(3).mapEval(_._2.toListL).toListL.runToFuture
         tActualFuture.map { tActual =>
