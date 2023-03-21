@@ -19,7 +19,7 @@ http://localhost:4000/
 ## collect novel data
 
 ```
-./sbt pack
+./sbt narou-tools/pack
 ```
 
 ```
