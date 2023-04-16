@@ -130,7 +130,9 @@ lazy val `narou-webui` = (project in file("narou-webui"))
       js.reactDomType,
       js.recharts,
       js.antd,
-      js.dropbox,
+      js.dropbox
+    ),
+    Compile / npmDevDependencies ++= Seq(
       js.`node-polyfill-webpack-plugin`
     ),
     stFlavour                        := Flavour.ScalajsReact,
