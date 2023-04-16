@@ -53,13 +53,14 @@ object Dependencies {
       ).map(_ % circeVersion)
     )
 
-    val monocle = Def.setting(
+    val monocle   = Def.setting(
       Seq(
         "dev.optics" %%% "monocle-core",
         "dev.optics" %%% "monocle-macro"
       ).map(_ % monocleVersion)
     )
 
+    val fastparse = Def.setting("com.lihaoyi" %%% "fastparse" % "3.0.1")
   }
 
   object js {

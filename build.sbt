@@ -47,8 +47,9 @@ lazy val `narou-libs-model` = crossProject(JVMPlatform, JSPlatform)
     libraryDependencies ++= scalajs.circe.value,
     libraryDependencies ++= Seq(
       scalajs.monixReactive.value,
-      scalajs.monoids.value
-    )
+      scalajs.monoids.value,
+      scalajs.fastparse.value
+    ) ++ scalajs.monocle.value
   )
   .settings(commonSettings)
   .jvmSettings(
