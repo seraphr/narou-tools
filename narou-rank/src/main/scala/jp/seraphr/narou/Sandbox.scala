@@ -15,7 +15,7 @@ object Sandbox extends App {
       .limit(100)
       //      .n(_.setPickup(true))
       .n(_.setCharacterLength(100000, Int.MaxValue)).n(_.setSearchWord("溺愛")).addFilter(tFav <= _.getFavCount)
-  //      .addFilter(_.getIsNovelContinue == 1)
+    //      .addFilter(_.getIsNovelContinue == 1)
   }
 
   val tFormat = new SimpleDateFormat("yyyy/MM/dd hh:mm", Locale.JAPAN)
