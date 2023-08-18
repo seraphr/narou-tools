@@ -26,7 +26,7 @@ object Main {
   import monix.execution.Scheduler.Implicits.global
 
   private val mCurrentURI = new URI("./narou_novels/")
-  println(s"===== currentURI = ${mCurrentURI.toString}")
+  dom.console.debug(s"===== currentURI = ${mCurrentURI.toString}")
   private val isLocal     = {
     val tLocation = dom.window.location
     tLocation.hostname == "localhost" || new dom.URLSearchParams(tLocation.search).has("local")

@@ -1,6 +1,7 @@
 package jp.seraphr.narou.webui
 
 import org.scalajs.dom.SVGElement
+import org.scalajs.dom.console
 import scala.scalajs.js
 import scala.scalajs.js.annotation.JSExportAll
 
@@ -20,6 +21,14 @@ object NovelScatterChart {
 
   import js.JSConverters._
 
+  /**
+   * @param novels
+   * @param selectedNovel 選択状態で表示する小説
+   * @param axisX
+   * @param axisY
+   * @param scatters
+   * @param selectNovel グラフ上で小説が選択された時のコールバック
+   */
   case class Props(
       novels: Seq[NarouNovel],
       selectedNovel: Option[NarouNovel],
@@ -85,7 +94,8 @@ object NovelScatterChart {
         .withReuse
         .autoRefresh
         .map { input =>
-          println(s"create scatter props !!")
+
+          console.debug(s"create scatter props !!")
           input
             .scatters
             .map { tScatterData =>
@@ -110,7 +120,7 @@ object NovelScatterChart {
 
       val Props(_, aSelectedNovel, aAxisX, aAxisY, _, _) = props
       val tScatters: Seq[ChildArg]                       = scatterPropss.value().map(Scatter.withProps)
-      println(s"scatters eq lastScatters => ${tScatters eq lastScatters}")
+      console.debug(s"scatters eq lastScatters => ${tScatters eq lastScatters}")
       lastScatters = tScatters
 
       val tChildren: Seq[ChildArg] = Seq(
