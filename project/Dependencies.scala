@@ -53,7 +53,7 @@ object Dependencies {
       ).map(_ % circeVersion)
     )
 
-    val monocle   = Def.setting(
+    val monocle = Def.setting(
       Seq(
         "dev.optics" %%% "monocle-core",
         "dev.optics" %%% "monocle-macro"
