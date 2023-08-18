@@ -163,7 +163,7 @@ object ScatterData {
    * @return
    */
   def range(aCondition: Option[NovelCondition], aWindow: Int, aRange: RangeFilter, aColor: String): ScatterData = {
-    case class NovelWithValue(novel: NarouNovel, xValue: Int, index: Int)
+    case class NovelWithValue(novel: NarouNovel, xValue: Int, yValue: Int, index: Int)
     def convert(aInput: ConvertInput): Seq[NarouNovel] = {
       val tBase   = aInput.novels
       val tNovels = aCondition.fold(tBase)(c => tBase.filter(c.predicate))
@@ -175,11 +175,11 @@ object ScatterData {
       val tNovelWithValues = tNovels
         .view
         .map { n =>
-          (n, xValue(n))
+          (n, xValue(n), yValue(n))
         }
         .zipWithIndex
-        .collect { case ((n, Some(xValue)), i) =>
-          NovelWithValue(n, xValue, i)
+        .collect { case ((n, Some(xValue), Some(yValue)), i) =>
+          NovelWithValue(n, xValue, yValue, i)
         }
         .toIndexedSeq
 
@@ -195,12 +195,13 @@ object ScatterData {
             (tNovelWithValues.takeRight(aWindow), tNovelWithValues(i))
           case i                              =>
             // 通常は、対象の小説を中心に、前後 (aWindow / 2)をとる
-            (tNovelWithValues.drop(i - aWindow / 2).take(aWindow), tNovelWithValues(i))
+            val tFrom = i - aWindow / 2
+            (tNovelWithValues.slice(tFrom, tFrom + aWindow), tNovelWithValues(i))
         }
         .filter { case (ns, n) =>
-          val values = ns.flatMap(n => yValue(n.novel))
-          val value  = yValue(n.novel)
-          value.fold(false)(aRange.filter(values, _))
+          val values = ns.map(_.yValue)
+          val value  = n.yValue
+          aRange.filter(values, value)
         }
         .map(_._2.novel)
         .toVector
