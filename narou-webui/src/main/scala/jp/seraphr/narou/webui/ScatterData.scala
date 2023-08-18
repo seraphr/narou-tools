@@ -22,7 +22,8 @@ object Sampling {
 case class ConvertInput(novels: Seq[NarouNovel], x: AxisData, y: AxisData)
 case class ScatterData(name: String, convert: ConvertInput => Seq[NarouNovel], color: String)
 object ScatterData {
-  private val mRandom                                                                            = new Random(1234)
+  private val mRandom = new Random(1234)
+
   def memorizeConvert(convert: ConvertInput => Seq[NarouNovel]): ConvertInput => Seq[NarouNovel] = {
     var tMemorizedInput: ConvertInput     = null
     var tMemorizedResult: Seq[NarouNovel] = null
@@ -65,20 +66,6 @@ object ScatterData {
 
   case class RangeFilter(name: String, filter: (Seq[Int], Int) => Boolean)
   object RangeFilter {
-    def percentile(name: String, min: Int, max: Int): RangeFilter = {
-      def filter(from: Seq[Int], value: Int): Boolean = {
-        val size                     = from.size
-        def index(percent: Int): Int = {
-          math.min(size - 1, math.max(0, (0.01 * size * percent).toInt))
-        }
-        val minValue                 = from(index(min))
-        val maxValue                 = from(index(max))
-
-        minValue <= value && value <= maxValue
-      }
-
-      RangeFilter(name, filter)
-    }
 
     /**
      * 四分位範囲(q3 - q1)を用いたハズレ値を抽出する
@@ -110,10 +97,6 @@ object ScatterData {
       RangeFilter(tName, filter)
     }
 
-    val q0q1            = percentile("Q0-Q1", 0, 25)
-    val q1q2            = percentile("Q1-Q2", 25, 50)
-    val q2q3            = percentile("Q2-Q3", 50, 75)
-    val q3q4            = percentile("Q3-Q4", 75, 100)
     val iqrUpperOutlier = iqrBaseOutlier(true, 1.5)
     val iqrLowerOutlier = iqrBaseOutlier(false, 1.5)
   }
