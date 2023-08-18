@@ -77,7 +77,8 @@ object Dependencies {
     val `file-loader`  = "file-loader"  -> "6.2.0"
     val `url-loader`   = "url-loader"   -> "4.1.1"
 
-    val webpack    = "5.76.2"
-    val typescript = "5.0.2"
+    val webpack          = "5.76.2"
+    val webpackDevServer = "3.11.3"
+    val typescript       = "5.0.2"
   }
 }
