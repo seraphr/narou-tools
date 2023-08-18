@@ -118,6 +118,7 @@ lazy val `narou-webui` = (project in file("narou-webui"))
   .enablePlugins(ScalaJSBundlerPlugin)
   .enablePlugins(ScalablyTypedConverterPlugin)
   .enablePlugins(GhpagesPlugin)
+  .enablePlugins(SitePreviewPlugin)
   .settings(commonSettings)
   .settings(
     scalaJSUseMainModuleInitializer  := true,
