@@ -6,7 +6,8 @@ import jp.seraphr.narou.webui.state.{ AppState, NarouWebAppStore }
 import jp.seraphr.util.DefaultStateApi
 
 import japgolly.scalajs.react.{ CtorType, React, ScalaComponent }
-import japgolly.scalajs.react.vdom.html_<^._
+import japgolly.scalajs.react.callback.{ AsyncCallback, Callback }
+import japgolly.scalajs.react.vdom.html_<^.*
 
 object StoreProvider {
   private var actions: Actions = null
@@ -26,7 +27,7 @@ object StoreProvider {
             loaders,
             { f =>
               import monix.execution.Scheduler.Implicits.global
-              f(tStateApi).foreach { _ => }
+              AsyncCallback.fromFuture(f(tStateApi).runToFuture).toCallback
             }
           )
         }

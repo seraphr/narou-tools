@@ -35,7 +35,7 @@ object NovelScatterChart {
       axisX: AxisData,
       axisY: AxisData,
       scatters: Seq[ScatterData],
-      selectNovel: NarouNovel => Unit
+      selectNovel: NarouNovel => Callback
   )
 
   object Props {
@@ -71,7 +71,7 @@ object NovelScatterChart {
 
     case class ScattersInput(
         scatters: Seq[ScatterInput],
-        selectNovel: NarouNovel => Unit
+        selectNovel: NarouNovel => Callback
     )
     object ScattersInput {
       implicit val reusable: Reusability[ScattersInput] =
@@ -105,12 +105,10 @@ object NovelScatterChart {
                 .setData(tScatterData.points.map(a => a: Any).toJSArray)
                 .setFill(tScatterData.color)
                 .setIsAnimationActive(false)
-                .setOnClick((a1, _, _) =>
-                  Callback {
-                    val novel = a1.asInstanceOf[js.Dynamic].payload.asInstanceOf[PointData].novel
-                    input.selectNovel(novel)
-                  }
-                )
+                .setOnClick { (a1, _, _) =>
+                  val novel = a1.asInstanceOf[js.Dynamic].payload.asInstanceOf[PointData].novel
+                  input.selectNovel(novel)
+                }
             }
         }
 
@@ -267,7 +265,7 @@ object NovelScatterChart {
       aNovels: Seq[NarouNovel],
       aSelectedNovel: Option[NarouNovel],
       aScatters: Seq[ScatterData],
-      selectNovel: NarouNovel => Unit
+      selectNovel: NarouNovel => Callback
   ) = {
     component(
       Props(

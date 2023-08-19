@@ -101,13 +101,13 @@ object RootView {
           Select()
             .dropdownMatchSelectWidth(false)
             .loading(dirNames.isLoading)
-            .onSelect((tValue, _) => Callback(actions.selectDir(tValue.toString)))(
+            .onSelect((tValue, _) => actions.selectDir(tValue.toString))(
               tSelectDirOptions: _*
             ),
           Select()
             .dropdownMatchSelectWidth(false)
             .loading(allMeta.isLoading)
-            .onSelect((tValue, _) => Callback(actions.selectMeta(tValue.toString)))(
+            .onSelect((tValue, _) => actions.selectMeta(tValue.toString))(
               tSelectMetaOptions: _*
             ),
           <.div(s"loaded novel count = ${novels.size}"),

@@ -40,7 +40,7 @@ object NovelDrawer {
       .visible(tNovel.nonEmpty)
       .width(400)
       .closable(true)
-      .onClose(_ => CallbackTo(tActions.deselectNovel()))(
+      .onClose(_ => tActions.deselectNovel())(
         tNovel.fold(EmptyVdom)(detailComponent(_))
       )
   }
