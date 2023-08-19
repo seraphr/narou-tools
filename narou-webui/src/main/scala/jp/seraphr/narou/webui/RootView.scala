@@ -4,14 +4,21 @@ import scala.annotation.nowarn
 import scala.scalajs.js
 import scala.scalajs.js.annotation.{ JSExportAll, JSImport }
 
-import jp.seraphr.narou.model.{ NarouNovel, NarouNovelsMeta, NovelCondition }
+import jp.seraphr.narou.model.{
+  NarouNovel,
+  NarouNovelsMeta,
+  NovelCondition,
+  NovelConditionParser,
+  NovelConditionWithSource
+}
 import jp.seraphr.narou.webui.ScatterData.{ RangeFilter, RepresentativeData }
 import jp.seraphr.narou.webui.action.Actions
-import jp.seraphr.narou.webui.component.NovelDrawer
+import jp.seraphr.narou.webui.component.{ NovelDrawer, NovelScatterChartPanel }
+import jp.seraphr.narou.webui.component.NovelScatterChartPanel.ScatterDataGroup
 import jp.seraphr.narou.webui.state.LazyLoad
 
-import japgolly.scalajs.react._
-import japgolly.scalajs.react.vdom.html_<^._
+import japgolly.scalajs.react.*
+import japgolly.scalajs.react.vdom.html_<^.*
 
 @JSImport("antd/dist/antd.css", JSImport.Default)
 @js.native
@@ -72,6 +79,25 @@ object RootView {
     )
   }
 
+  private val scatterCandidates = Seq(
+    ScatterDataGroup("サンプリング", samplingScatters),
+    ScatterDataGroup("代表値", representativeScatters)
+  )
+
+  extension [L, R](e: Either[L, R]) {
+    def value: R = e match {
+      case Right(r) => r
+      case Left(l)  => throw new RuntimeException(s"Left($l)")
+    }
+
+  }
+
+  private val builtInFilters = Seq(
+    NovelConditionParser("all").value,
+    NovelConditionParser("length >= 1000000").value,
+    NovelConditionParser("bookmark <= 10000").value
+  )
+
   private val innerComponent =
     ScalaComponent
       .builder[Props]("RootView")
@@ -88,6 +114,20 @@ object RootView {
           .map { tName =>
             Option.value(tName)(tName).build
           }
+
+        val tScatterChartPanel = NovelScatterChartPanel(
+          scatterCandidates,
+          AxisData.all,
+          builtInFilters,
+          defaultState = Some(
+            NovelScatterChartPanel.State(
+              builtInFilters.head,
+              AxisData.bookmark,
+              AxisData.evaluationPerBookmark,
+              representativeScatters.toSet
+            )
+          )
+        )
 
         val tSelectMetaOptions = allMeta
           .getOrElse(Map.empty)
@@ -111,26 +151,13 @@ object RootView {
               tSelectMetaOptions: _*
             ),
           <.div(s"loaded novel count = ${novels.size}"),
-          <.div("サンプリング"),
-          NovelScatterChart(
-            novels,
-            selectedNovel,
-            samplingScatters,
-            actions.selectNovel
-          ),
-          <.div("代表値"),
-          NovelScatterChart(
-            novels,
-            selectedNovel,
-            representativeScatters,
-            actions.selectNovel
-          ),
+          tScatterChartPanel,
           NovelDrawer()
         )
       }
       .build
 
-  val storeWrapper = new StoreWrapper(StoreProvider.context)(s =>
+  val storeWrapper = StoreWrapper.wrapCompletely(StoreProvider.context)(s =>
     Props(
       s.actions,
       s.state.dirNames,

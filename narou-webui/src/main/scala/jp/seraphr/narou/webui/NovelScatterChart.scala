@@ -182,88 +182,11 @@ object NovelScatterChart {
     .configure(Reusability.shouldComponentUpdate)
     .build
 
-  //  val component = ScalaFnComponent[Props] { case Props(aNovels, aSelectedNovel, aAxisX, aAxisY, aScatters, selectNovel) =>
-  //    val tScatters: Seq[ChildArg] = aScatters.map { tScatterData =>
-  //      val tPoints = createPointData(aNovels, aAxisX, aAxisY, tScatterData).toJSArray
-  //      val tName = s"${tScatterData.name}(${tPoints.size})"
-  //      Scatter.create(tName, js.undefined)
-  //        .data(tPoints)
-  //        .fill(tScatterData.color)
-  //        .isAnimationActive(false)
-  //        .onClick((a1, _, _) => Callback {
-  //          val novel = a1.asInstanceOf[js.Dynamic].payload.asInstanceOf[PointData].novel
-  //          selectNovel(novel)
-  //        })
-  //        .build
-  //    }
-  //
-  //    import typings.recharts.components.{ XAxis, YAxis, ZAxis, Tooltip, Legend, Label, ReferenceDot }
-  //
-  //    val tChildren: Seq[ChildArg] = Seq(
-  //      CartesianGrid(CartesianGrid.Props().setStrokeDasharray("3 3")),
-  //      XAxis
-  //        .`type`(Axis.Type.number)
-  //        .dataKey("x")
-  //        .name(aAxisX.name)
-  //        .label(
-  //          Label.create()
-  //            .value(aAxisX.name)
-  //            .angle(0)
-  //            .position(rechartsStrings.insideBottom)
-  //            .build.rawElement
-  //        )
-  //        .unit(aAxisX.unit),
-  //      YAxis.create()
-  //        .dataKey("y")
-  //        .name(aAxisY.name)
-  //        .label(
-  //          Label.create()
-  //            .value(aAxisY.name)
-  //            .angle(-90)
-  //            .position(rechartsStrings.insideLeft)
-  //            .build.rawElement
-  //        )
-  //        .unit(aAxisY.unit),
-  //      ZAxis().
-  //        `type`(rechartsStrings.category)
-  //        .dataKey("z")
-  //        .range(js.Array(20, 20))
-  //        .name("title"),
-  //      Tooltip.cursor(SVGProps[SVGElement]().setStrokeDasharray("3 3").asInstanceOf[Boolean | Element | SVGProps[SVGElement]]),
-  //      Legend.create()
-  //    )
-  //    val tReDot = for {
-  //      tSelected <- aSelectedNovel
-  //      x <- aAxisX.toValue(tSelected)
-  //      y <- aAxisY.toValue(tSelected)
-  //    } yield {
-  //      ReferenceDot.create(
-  //        className = js.undefined,
-  //        cx = x,
-  //        cy = y,
-  //        r = 10
-  //      )
-  //        .x(x)
-  //        .y(y)
-  //        .isFront(true)
-  //        .fill("red")
-  //        .build
-  //    }
-  //
-  //    ScatterChart(
-  //      ScatterChart.Props().setWidth(2400).setHeight(600).setMargin(
-  //        Margin().setTop(20)
-  //          .setRight(20)
-  //          .setBottom(10)
-  //          .setLeft(10)
-  //      )
-  //    )(tChildren ++ tScatters ++ tReDot.to(Seq): _*)
-  //  }
-
-  //  private val memo = React.memo(component)
   def apply(
       aNovels: Seq[NarouNovel],
       aSelectedNovel: Option[NarouNovel],
+      aAxisX: AxisData,
+      aAxisY: AxisData,
       aScatters: Seq[ScatterData],
       selectNovel: NarouNovel => Callback
   ) = {
@@ -271,8 +194,8 @@ object NovelScatterChart {
       Props(
         novels = aNovels,
         selectedNovel = aSelectedNovel,
-        axisX = AxisData.bookmark,
-        axisY = AxisData.evaluationPerBookmark,
+        axisX = aAxisX,
+        axisY = aAxisY,
         scatters = aScatters,
         selectNovel
       )

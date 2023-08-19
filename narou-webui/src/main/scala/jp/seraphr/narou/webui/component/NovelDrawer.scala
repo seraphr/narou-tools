@@ -45,7 +45,7 @@ object NovelDrawer {
       )
   }
 
-  private val mStoreWrapper = StoreWrapper(StoreProvider.context) { tState =>
+  private val mStoreWrapper = StoreWrapper.wrapCompletely(StoreProvider.context) { tState =>
     Props(tState.state.selected.novel, tState.actions)
   }
 
