@@ -7,19 +7,19 @@ import typings.antd.components.{ Button, Checkbox, Divider, Popover }
 import typings.antd.libCheckboxGroupMod.CheckboxOptionType
 import typings.antd.libTooltipMod.TooltipPlacement
 
-object CheckboxSelector {
-  case class Option[A](name: String, value: A)
-  case class OptionGroup[A](name: String, values: Seq[Option[A]])
-  case class Props[A](
+class CheckboxSelector[A] {
+  case class OptionItem(name: String, value: A)
+  case class OptionGroup(name: String, values: Seq[OptionItem])
+  case class Props(
       title: String,
-      options: Seq[OptionGroup[A]],
+      options: Seq[OptionGroup],
       defaultSelected: Set[A],
       toOptionValue: A => String,
       onChange: Set[A] => Callback
   )
 
-  def component[A] = ScalaFnComponent
-    .withHooks[Props[A]]
+  val component = ScalaFnComponent
+    .withHooks[Props]
     .useStateBy(_.defaultSelected)
     .render { (props, selected) =>
       extension (a: A) {
@@ -30,12 +30,10 @@ object CheckboxSelector {
         props
           .options
           .map { case OptionGroup(tName, tOptions) =>
-            val tOptionTypes = tOptions.map { case Option(tOptionName, tValue) =>
+            val tOptionTypes = tOptions.map { case OptionItem(tOptionName, tValue) =>
               CheckboxOptionType(tValue.toOptionValue)
                 .setLabel(tOptionName)
                 .setOnChange { tEvent =>
-                  tEvent.preventDefault()
-                  tEvent.stopPropagation()
                   val tChecked     = tEvent.target.checked_CheckboxChangeEventTarget
                   val tNewSelected =
                     if (tChecked) selected.value + tValue
@@ -69,9 +67,9 @@ object CheckboxSelector {
         .apply(Button(props.title))
     }
 
-  def apply[A](
+  def apply(
       title: String,
-      options: Seq[OptionGroup[A]],
+      options: Seq[OptionGroup],
       defaultSelected: Set[A],
       toOptionValue: A => String,
       onChange: Set[A] => Callback

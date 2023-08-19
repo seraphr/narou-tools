@@ -5,7 +5,6 @@ import scala.scalajs.js.JSConverters.*
 
 import jp.seraphr.narou.model.{ NarouNovel, NovelCondition, NovelConditionWithSource }
 import jp.seraphr.narou.webui.{ AxisData, NovelScatterChart, ScatterData, StoreProvider, StoreWrapper }
-import jp.seraphr.narou.webui.component.CheckboxSelector.OptionGroup
 import jp.seraphr.narou.webui.state.{ AppState, NarouWebAppStore }
 
 import japgolly.scalajs.react.{ Callback, ScalaFnComponent }
@@ -46,20 +45,22 @@ object NovelScatterChartPanel {
     scatters = p.scatterCandidates.head.data.toSet
   )
 
+  private val ScatterCheckboxSelector = new CheckboxSelector[ScatterData]
+
   private val innerComponent = ScalaFnComponent
     .withHooks[Props]
     .useStateBy(p => p.defaultState.getOrElse(defaultState(p)))
     .useState(nextId())
     .render { (props, state, editingId) =>
-      val tScatterDataOptions: Seq[OptionGroup[ScatterData]] = props
+      val tScatterDataOptions: Seq[ScatterCheckboxSelector.OptionGroup] = props
         .scatterCandidates
         .map { tGroup =>
-          OptionGroup(
+          ScatterCheckboxSelector.OptionGroup(
             tGroup.name,
             tGroup
               .data
               .map { tScatterData =>
-                CheckboxSelector.Option(tScatterData.name, tScatterData)
+                ScatterCheckboxSelector.OptionItem(tScatterData.name, tScatterData)
               }
           )
         }
@@ -79,7 +80,7 @@ object NovelScatterChartPanel {
             state.value.axisY,
             tAxis => state.modState(_.copy(axisY = tAxis))
           ),
-          CheckboxSelector(
+          ScatterCheckboxSelector(
             "データ系列",
             tScatterDataOptions,
             state.value.scatters,
