@@ -24,7 +24,7 @@ object NarouNovelConverter {
         n.getUserId,
         n.getWriter,
         n.getStory,
-        Genre(n.getGenre.getId, n.getGenre.getText),
+        Genre.fromId(n.getGenre.getId).fold(s => throw new RuntimeException(s), identity),
         if (n.getGensaku == 0) "" else n.getGensaku.toString,
         n.getKeyword.split(" ").toVector,
         n.getFirstUploadDate,

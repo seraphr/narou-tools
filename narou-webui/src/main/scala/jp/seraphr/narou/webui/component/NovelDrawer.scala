@@ -18,10 +18,13 @@ object NovelDrawer {
     .noBackend
     .renderP { (tScope, tNovel) =>
       val showStory = tScope.state
-      val tUrl      = s"https://ncode.syosetu.com/${tNovel.ncode}/"
+      val tUrl      = s"https://ncode.syosetu.com/${tNovel.ncode.toLowerCase}/"
 
       React.Fragment(
         <.div(tNovel.title),
+        <.div(f"${tNovel.length}%,3d 文字"),
+        <.div(s"${tNovel.genre.text}"),
+        <.div(tNovel.keywords.mkString("[", ", ", "]")),
         <.div(<.a(^.href := tUrl)(tUrl)),
         <.div(Button.`type`(antdStrings.link).onClick(_ => tScope.modState(v => !v)).size(antdStrings.small)("あらすじ")),
         Drawer

@@ -1,25 +1,25 @@
-package jp.seraphr.narou.webui
+package jp.seraphr.narou.webui.component
 
-import org.scalajs.dom.SVGElement
-import org.scalajs.dom.console
+import org.scalajs.dom.{ console, SVGElement }
 import scala.scalajs.js
 import scala.scalajs.js.annotation.JSExportAll
 
 import jp.seraphr.narou.model.NarouNovel
+import jp.seraphr.narou.webui.{ AxisData, ConvertInput, ScatterData }
 import jp.seraphr.recharts.{ Axis, CartesianGrid, ScatterChart }
 
 import japgolly.scalajs.react.{ BackendScope, Callback, Reusability, ScalaComponent }
 import japgolly.scalajs.react.CtorType.ChildArg
 import japgolly.scalajs.react.extra.Px
 import typings.react.mod.SVGProps
-import typings.recharts.{ rechartsStrings, typesCartesianScatterMod => scatterMod }
+import typings.recharts.{ rechartsStrings, typesCartesianScatterMod as scatterMod }
 import typings.recharts.components.Scatter
 import typings.recharts.typesUtilTypesMod.Margin
 
 object NovelScatterChart {
-  import jp.seraphr.recharts.Implicits._
+  import jp.seraphr.recharts.Implicits.*
 
-  import js.JSConverters._
+  import js.JSConverters.*
 
   /**
    * @param novels
@@ -58,7 +58,7 @@ object NovelScatterChart {
         for {
           x <- aAxisX.toValue(n)
           y <- aAxisY.toValue(n)
-        } yield PointData(x, y, n.title, n)
+        } yield PointData(x, y, s"${n.title} [${n.genre.text}]", n)
       }
   }
 
@@ -114,7 +114,7 @@ object NovelScatterChart {
 
     var lastScatters: Seq[ChildArg] = null
     def render(props: Props)        = {
-      import typings.recharts.components.{ XAxis, YAxis, ZAxis, Tooltip, Legend, Label, ReferenceDot }
+      import typings.recharts.components.{ Label, Legend, ReferenceDot, Tooltip, XAxis, YAxis, ZAxis }
 
       val Props(_, aSelectedNovel, aAxisX, aAxisY, _, _) = props
       val tScatters: Seq[ChildArg]                       = scatterPropss.value().map(Scatter.withProps)
@@ -139,7 +139,7 @@ object NovelScatterChart {
             Label.create().value(aAxisY.name).angle(-90).position(rechartsStrings.insideLeft).build.rawElement
           )
           .unit(aAxisY.unit),
-        ZAxis().`type`(rechartsStrings.category).dataKey("z").range(js.Array(20, 20)).name("title"),
+        ZAxis().`type`(rechartsStrings.category).dataKey("z").range(js.Array(50, 50)).name("title"),
         Tooltip.cursor(SVGProps[SVGElement]().setStrokeDasharray("3 3")).build,
         Legend.create()
       )

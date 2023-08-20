@@ -94,7 +94,10 @@ object RootView {
   private val builtInFilters = Seq(
     NovelConditionParser("all").value,
     NovelConditionParser("length >= 1000000").value,
-    NovelConditionParser("bookmark <= 10000").value
+    NovelConditionParser("bookmark <= 10000").value,
+    NovelConditionParser("bookmark <= 10000 && !isRomance").value,
+    NovelConditionParser("bookmark <= 10000 && (isFantasy || genreId == 401)").value,
+    NovelConditionParser("isTensei || isTenni").value
   )
 
   private val innerComponent =

@@ -59,10 +59,11 @@ object NovelCondition {
 
 object NovelConditionParser {
   enum FilterOp {
-    case EQ, GE, GQ, LE, LQ
+    case EQ, NQ, GE, GQ, LE, LQ
 
     override def toString: String = this match {
       case EQ => "=="
+      case NQ => "!="
       case GE => ">="
       case GQ => ">"
       case LE => "<="
@@ -74,6 +75,7 @@ object NovelConditionParser {
   object FilterOp {
     def fromString(str: String): FilterOp = str match {
       case "==" => EQ
+      case "!=" => NQ
       case ">=" => GE
       case ">"  => GQ
       case "<=" => LE
@@ -84,6 +86,7 @@ object NovelConditionParser {
 
   private def genFilter(toValue: NarouNovel => Int, op: FilterOp, value: Int): NarouNovel => Boolean = op match {
     case FilterOp.EQ => toValue(_) == value
+    case FilterOp.NQ => toValue(_) != value
     case FilterOp.GE => toValue(_) >= value
     case FilterOp.GQ => toValue(_) > value
     case FilterOp.LE => toValue(_) <= value
@@ -121,17 +124,35 @@ object NovelConditionParser {
       val tFilter = genFilter(_.evaluationCount, op, value)
 
       NovelCondition(tName, tName, tFilter)
+    },
+    "genreId"     -> { (op, value) =>
+      val tName   = s"genreId ${op} ${value}"
+      val tFilter = genFilter(_.genre.id, op, value)
+
+      NovelCondition(tName, tName, tFilter)
+    },
+    "bigGenreId"  -> { (op, value) =>
+      val tName   = s"bigGenreId ${op} ${value}"
+      val tFilter = genFilter(_.genre.bigGenre.id, op, value)
+
+      NovelCondition(tName, tName, tFilter)
     }
   )
 
   private val mBooleanValues = Map(
-    "isFinished" -> NovelCondition.finished,
-    "isR15"      -> NovelCondition("isR15", "R15", _.isR15),
-    "isBL"       -> NovelCondition("isBL", "BL", _.isBL),
-    "isGL"       -> NovelCondition("isGL", "GL", _.isGL),
-    "isZankoku"  -> NovelCondition("isZankoku", "残酷", _.isZankoku),
-    "isTensei"   -> NovelCondition("isTensei", "転生", _.isTensei),
-    "isTenni"    -> NovelCondition("isTenni", "転移", _.isTenni)
+    "isFinished"   -> NovelCondition.finished,
+    "isR15"        -> NovelCondition("isR15", "R15", _.isR15),
+    "isBL"         -> NovelCondition("isBL", "BL", _.isBL),
+    "isGL"         -> NovelCondition("isGL", "GL", _.isGL),
+    "isZankoku"    -> NovelCondition("isZankoku", "残酷", _.isZankoku),
+    "isTensei"     -> NovelCondition("isTensei", "転生", _.isTensei),
+    "isTenni"      -> NovelCondition("isTenni", "転移", _.isTenni),
+    "isRomance"    -> NovelCondition("isRomance", "恋愛", _.genre.bigGenre == BigGenre.Romance),
+    "isFantasy"    -> NovelCondition("isFantasy", "ファンタジー", _.genre.bigGenre == BigGenre.Fantasy),
+    "isLiterature" -> NovelCondition("isLiterature", "文学", _.genre.bigGenre == BigGenre.Literature),
+    "isSF"         -> NovelCondition("isSF", "SF", _.genre.bigGenre == BigGenre.SF),
+    "isOther"      -> NovelCondition("isOther", "その他", _.genre.bigGenre == BigGenre.Other),
+    "isNonGenre"   -> NovelCondition("isNonGenre", "ノンジャンル", _.genre.bigGenre == BigGenre.NonGenre)
   )
 
   import fastparse.*
@@ -150,7 +171,7 @@ object NovelConditionParser {
   private def term[S: P]: P[NovelCondition] = {
     // mapして|で結合すると動かないが、foldLeftで結合すると動く。 何故かは知らん
     def field[S: P]   = mFilterValues.keys.foldLeft[P[Unit]](Fail)(_ | P(_))
-    def op[S: P]      = StringIn("==", ">=", ">", "<=", "<")
+    def op[S: P]      = StringIn("==", "!=", ">=", ">", "<=", "<")
     def value[S: P]   = CharsWhile(_.isDigit, min = 1)
     def tFilter[S: P] = P(field.! ~ op.! ~ value.!).map { (tField, tOp, tValue) =>
       mFilterValues(tField)(FilterOp.fromString(tOp), tValue.toInt)
@@ -161,10 +182,11 @@ object NovelConditionParser {
   }
 
   private def factor[$: P]: P[NovelCondition] = {
+    // mapして|で結合すると動かないが、foldLeftで結合すると動く。 何故かは知らん
+    def tBoolean[S: P]     = mBooleanValues.keys.foldLeft[P[Unit]](Fail)(_ | P(_)).!.map(mBooleanValues(_))
     def trueLiteral[$: P]  = P("true").map(_ => NovelCondition("true", "true", _ => true))
     def allLiteral[$: P]   = P("all").map(_ => NovelCondition("all", "all", _ => true))
     def falseLiteral[$: P] = P("false").map(_ => NovelCondition("false", "false", _ => false))
-    def tBoolean[S: P]     = P(mBooleanValues.keys.map(P(_).!).reduce(_ | _)).map(mBooleanValues(_))
     def tParen[S: P]       = P("(" ~ expr ~ ")")
 
     tBoolean | tParen | trueLiteral | allLiteral | falseLiteral
