@@ -84,3 +84,41 @@ case class NarouNovel(
     novelUpdatedAt: String,
     updatedAt: String
 )
+
+object NarouNovel {
+  object lens {
+
+    import monocle.macros.GenLens
+
+    val title             = GenLens[NarouNovel](_.title)
+    val ncode             = GenLens[NarouNovel](_.ncode)
+    val userId            = GenLens[NarouNovel](_.userId)
+    val writer            = GenLens[NarouNovel](_.writer)
+    val story             = GenLens[NarouNovel](_.story)
+    val genre             = GenLens[NarouNovel](_.genre)
+    val gensaku           = GenLens[NarouNovel](_.gensaku)
+    val keywords          = GenLens[NarouNovel](_.keywords)
+    val firstUpload       = GenLens[NarouNovel](_.firstUpload)
+    val lastUpload        = GenLens[NarouNovel](_.lastUpload)
+    val novelType         = GenLens[NarouNovel](_.novelType)
+    val isFinished        = GenLens[NarouNovel](_.isFinished)
+    val chapterCount      = GenLens[NarouNovel](_.chapterCount)
+    val length            = GenLens[NarouNovel](_.length)
+    val readTimeMinutes   = GenLens[NarouNovel](_.readTimeMinutes)
+    val isR15             = GenLens[NarouNovel](_.isR15)
+    val isBL              = GenLens[NarouNovel](_.isBL)
+    val isGL              = GenLens[NarouNovel](_.isGL)
+    val isZankoku         = GenLens[NarouNovel](_.isZankoku)
+    val isTensei          = GenLens[NarouNovel](_.isTensei)
+    val isTenni           = GenLens[NarouNovel](_.isTenni)
+    val uploadType        = GenLens[NarouNovel](_.uploadType)
+    val globalPoint       = GenLens[NarouNovel](_.globalPoint)
+    val bookmarkCount     = GenLens[NarouNovel](_.bookmarkCount)
+    val reviewCount       = GenLens[NarouNovel](_.reviewCount)
+    val evaluationPoint   = GenLens[NarouNovel](_.evaluationPoint)
+    val evaluationCount   = GenLens[NarouNovel](_.evaluationCount)
+    val illustrationCount = GenLens[NarouNovel](_.illustrationCount)
+    val novelUpdatedAt    = GenLens[NarouNovel](_.novelUpdatedAt)
+    val updatedAt         = GenLens[NarouNovel](_.updatedAt)
+  }
+}

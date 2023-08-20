@@ -2,7 +2,7 @@ package jp.seraphr.narou.commands.sandbox
 
 import java.io.File
 
-import scala.annotation.nowarn
+import scala.annotation.unused
 import scala.io.Source
 import scala.util.{ Failure, Try, Using }
 
@@ -45,8 +45,7 @@ class SandboxCommand(aDefaultArg: SandboxCommandArg) extends Command with HasLog
     //    findUploadType0(tNovels)
   }
 
-  // unusedは scala 3.3で復活する
-  //  @nowarn("cat=unused")
+  @unused
   private def findUploadType0(aNovels: Vector[Novel]): Unit = {
     val tFiltered = aNovels.filter(_.getUploadType == 0)
     logger.info(s"count = ${tFiltered.size}")
@@ -59,8 +58,7 @@ class SandboxCommand(aDefaultArg: SandboxCommandArg) extends Command with HasLog
       .foreach(n => logger.info(s"ncode=${n.getNcode}, length=${n.getNumberOfChar}"))
   }
 
-  // unusedは scala 3.3で復活する
-  //  @nowarn("cat=unused")
+  @unused
   private def showKeywords(aNovels: Vector[Novel]): Unit = {
     logger.info(s"keyword情報取得")
     val tSortedKeywords = aNovels
@@ -83,7 +81,7 @@ class SandboxCommand(aDefaultArg: SandboxCommandArg) extends Command with HasLog
     tSortedKeywords.takeRight((10)).foreach(println)
   }
 
-  //  @nowarn("cat=unused")
+  @unused
   private def convertNovelList(aNovels: Vector[Novel], aOutputDir: File): Unit = {
     logger.info(s"novelの変換を行います: Novel数=${aNovels.size}")
     import jp.seraphr.narou.model.NarouNovelConverter._

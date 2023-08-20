@@ -6,24 +6,27 @@ import jp.seraphr.narou.webui.state.{ AppState, LazyLoad, Selected }
 import jp.seraphr.util.StateApi
 
 import cats.data.OptionT
+import japgolly.scalajs.react.Callback
 import monix.eval.Task
 
 trait Actions {
-  def selectDir(aDirName: String): Unit
-  def selectMeta(aId: String): Unit
-  def selectNovel(aNovel: NarouNovel): Unit
-  def deselectNovel(): Unit
+  def selectDir(aDirName: String): Callback
+  def selectMeta(aId: String): Callback
+  def selectNovel(aNovel: NarouNovel): Callback
+  def deselectNovel(): Callback
 }
 
 object NopActions extends Actions {
-  override def selectDir(aDirName: String): Unit     = ???
-  override def selectMeta(aId: String): Unit         = ???
-  override def selectNovel(aNovel: NarouNovel): Unit = ???
-  override def deselectNovel(): Unit                 = ???
+  override def selectDir(aDirName: String): Callback     = ???
+  override def selectMeta(aId: String): Callback         = ???
+  override def selectNovel(aNovel: NarouNovel): Callback = ???
+  override def deselectNovel(): Callback                 = ???
 }
 
-class DefaultActions(loaders: Map[String, ExtractedNovelLoader], runStateApi: (StateApi[AppState] => Task[_]) => Unit)
-    extends Actions {
+class DefaultActions(
+    loaders: Map[String, ExtractedNovelLoader],
+    runStateApi: (StateApi[AppState] => Task[_]) => Callback
+) extends Actions {
   import cats.syntax.all._
   import monocle.Focus
 
@@ -38,7 +41,7 @@ class DefaultActions(loaders: Map[String, ExtractedNovelLoader], runStateApi: (S
     val selectedNovel  = selected andThen novel
   }
 
-  override def selectDir(aDirName: String): Unit = runStateApi { stateApi =>
+  override def selectDir(aDirName: String): Callback = runStateApi { stateApi =>
     for {
       _          <- stateApi.modState(Lens.allMeta.replace(LazyLoad.Loading))
       tAllMeta   <- loaders(aDirName).allMetadata
@@ -48,7 +51,7 @@ class DefaultActions(loaders: Map[String, ExtractedNovelLoader], runStateApi: (S
     } yield ()
   }
 
-  override def selectMeta(aId: String): Unit = runStateApi { stateApi =>
+  override def selectMeta(aId: String): Callback = runStateApi { stateApi =>
     stateApi
       .modStateTaskOpt { tState =>
         val tMeta    = tState.allMeta.getOrElse(Map.empty).get(aId)
@@ -62,11 +65,11 @@ class DefaultActions(loaders: Map[String, ExtractedNovelLoader], runStateApi: (S
       .value
   }
 
-  override def selectNovel(aNovel: NarouNovel): Unit = runStateApi { stateApi =>
+  override def selectNovel(aNovel: NarouNovel): Callback = runStateApi { stateApi =>
     stateApi.modState(Lens.selectedNovel.replace(Some(aNovel)))
   }
 
-  override def deselectNovel(): Unit = runStateApi { stateApi =>
+  override def deselectNovel(): Callback = runStateApi { stateApi =>
     stateApi.modState(Lens.selectedNovel.replace(None))
   }
 

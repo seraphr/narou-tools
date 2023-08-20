@@ -22,7 +22,8 @@ object Sampling {
 case class ConvertInput(novels: Seq[NarouNovel], x: AxisData, y: AxisData)
 case class ScatterData(name: String, convert: ConvertInput => Seq[NarouNovel], color: String)
 object ScatterData {
-  private val mRandom                                                                            = new Random(1234)
+  private val mRandom = new Random(1234)
+
   def memorizeConvert(convert: ConvertInput => Seq[NarouNovel]): ConvertInput => Seq[NarouNovel] = {
     var tMemorizedInput: ConvertInput     = null
     var tMemorizedResult: Seq[NarouNovel] = null
@@ -65,20 +66,6 @@ object ScatterData {
 
   case class RangeFilter(name: String, filter: (Seq[Int], Int) => Boolean)
   object RangeFilter {
-    def percentile(name: String, min: Int, max: Int): RangeFilter = {
-      def filter(from: Seq[Int], value: Int): Boolean = {
-        val size                     = from.size
-        def index(percent: Int): Int = {
-          math.min(size - 1, math.max(0, (0.01 * size * percent).toInt))
-        }
-        val minValue                 = from(index(min))
-        val maxValue                 = from(index(max))
-
-        minValue <= value && value <= maxValue
-      }
-
-      RangeFilter(name, filter)
-    }
 
     /**
      * 四分位範囲(q3 - q1)を用いたハズレ値を抽出する
@@ -110,10 +97,6 @@ object ScatterData {
       RangeFilter(tName, filter)
     }
 
-    val q0q1            = percentile("Q0-Q1", 0, 25)
-    val q1q2            = percentile("Q1-Q2", 25, 50)
-    val q2q3            = percentile("Q2-Q3", 50, 75)
-    val q3q4            = percentile("Q3-Q4", 75, 100)
     val iqrUpperOutlier = iqrBaseOutlier(true, 1.5)
     val iqrLowerOutlier = iqrBaseOutlier(false, 1.5)
   }
@@ -180,7 +163,7 @@ object ScatterData {
    * @return
    */
   def range(aCondition: Option[NovelCondition], aWindow: Int, aRange: RangeFilter, aColor: String): ScatterData = {
-    case class NovelWithValue(novel: NarouNovel, xValue: Int, index: Int)
+    case class NovelWithValue(novel: NarouNovel, xValue: Int, yValue: Int, index: Int)
     def convert(aInput: ConvertInput): Seq[NarouNovel] = {
       val tBase   = aInput.novels
       val tNovels = aCondition.fold(tBase)(c => tBase.filter(c.predicate))
@@ -192,11 +175,11 @@ object ScatterData {
       val tNovelWithValues = tNovels
         .view
         .map { n =>
-          (n, xValue(n))
+          (n, xValue(n), yValue(n))
         }
         .zipWithIndex
-        .collect { case ((n, Some(xValue)), i) =>
-          NovelWithValue(n, xValue, i)
+        .collect { case ((n, Some(xValue), Some(yValue)), i) =>
+          NovelWithValue(n, xValue, yValue, i)
         }
         .toIndexedSeq
 
@@ -212,12 +195,13 @@ object ScatterData {
             (tNovelWithValues.takeRight(aWindow), tNovelWithValues(i))
           case i                              =>
             // 通常は、対象の小説を中心に、前後 (aWindow / 2)をとる
-            (tNovelWithValues.drop(i - aWindow / 2).take(aWindow), tNovelWithValues(i))
+            val tFrom = i - aWindow / 2
+            (tNovelWithValues.slice(tFrom, tFrom + aWindow), tNovelWithValues(i))
         }
         .filter { case (ns, n) =>
-          val values = ns.flatMap(n => yValue(n.novel))
-          val value  = yValue(n.novel)
-          value.fold(false)(aRange.filter(values, _))
+          val values = ns.map(_.yValue)
+          val value  = n.yValue
+          aRange.filter(values, value)
         }
         .map(_._2.novel)
         .toVector

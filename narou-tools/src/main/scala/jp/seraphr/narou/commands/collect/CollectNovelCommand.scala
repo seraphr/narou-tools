@@ -110,7 +110,6 @@ class CollectNovelCommand(aDefaultArg: CollectNovelCommandArg)(implicit schedule
         loadFrom(tOutputDataAccessor)
     }
 
-    //    val tCollector = new NovelCollector(aArg.intervalMillis)
     val tCollector = new AllNovelCollector(aArg.intervalMillis)
     val tInitSize  = tInitMap.size
     logger.info(s"小説リストの収集を開始します。 初期ノベル数: ${tInitSize}")

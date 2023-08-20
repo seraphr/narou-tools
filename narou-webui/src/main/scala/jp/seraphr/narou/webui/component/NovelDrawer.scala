@@ -4,7 +4,7 @@ import jp.seraphr.narou.model.NarouNovel
 import jp.seraphr.narou.webui.{ StoreProvider, StoreWrapper }
 import jp.seraphr.narou.webui.action.Actions
 
-import japgolly.scalajs.react.{ CallbackTo, React, ScalaComponent, ScalaFnComponent }
+import japgolly.scalajs.react.{ React, ScalaComponent, ScalaFnComponent }
 import japgolly.scalajs.react.vdom.html_<^._
 import typings.antd.antdStrings
 import typings.antd.components.{ Button, Drawer }
@@ -40,12 +40,12 @@ object NovelDrawer {
       .visible(tNovel.nonEmpty)
       .width(400)
       .closable(true)
-      .onClose(_ => CallbackTo(tActions.deselectNovel()))(
+      .onClose(_ => tActions.deselectNovel())(
         tNovel.fold(EmptyVdom)(detailComponent(_))
       )
   }
 
-  private val mStoreWrapper = StoreWrapper(StoreProvider.context) { tState =>
+  private val mStoreWrapper = StoreWrapper.wrapCompletely(StoreProvider.context) { tState =>
     Props(tState.state.selected.novel, tState.actions)
   }
 

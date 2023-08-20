@@ -22,4 +22,5 @@ object AxisData {
     "評価ポイント/ブックマーク"
   )
 
+  def all: Seq[AxisData] = Seq(bookmark, evaluationPoint, globalPoint, evaluationPerBookmark)
 }

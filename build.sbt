@@ -22,9 +22,8 @@ val commonSettings = Def.settings(
       "UTF-8",
       "-feature",
       "-deprecation",
-      "-unchecked"
-      // -Wunused scala 3.3.0 から対応されそう。 patvarsはunsafe-warn-patvars になりそうかな？
-//      "-Wunused:patvars,imports,locals,privates,params"
+      "-unchecked",
+      "-Wunused:imports,locals,privates,params"
     )
     val tInCI = Seq(
       "-Werror"
@@ -47,8 +46,9 @@ lazy val `narou-libs-model` = crossProject(JVMPlatform, JSPlatform)
     libraryDependencies ++= scalajs.circe.value,
     libraryDependencies ++= Seq(
       scalajs.monixReactive.value,
-      scalajs.monoids.value
-    )
+      scalajs.monoids.value,
+      scalajs.fastparse.value
+    ) ++ scalajs.monocle.value
   )
   .settings(commonSettings)
   .jvmSettings(
@@ -117,6 +117,7 @@ lazy val `narou-webui` = (project in file("narou-webui"))
   .enablePlugins(ScalaJSBundlerPlugin)
   .enablePlugins(ScalablyTypedConverterPlugin)
   .enablePlugins(GhpagesPlugin)
+  .enablePlugins(SitePreviewPlugin)
   .settings(commonSettings)
   .settings(
     scalaJSUseMainModuleInitializer  := true,
@@ -130,7 +131,9 @@ lazy val `narou-webui` = (project in file("narou-webui"))
       js.reactDomType,
       js.recharts,
       js.antd,
-      js.dropbox,
+      js.dropbox
+    ),
+    Compile / npmDevDependencies ++= Seq(
       js.`node-polyfill-webpack-plugin`
     ),
     stFlavour                        := Flavour.ScalajsReact,
@@ -141,6 +144,7 @@ lazy val `narou-webui` = (project in file("narou-webui"))
     // css-load設定 fileとかurlは要らんが、scalablytypedデモプロジェクトからそのまま持ってきた
     webpackConfigFile                := Some(baseDirectory.value / "custom-scalajs.webpack.config"),
     webpack / version                := Dependencies.js.webpack,
+    startWebpackDevServer / version  := Dependencies.js.webpackDevServer,
     Compile / npmDevDependencies ++= Seq(
       js.`css-loader`,
       js.`style-loader`,
