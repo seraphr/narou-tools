@@ -18,7 +18,7 @@ object NovelDrawer {
     .noBackend
     .renderP { (tScope, tNovel) =>
       val showStory = tScope.state
-      val tUrl      = s"https://ncode.syosetu.com/${tNovel.ncode}/"
+      val tUrl      = s"https://ncode.syosetu.com/${tNovel.ncode.toLowerCase}/"
 
       React.Fragment(
         <.div(tNovel.title),
