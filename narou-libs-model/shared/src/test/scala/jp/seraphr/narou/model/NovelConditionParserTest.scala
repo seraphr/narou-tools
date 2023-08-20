@@ -180,6 +180,12 @@ class NovelConditionParserTest extends AnyFreeSpec with Matchers with EitherValu
       }
     }
 
+    "all" in {
+      forAll(narouNovelGen) { tNovel =>
+        assertParseSuccess("all", tNovel, true)
+      }
+    }
+
     "false" in {
       forAll(narouNovelGen) { tNovel =>
         assertParseSuccess("false", tNovel, false)
