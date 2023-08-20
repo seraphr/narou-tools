@@ -23,8 +23,7 @@ class NovelConditionParserTest extends AnyFreeSpec with Matchers with EitherValu
     userId            <- Gen.alphaNumStr
     writer            <- Gen.alphaNumStr
     story             <- Gen.alphaNumStr
-    genreId           <- Gen.posNum[Int]
-    genreText         <- Gen.alphaNumStr
+    genre             <- Gen.oneOf(Genre.values.toSeq)
     gensaku           <- Gen.alphaNumStr
     keywords          <- Gen.listOf(Gen.alphaNumStr)
     firstUpload       <- Gen.alphaNumStr
@@ -59,7 +58,7 @@ class NovelConditionParserTest extends AnyFreeSpec with Matchers with EitherValu
     userId,
     writer,
     story,
-    Genre(genreId, genreText),
+    genre,
     gensaku,
     keywords,
     firstUpload,

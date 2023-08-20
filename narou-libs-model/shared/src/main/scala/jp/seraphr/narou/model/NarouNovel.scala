@@ -2,7 +2,45 @@ package jp.seraphr.narou.model
 
 import scala.scalajs.js.annotation.JSExportAll
 
-case class Genre(id: Int, text: String)
+enum Genre(val id: Int, val text: String, val bigGenre: BigGenre) {
+  case AnotherWorldRomance extends Genre(101, "異世界〔恋愛〕", BigGenre.Romance)
+  case Romance             extends Genre(102, "現実世界〔恋愛〕", BigGenre.Romance)
+  case HighFantasy         extends Genre(201, "ハイファンタジー〔ファンタジー〕", BigGenre.Fantasy)
+  case LowFantasy          extends Genre(202, "ローファンタジー〔ファンタジー〕", BigGenre.Fantasy)
+  case PureLiterature      extends Genre(301, "純文学〔文芸〕", BigGenre.Literature)
+  case HumanDrama          extends Genre(302, "ヒューマンドラマ〔文芸〕", BigGenre.Literature)
+  case History             extends Genre(303, "歴史〔文芸〕", BigGenre.Literature)
+  case Detective           extends Genre(304, "推理〔文芸〕", BigGenre.Literature)
+  case Horror              extends Genre(305, "ホラー〔文芸〕", BigGenre.Literature)
+  case Action              extends Genre(306, "アクション〔文芸〕", BigGenre.Literature)
+  case Comedy              extends Genre(307, "コメディー〔文芸〕", BigGenre.Literature)
+  case VRGame              extends Genre(401, "VRゲーム〔SF〕", BigGenre.SF)
+  case Space               extends Genre(402, "宇宙〔SF〕", BigGenre.SF)
+  case SF                  extends Genre(403, "空想科学〔SF〕", BigGenre.SF)
+  case Panic               extends Genre(404, "パニック〔SF〕", BigGenre.SF)
+  case FairyTale           extends Genre(9901, "童話〔その他〕", BigGenre.Other)
+  case Poem                extends Genre(9902, "詩〔その他〕", BigGenre.Other)
+  case Essay               extends Genre(9903, "エッセイ〔その他〕", BigGenre.Other)
+  case Replay              extends Genre(9904, "リプレイ〔その他〕", BigGenre.Other)
+  case Other               extends Genre(9999, "その他〔その他〕", BigGenre.Other)
+  case NonGenre            extends Genre(9801, "ノンジャンル〔ノンジャンル〕", BigGenre.NonGenre)
+}
+
+object Genre {
+  def fromId(id: Int): Either[String, Genre] = {
+    Genre.values.find(_.id == id).toRight(s"invalid genre id: $id")
+  }
+
+}
+
+enum BigGenre {
+  case Romance
+  case Fantasy
+  case Literature
+  case SF
+  case Other
+  case NonGenre
+}
 
 enum NovelType(val id: Int) {
   case Serially    extends NovelType(1)

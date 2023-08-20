@@ -105,7 +105,7 @@ object LocalDummyData {
       "userId".n,
       "writer".n,
       "story".n,
-      Genre(i, "ジャンル".n),
+      Genre.values(rand.nextInt(Genre.values.length)),
       "gensaku".n,
       Seq("keyword".n),
       "firstUpload".n,
