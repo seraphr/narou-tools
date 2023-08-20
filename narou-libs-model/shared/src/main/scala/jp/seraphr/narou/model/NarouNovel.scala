@@ -33,13 +33,13 @@ object Genre {
 
 }
 
-enum BigGenre {
-  case Romance
-  case Fantasy
-  case Literature
-  case SF
-  case Other
-  case NonGenre
+enum BigGenre(val id: Int) {
+  case Romance    extends BigGenre(1)
+  case Fantasy    extends BigGenre(2)
+  case Literature extends BigGenre(3)
+  case SF         extends BigGenre(4)
+  case Other      extends BigGenre(99)
+  case NonGenre   extends BigGenre(98)
 }
 
 enum NovelType(val id: Int) {

@@ -115,6 +115,20 @@ class NovelConditionParserTest extends AnyFreeSpec with Matchers with EitherValu
         }
       }
 
+      "!=" - {
+        "match" in {
+          forAll(narouNovelGen replace lens.length by 1234) { tNovel =>
+            assertParseSuccess("length != 1235", tNovel, true)
+          }
+        }
+
+        "notMatch" in {
+          forAll(narouNovelGen replace lens.length by 1234) { tNovel =>
+            assertParseSuccess("length != 1234", tNovel, false)
+          }
+        }
+      }
+
       "<" - {
         "match" in {
           forAll(narouNovelGen replace lens.length by 1234) { tNovel =>
