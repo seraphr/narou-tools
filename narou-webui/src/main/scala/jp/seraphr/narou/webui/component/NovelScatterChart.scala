@@ -58,7 +58,7 @@ object NovelScatterChart {
         for {
           x <- aAxisX.toValue(n)
           y <- aAxisY.toValue(n)
-        } yield PointData(x, y, n.title, n)
+        } yield PointData(x, y, s"${n.title} [${n.genre.text}]", n)
       }
   }
 
