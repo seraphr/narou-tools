@@ -139,7 +139,7 @@ object NovelScatterChart {
             Label.create().value(aAxisY.name).angle(-90).position(rechartsStrings.insideLeft).build.rawElement
           )
           .unit(aAxisY.unit),
-        ZAxis().`type`(rechartsStrings.category).dataKey("z").range(js.Array(20, 20)).name("title"),
+        ZAxis().`type`(rechartsStrings.category).dataKey("z").range(js.Array(50, 50)).name("title"),
         Tooltip.cursor(SVGProps[SVGElement]().setStrokeDasharray("3 3")).build,
         Legend.create()
       )
