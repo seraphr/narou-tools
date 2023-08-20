@@ -4,7 +4,7 @@ import scala.scalajs.js
 import scala.scalajs.js.JSConverters.*
 
 import jp.seraphr.narou.model.{ NarouNovel, NovelConditionWithSource }
-import jp.seraphr.narou.webui.{ AxisData, NovelScatterChart, ScatterData, StoreProvider, StoreWrapper }
+import jp.seraphr.narou.webui.{ AxisData, ScatterData, StoreProvider, StoreWrapper }
 import jp.seraphr.narou.webui.state.NarouWebAppStore
 
 import japgolly.scalajs.react.{ Callback, ScalaFnComponent }
