@@ -182,10 +182,11 @@ object NovelConditionParser {
   }
 
   private def factor[$: P]: P[NovelCondition] = {
+    // mapして|で結合すると動かないが、foldLeftで結合すると動く。 何故かは知らん
+    def tBoolean[S: P]     = mBooleanValues.keys.foldLeft[P[Unit]](Fail)(_ | P(_)).!.map(mBooleanValues(_))
     def trueLiteral[$: P]  = P("true").map(_ => NovelCondition("true", "true", _ => true))
     def allLiteral[$: P]   = P("all").map(_ => NovelCondition("all", "all", _ => true))
     def falseLiteral[$: P] = P("false").map(_ => NovelCondition("false", "false", _ => false))
-    def tBoolean[S: P]     = P(mBooleanValues.keys.map(P(_).!).reduce(_ | _)).map(mBooleanValues(_))
     def tParen[S: P]       = P("(" ~ expr ~ ")")
 
     tBoolean | tParen | trueLiteral | allLiteral | falseLiteral
