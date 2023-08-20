@@ -4,7 +4,7 @@ import jp.seraphr.narou.model.NarouNovel
 import jp.seraphr.narou.webui.{ StoreProvider, StoreWrapper }
 import jp.seraphr.narou.webui.action.Actions
 
-import japgolly.scalajs.react.{ CallbackTo, React, ScalaComponent, ScalaFnComponent }
+import japgolly.scalajs.react.{ React, ScalaComponent, ScalaFnComponent }
 import japgolly.scalajs.react.vdom.html_<^._
 import typings.antd.antdStrings
 import typings.antd.components.{ Button, Drawer }

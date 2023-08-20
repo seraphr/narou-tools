@@ -22,9 +22,8 @@ val commonSettings = Def.settings(
       "UTF-8",
       "-feature",
       "-deprecation",
-      "-unchecked"
-      // -Wunused scala 3.3.0 から対応されそう。 patvarsはunsafe-warn-patvars になりそうかな？
-//      "-Wunused:patvars,imports,locals,privates,params"
+      "-unchecked",
+      "-Wunused:imports,locals,privates,params"
     )
     val tInCI = Seq(
       "-Werror"

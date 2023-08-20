@@ -3,14 +3,14 @@ package jp.seraphr.narou.webui.component
 import scala.scalajs.js
 import scala.scalajs.js.JSConverters.*
 
-import jp.seraphr.narou.model.{ NarouNovel, NovelCondition, NovelConditionWithSource }
+import jp.seraphr.narou.model.{ NarouNovel, NovelConditionWithSource }
 import jp.seraphr.narou.webui.{ AxisData, NovelScatterChart, ScatterData, StoreProvider, StoreWrapper }
-import jp.seraphr.narou.webui.state.{ AppState, NarouWebAppStore }
+import jp.seraphr.narou.webui.state.NarouWebAppStore
 
 import japgolly.scalajs.react.{ Callback, ScalaFnComponent }
 import japgolly.scalajs.react.vdom.html_<^.*
 import typings.antd.antdStrings
-import typings.antd.components.{ Button, Dropdown, Input, Space }
+import typings.antd.components.{ Button, Dropdown, Input }
 import typings.antd.libMenuHooksUseItemsMod.MenuItemType
 import typings.antd.libMenuMod.MenuProps
 

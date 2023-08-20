@@ -1,6 +1,6 @@
 package jp.seraphr.narou.webui
 
-import scala.annotation.nowarn
+import scala.annotation.unused
 import scala.scalajs.js
 import scala.scalajs.js.annotation.{ JSExportAll, JSImport }
 
@@ -25,8 +25,7 @@ import japgolly.scalajs.react.vdom.html_<^.*
 object CSS extends js.Any
 
 object RootView {
-  // unusedは scala 3.3で復活する
-  //  @nowarn("cat=unused")
+  @unused
   private val css = CSS
 
   @JSExportAll
