@@ -22,6 +22,9 @@ object NovelDrawer {
 
       React.Fragment(
         <.div(tNovel.title),
+        <.div(s"${tNovel.length} 文字"),
+        <.div(s"${tNovel.genre.text}"),
+        <.div(tNovel.keywords.mkString("[", ", ", "]")),
         <.div(<.a(^.href := tUrl)(tUrl)),
         <.div(Button.`type`(antdStrings.link).onClick(_ => tScope.modState(v => !v)).size(antdStrings.small)("あらすじ")),
         Drawer
