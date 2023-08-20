@@ -22,7 +22,7 @@ object NovelDrawer {
 
       React.Fragment(
         <.div(tNovel.title),
-        <.div(s"${tNovel.length} 文字"),
+        <.div(f"${tNovel.length}%,3d 文字"),
         <.div(s"${tNovel.genre.text}"),
         <.div(tNovel.keywords.mkString("[", ", ", "]")),
         <.div(<.a(^.href := tUrl)(tUrl)),
