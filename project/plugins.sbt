@@ -1,6 +1,6 @@
 // resolvers += Resolver.bintrayRepo("oyvindberg", "converter")
 
-addSbtPlugin("org.scalameta"  % "sbt-scalafmt" % "2.5.0")
+addSbtPlugin("org.scalameta"  % "sbt-scalafmt" % "2.5.2")
 addSbtPlugin("org.xerial.sbt" % "sbt-pack"     % "0.17")
 
 addSbtPlugin("org.scala-js"       % "sbt-scalajs"              % "1.13.2")
