@@ -1,5 +1,5 @@
 // このファイルをgithub actionsのcacheで監視することで、バージョンごと保存するキャッシュを分離する
 // こうしておかないとScalablyTypedのキャッシュが無限に大きくなる
-addSbtPlugin("org.scalablytyped.converter" % "sbt-converter" % "1.0.0-beta43")
+addSbtPlugin("org.scalablytyped.converter" % "sbt-converter" % "1.0.0-beta44")
 
 ThisBuild / libraryDependencySchemes += "org.scala-lang.modules" %% "scala-xml" % VersionScheme.Always
