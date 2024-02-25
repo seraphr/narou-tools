@@ -195,8 +195,7 @@ object ScatterData {
             (tNovelWithValues.takeRight(aWindow), tNovelWithValues(i))
           case i                              =>
             // 通常は、対象の小説を中心に、前後 (aWindow / 2)をとる
-            val tFrom = i - aWindow / 2
-            (tNovelWithValues.slice(tFrom, tFrom + aWindow), tNovelWithValues(i))
+            val tFrom = i - aWindow / 2 (tNovelWithValues.slice(tFrom, tFrom + aWindow), tNovelWithValues(i))
         }
         .filter { case (ns, n) =>
           val values = ns.map(_.yValue)
