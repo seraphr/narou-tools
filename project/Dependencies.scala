@@ -21,7 +21,7 @@ object Dependencies {
     val logback       = "ch.qos.logback"    % "logback-classic"  % "1.5.6"
     val monix         = "io.monix"         %% "monix"            % monixVersion
     val monixReactive = "io.monix"         %% "monix-reactive"   % monixVersion
-    val dropbox       = "com.dropbox.core"  % "dropbox-core-sdk" % "6.1.0"
+    val dropbox       = "com.dropbox.core"  % "dropbox-core-sdk" % "7.0.0"
 
     val circe = Seq(
       "io.circe" %% "circe-core",
