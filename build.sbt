@@ -23,7 +23,9 @@ val commonSettings = Def.settings(
       "-feature",
       "-deprecation",
       "-unchecked",
-      "-Wunused:imports,locals,privates,params"
+      "-Wunused:imports,locals,privates,params",
+      "-Xmax-inlines",
+      "64"
     )
     val tInCI = Seq(
       "-Werror"
