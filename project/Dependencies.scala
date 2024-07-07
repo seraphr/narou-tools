@@ -60,7 +60,7 @@ object Dependencies {
       ).map(_ % monocleVersion)
     )
 
-    val fastparse = Def.setting("com.lihaoyi" %%% "fastparse" % "3.1.0")
+    val fastparse = Def.setting("com.lihaoyi" %%% "fastparse" % "3.1.1")
   }
 
   object js {
