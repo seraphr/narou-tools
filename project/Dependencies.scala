@@ -41,8 +41,8 @@ object Dependencies {
     val scalajsDom    = Def.setting("org.scala-js" %%% "scalajs-dom" % "2.8.0")
     val scalatest     = Def.setting("org.scalatest" %%% "scalatest" % scalatestVersion)
     val scalacheck    = Def.setting("org.scalatestplus" %%% "scalacheck-1-17" % scalatestplusVersion)
-    val reactjs       = Def.setting("com.github.japgolly.scalajs-react" %%% "core" % "2.1.1")
-    val reactjsExtra  = Def.setting("com.github.japgolly.scalajs-react" %%% "extra" % "2.1.1")
+    val reactjs       = Def.setting("com.github.japgolly.scalajs-react" %%% "core" % "2.1.2")
+    val reactjsExtra  = Def.setting("com.github.japgolly.scalajs-react" %%% "extra" % "2.1.2")
     val monixReactive = Def.setting("io.monix" %%% "monix-reactive" % monixVersion)
     val monoids       = Def.setting("org.typelevel" %%% "monoids" % "0.2.0")
     val circe         = Def.setting(
