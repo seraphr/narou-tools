@@ -46,8 +46,8 @@ object Sandbox extends App {
           val tUrl      = s"http://ncode.syosetu.com/${tNovel.getNcode}/"
           val tKeywords = s"[${tNovel.getKeyword}]"
           val tRateStr  = "%.4f".format(tRate)
-          val tLine     = s"${tIndex + 1}\t${tUrl}\t${tNovel.getNumberOfChar}\t${tNovel.getAllPoint}\t${tNovel
-              .getFavCount}\t${tRateStr}\t${tNovel.getTitle.replaceAll("[\r\n]", "")}\t${tKeywords}\n"
+          val tLine     =
+            s"${tIndex + 1}\t${tUrl}\t${tNovel.getNumberOfChar}\t${tNovel.getAllPoint}\t${tNovel.getFavCount}\t${tRateStr}\t${tNovel.getTitle.replaceAll("[\r\n]", "")}\t${tKeywords}\n"
 
           tWriter.write(tLine)
         }
