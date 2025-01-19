@@ -11,7 +11,7 @@ object ScatterChart {
 
   private val component = JsComponent[Props, Children.Varargs, Null](mod.ScatterChart.^)
 
-  def apply(p: Props)(children: CtorType.ChildArg*): JsComponent.Unmounted[Props, Null] = component
-    .apply(p)(children: _*)
+  def apply(p: Props)(children: CtorType.ChildArg*): JsComponent.Unmounted[Props, Null] =
+    component.apply(p)(children: _*)
 
 }

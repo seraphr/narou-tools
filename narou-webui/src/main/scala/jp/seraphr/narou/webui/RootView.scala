@@ -55,12 +55,27 @@ object RootView {
     val tWindow          = 300
     Seq(
       ScatterData.range(Some(NovelCondition.all), tWindow, RangeFilter.iqrUpperOutlier, "blue"),
-      ScatterData
-        .representative(Some(NovelCondition.all), tInterval, tMinSectionCount, RepresentativeData.top, "skyblue"),
-      ScatterData
-        .representative(Some(NovelCondition.finished), tInterval, tMinSectionCount, RepresentativeData.average, "red"),
-      ScatterData
-        .representative(Some(NovelCondition.finished), tInterval, tMinSectionCount, RepresentativeData.mean, "orange"),
+      ScatterData.representative(
+        Some(NovelCondition.all),
+        tInterval,
+        tMinSectionCount,
+        RepresentativeData.top,
+        "skyblue"
+      ),
+      ScatterData.representative(
+        Some(NovelCondition.finished),
+        tInterval,
+        tMinSectionCount,
+        RepresentativeData.average,
+        "red"
+      ),
+      ScatterData.representative(
+        Some(NovelCondition.finished),
+        tInterval,
+        tMinSectionCount,
+        RepresentativeData.mean,
+        "orange"
+      ),
       ScatterData.representative(
         Some(NovelCondition.finished.not),
         tInterval,

@@ -14,7 +14,9 @@ object Sandbox extends App {
     NarouRankSettings()
       .limit(100)
       //      .n(_.setPickup(true))
-      .n(_.setCharacterLength(100000, Int.MaxValue)).n(_.setSearchWord("溺愛")).addFilter(tFav <= _.getFavCount)
+      .n(_.setCharacterLength(100000, Int.MaxValue))
+      .n(_.setSearchWord("溺愛"))
+      .addFilter(tFav <= _.getFavCount)
     //      .addFilter(_.getIsNovelContinue == 1)
   }
 
@@ -47,7 +49,8 @@ object Sandbox extends App {
           val tKeywords = s"[${tNovel.getKeyword}]"
           val tRateStr  = "%.4f".format(tRate)
           val tLine     =
-            s"${tIndex + 1}\t${tUrl}\t${tNovel.getNumberOfChar}\t${tNovel.getAllPoint}\t${tNovel.getFavCount}\t${tRateStr}\t${tNovel.getTitle.replaceAll("[\r\n]", "")}\t${tKeywords}\n"
+            s"${tIndex + 1}\t${tUrl}\t${tNovel.getNumberOfChar}\t${tNovel.getAllPoint}\t${tNovel
+                .getFavCount}\t${tRateStr}\t${tNovel.getTitle.replaceAll("[\r\n]", "")}\t${tKeywords}\n"
 
           tWriter.write(tLine)
         }

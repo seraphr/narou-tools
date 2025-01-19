@@ -36,7 +36,9 @@ class StoreWrapper[State, Props, WrappedProps](aContext: Context[State])(aToProp
 object StoreWrapper {
 
   /** 対象コンポーネントをwrapして、PropsがUnitなコンポーネントを生成するStoreWrapperを作る */
-  def wrapCompletely[State, Props](aContext: Context[State])(aToProps: State => Props): StoreWrapper[State, Props, Unit] =
+  def wrapCompletely[State, Props](aContext: Context[State])(
+      aToProps: State => Props
+  ): StoreWrapper[State, Props, Unit] =
     new StoreWrapper(aContext)((s, _) => aToProps(s))
 
   /** 対象コンポーネントをwrapして、PropsがWrappedPropsなコンポーネントを生成するStoreWrapperを作る */

@@ -39,8 +39,9 @@ object NovelScatterChart {
   )
 
   object Props {
-    implicit val propsReusable: Reusability[Props] = Reusability
-      .by[Props, Seq[Any]](p => Seq(p.axisX, p.axisY, p.novels, p.selectedNovel, p.scatters))(Reusability.by_==)
+    implicit val propsReusable: Reusability[Props] = Reusability.by[Props, Seq[Any]](p =>
+      Seq(p.axisX, p.axisY, p.novels, p.selectedNovel, p.scatters)
+    )(Reusability.by_==)
 
   }
 
