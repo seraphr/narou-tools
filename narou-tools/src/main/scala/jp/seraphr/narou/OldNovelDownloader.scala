@@ -89,6 +89,7 @@ object OldNovelDownloaderMain extends App {
     }
     .filter(identity)            // ダウンロードが1つ以上行われたものを数える
     .take(500)                   // とりあえず1000ノベルダウンロード
-    .zipWithIndex.foreach(println)
+    .zipWithIndex
+    .foreach(println)
 
 }
