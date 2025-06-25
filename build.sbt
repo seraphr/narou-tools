@@ -122,6 +122,9 @@ lazy val `narou-webui` = (project in file("narou-webui"))
   .enablePlugins(SitePreviewPlugin)
   .settings(commonSettings)
   .settings(
+    scalacOptions ++= Seq(
+      "-Wconf:cat=deprecation&msg=linkingInfo:i"
+    ),
     scalaJSUseMainModuleInitializer  := true,
     libraryDependencies ++= Seq(
       scalajs.reactjs.value,
