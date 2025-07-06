@@ -11,6 +11,7 @@ object Dependencies {
   val circeVersion         = "0.14.10"
   val monixVersion         = "3.4.1"
   val monocleVersion       = "3.3.0"
+  val sttpVersion          = "4.0.9"
 
   object jvm {
     val scalaTest     = "org.scalatest"    %% "scalatest"        % scalatestVersion
@@ -61,6 +62,14 @@ object Dependencies {
     )
 
     val fastparse = Def.setting("com.lihaoyi" %%% "fastparse" % "3.1.1")
+    val sttp      = Def.setting(
+      Seq(
+        "com.softwaremill.sttp.client4" %%% "core",
+        "com.softwaremill.sttp.client4" %%% "circe",
+        "com.softwaremill.sttp.client4" %%% "monix"
+      ).map(_ % sttpVersion)
+    )
+
   }
 
   object js {

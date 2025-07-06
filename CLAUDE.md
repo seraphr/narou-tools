@@ -75,6 +75,7 @@ This is a multi-module Scala 3 project using SBT with cross-platform compilation
 Tests use ScalaTest with ScalaCheck property-based testing. Key test file:
 
 - `NovelConditionParserTest.scala` - Comprehensive parser tests with property-based testing
+- テストには`AsyncFreeSpec` / `AnyFreeSpec`を利用する
 
 ## Development Notes
 
@@ -96,3 +97,63 @@ Tests use ScalaTest with ScalaCheck property-based testing. Key test file:
 - State management using custom `AppState` with `StoreProvider`
 - Visualization with Recharts for scatter plots and data analysis
 - Local development uses dummy data, production connects to Dropbox
+
+## コーディング規約
+
+### 命名規則
+
+#### 変数名プレフィックス
+
+- t - 一時的・ローカル変数：tConditions, tNovelPredicate, tConfig
+- a - メソッド引数：aArgs, aBuilder, aMinLength, aSkip
+- m - プライベートフィールド：mLimit, mMaxSkip, mParser
+
+ただし、意味的に引数でも
+
+#### 変数名
+
+変数名には名詞句もしくは動詞句を利用する。
+基本的には関数名には動詞句を利用し、それ以外には名詞句を利用する。
+名前に記号は利用しない。
+
+class、trait、object のメンバーも同様である。
+
+##### 例外
+
+###### 関数が、第一級関数の値として持ち運ばれるとき、その変数を名詞句としても良い
+
+```scala
+def search(aHumanFilter: Human => boolean): Seq[Human]
+```
+
+###### コレクションの添字や for のループ変数に`i`, `j`, `k`などの１文字の変数を利用しても良い
+
+```scala
+array.zipWithIndex.foreach((tElement, i) => println(`${i}: ${element}`))
+```
+
+###### 十分にスコープが小さい時、その適切な名前の略語や先頭 1 文字の変数を使っても良い
+
+```scala
+conditions.foreach(c => c.apply(object))
+numbers.reduceLeft(0)((tAcc, tNum) => tAcc + tNum)
+```
+
+### テスト
+
+- テスト名には日本語を使用する
+- テスト名は以下の例の様に`〇〇である時、□□をすると、～であること`など、どういう性質をテストしているのかが分かりやすい名前にすること
+- コードを追加・修正するときは、それに対応するユニットテストを常に追加・修正する
+
+### コメント
+
+- コメントは日本語で記述する
+- public なメンバーには必ずコメントを記述する
+  - 特に、型情報ではわからない値は、フォーマットや単位を明記する。
+
+### 関数型プログラミングを重視する
+
+- 純粋関数を優先
+- 基本的に不変データ構造を利用・定義する
+- 副作用の分離と局所化を行う
+- 型安全性を確保する

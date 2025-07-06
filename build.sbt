@@ -75,6 +75,20 @@ lazy val `narou-libs-model` = crossProject(JVMPlatform, JSPlatform)
 lazy val modelJVM = `narou-libs-model`.jvm
 lazy val modelJS  = `narou-libs-model`.js
 
+lazy val `narou-api-client` = crossProject(JVMPlatform, JSPlatform)
+  .crossType(CrossType.Full)
+  .in(file("narou-api-client"))
+  .settings(
+    libraryDependencies ++= Seq(
+      scalajs.monixReactive.value,
+      scalajs.scalatest.value % "test"
+    ) ++ scalajs.circe.value ++ scalajs.sttp.value
+  )
+  .settings(commonSettings)
+
+lazy val `narou-api-clientJVM` = `narou-api-client`.jvm
+lazy val `narou-api-clientJS`  = `narou-api-client`.js
+
 lazy val `narou-libs` = (project in file("narou-libs"))
   .settings(
     libraryDependencies ++= Seq(
