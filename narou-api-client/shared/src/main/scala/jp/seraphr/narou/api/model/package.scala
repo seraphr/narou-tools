@@ -14,6 +14,15 @@ package object model {
       novels: List[NovelInfo]
   )
 
+  enum BigGenre (val id: Int, val name: String) {
+    case Romance extends BigGenre(1, "恋愛")
+    case Fantasy extends BigGenre(2, "ファンタジー")
+    case Literature extends BigGenre(3, "文芸")
+    case SF extends BigGenre(4, "SF")
+    case Other extends BigGenre(99, "その他")
+    case NonGenre extends BigGenre(98, "ノンジャンル")
+  }
+
   /**
    * なろう小説APIから取得される小説情報
    *
