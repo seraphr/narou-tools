@@ -1,6 +1,6 @@
 package jp.seraphr.narou.api
 
-import jp.seraphr.narou.api.model.SearchParams
+import jp.seraphr.narou.api.model.{ BigGenre, SearchParams }
 
 import monix.eval.Task
 import monix.execution.Scheduler
@@ -35,8 +35,6 @@ class NarouApiClientIntegrationTest extends AsyncFreeSpec with Matchers {
                         novel.title should not be empty
                         novel.ncode should not be empty
                         novel.writer should not be empty
-                        novel.biggenre should be >= 0
-                        novel.genre should be >= 0
                       } else {
                         result.novels should be(empty)
                       }
@@ -116,9 +114,9 @@ class NarouApiClientIntegrationTest extends AsyncFreeSpec with Matchers {
 
     "複数の検索パラメータを組み合わせたテスト" in {
       val params = SearchParams(
-        biggenre = Some(1),   // ハイファンタジー
+        biggenre = Some(BigGenre.Romance), // 恋愛
         lim = Some(1),
-        order = Some("hyoka") // 評価順
+        order = Some("hyoka")              // 評価順
       )
 
       for {
@@ -131,7 +129,7 @@ class NarouApiClientIntegrationTest extends AsyncFreeSpec with Matchers {
                       if (result.allcount > 0) {
                         result.novels should not be empty
                         val novel = result.novels.head
-                        novel.biggenre should be(1) // ハイファンタジーであることを確認
+                        novel.biggenre should be(BigGenre.Romance) // 恋愛であることを確認
                       }
                       succeed
                     }

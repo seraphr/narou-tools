@@ -14,13 +14,49 @@ package object model {
       novels: List[NovelInfo]
   )
 
-  enum BigGenre (val id: Int, val name: String) {
-    case Romance extends BigGenre(1, "恋愛")
-    case Fantasy extends BigGenre(2, "ファンタジー")
+  enum BigGenre(val id: Int, val name: String) {
+    case Unselected extends BigGenre(0, "未選択")
+    case Romance    extends BigGenre(1, "恋愛")
+    case Fantasy    extends BigGenre(2, "ファンタジー")
     case Literature extends BigGenre(3, "文芸")
-    case SF extends BigGenre(4, "SF")
-    case Other extends BigGenre(99, "その他")
-    case NonGenre extends BigGenre(98, "ノンジャンル")
+    case SF         extends BigGenre(4, "SF")
+    case NonGenre   extends BigGenre(98, "ノンジャンル")
+    case Other      extends BigGenre(99, "その他")
+  }
+
+  enum Genre(val id: Int, val name: String) {
+    case Unselected     extends Genre(0, "未選択")
+    // 恋愛
+    case RomanceIsekai  extends Genre(101, "異世界〔恋愛〕")
+    case RomanceReality extends Genre(102, "現実世界〔恋愛〕")
+    // ファンタジー
+    case HighFantasy    extends Genre(201, "ハイファンタジー〔ファンタジー〕")
+    case LowFantasy     extends Genre(202, "ローファンタジー〔ファンタジー〕")
+    // 文芸
+    case PureLiterature extends Genre(301, "純文学〔文芸〕")
+    case HumanDrama     extends Genre(302, "ヒューマンドラマ〔文芸〕")
+    case History        extends Genre(303, "歴史〔文芸〕")
+    case Mystery        extends Genre(304, "推理〔文芸〕")
+    case Horror         extends Genre(305, "ホラー〔文芸〕")
+    case Action         extends Genre(306, "アクション〔文芸〕")
+    case Comedy         extends Genre(307, "コメディー〔文芸〕")
+    // SF
+    case VRGame         extends Genre(401, "VRゲーム〔SF〕")
+    case Space          extends Genre(402, "宇宙〔SF〕")
+    case Science        extends Genre(403, "空想科学〔SF〕")
+    case Panic          extends Genre(404, "パニック〔SF〕")
+    // その他
+    case Fairy          extends Genre(9901, "童話〔その他〕")
+    case Poetry         extends Genre(9902, "詩〔その他〕")
+    case Essay          extends Genre(9903, "エッセイ〔その他〕")
+    case Replay         extends Genre(9904, "リプレイ〔その他〕")
+    case OtherMisc      extends Genre(9999, "その他")
+    case NonGenreDetail extends Genre(9801, "ノンジャンル")
+  }
+
+  enum NovelType(val id: Int, val name: String) {
+    case Short  extends NovelType(1, "短編")
+    case Serial extends NovelType(2, "連載")
   }
 
   /**
@@ -31,24 +67,24 @@ package object model {
    *  @param userid 作者のユーザID
    *  @param writer 作者名
    *  @param story 小説のあらすじ
-   *  @param biggenre 大ジャンル（1:恋愛 2:ファンタジー 3:文芸 4:SF 99:その他 98:ノンジャンル）
-   *  @param genre 詳細ジャンル（101:異世界〔恋愛〕 102:現実世界〔恋愛〕 201:ハイファンタジー〔ファンタジー〕 202:ローファンタジー〔ファンタジー〕等）
+   *  @param biggenre 大ジャンル
+   *  @param genre 詳細ジャンル
    *  @param gensaku 原作の有無（なし:空文字、有り:原作名）
    *  @param keyword キーワード（スペース区切り）
    *  @param general_firstup 初回掲載日時（YYYY-MM-DD HH:MM:SS）
    *  @param general_lastup 最終掲載日時（YYYY-MM-DD HH:MM:SS）
-   *  @param novel_type 小説の種類（1:短編 2:連載中 3:完結済み）
-   *  @param end 完結済みかどうか（0:連載中 1:完結済み）
+   *  @param novel_type 小説の種類
+   *  @param end 完結済みかどうか
    *  @param general_all_no 全話数
    *  @param length 総文字数
    *  @param time 読了時間（分）
-   *  @param isstop 長期間連載停止中かどうか（0:連載中 1:停止中）
-   *  @param isr15 R15指定（0:なし 1:あり）
-   *  @param isbl ボーイズラブ指定（0:なし 1:あり）
-   *  @param isgl ガールズラブ指定（0:なし 1:あり）
-   *  @param iszankoku 残酷な描写指定（0:なし 1:あり）
-   *  @param istensei 異世界転生指定（0:なし 1:あり）
-   *  @param istenni 異世界転移指定（0:なし 1:あり）
+   *  @param isstop 長期間連載停止中かどうか
+   *  @param isr15 R15指定
+   *  @param isbl ボーイズラブ指定
+   *  @param isgl ガールズラブ指定
+   *  @param iszankoku 残酷な描写指定
+   *  @param istensei 異世界転生指定
+   *  @param istenni 異世界転移指定
    *  @param global_point 総合評価ポイント
    *  @param daily_point 日間ポイント
    *  @param weekly_point 週間ポイント
@@ -71,24 +107,24 @@ package object model {
       userid: Int,
       writer: String,
       story: String,
-      biggenre: Int,
-      genre: Int,
+      biggenre: BigGenre,
+      genre: Genre,
       gensaku: String,
       keyword: String,
       general_firstup: String,
       general_lastup: String,
-      novel_type: Int,
-      end: Int,
+      novel_type: NovelType,
+      end: Boolean,
       general_all_no: Int,
       length: Int,
       time: Int,
-      isstop: Int,
-      isr15: Int,
-      isbl: Int,
-      isgl: Int,
-      iszankoku: Int,
-      istensei: Int,
-      istenni: Int,
+      isstop: Boolean,
+      isr15: Boolean,
+      isbl: Boolean,
+      isgl: Boolean,
+      iszankoku: Boolean,
+      istensei: Boolean,
+      istenni: Boolean,
       global_point: Int,
       daily_point: Int,
       weekly_point: Int,
@@ -111,9 +147,9 @@ package object model {
    *
    *  @param word 検索キーワード（部分一致、スペース区切りでAND検索）
    *  @param notword 除外キーワード（部分一致、スペース区切りでAND検索）
-   *  @param biggenre 大ジャンル（1:恋愛 2:ファンタジー 3:文芸 4:SF 99:その他 98:ノンジャンル）
+   *  @param biggenre 大ジャンル
    *  @param notbiggenre 除外大ジャンル
-   *  @param genre 詳細ジャンル（101:異世界〔恋愛〕 102:現実世界〔恋愛〕 201:ハイファンタジー〔ファンタジー〕等）
+   *  @param genre 詳細ジャンル
    *  @param notgenre 除外詳細ジャンル
    *  @param userid 作者のユーザID
    *  @param ncode 小説のユニークコード（Nコード）
@@ -121,18 +157,18 @@ package object model {
    *  @param ex 除外小説名完全一致
    *  @param keyword キーワード完全一致
    *  @param wname 作者名完全一致
-   *  @param isr15 R15指定作品のみ（1:含む）
-   *  @param isbl ボーイズラブ作品のみ（1:含む）
-   *  @param isgl ガールズラブ作品のみ（1:含む）
-   *  @param iszankoku 残酷描写作品のみ（1:含む）
-   *  @param istensei 異世界転生作品のみ（1:含む）
-   *  @param istenni 異世界転移作品のみ（1:含む）
-   *  @param notr15 R15指定作品除外（1:除外）
-   *  @param notbl ボーイズラブ作品除外（1:除外）
-   *  @param notgl ガールズラブ作品除外（1:除外）
-   *  @param notzankoku 残酷描写作品除外（1:除外）
-   *  @param nottensei 異世界転生作品除外（1:除外）
-   *  @param nottenni 異世界転移作品除外（1:除外）
+   *  @param isr15 R15指定作品のみ
+   *  @param isbl ボーイズラブ作品のみ
+   *  @param isgl ガールズラブ作品のみ
+   *  @param iszankoku 残酷描写作品のみ
+   *  @param istensei 異世界転生作品のみ
+   *  @param istenni 異世界転移作品のみ
+   *  @param notr15 R15指定作品除外
+   *  @param notbl ボーイズラブ作品除外
+   *  @param notgl ガールズラブ作品除外
+   *  @param notzankoku 残酷描写作品除外
+   *  @param nottensei 異世界転生作品除外
+   *  @param nottenni 異世界転移作品除外
    *  @param minlen 最小文字数
    *  @param maxlen 最大文字数
    *  @param length 文字数範囲（1-4、1:短編 2:中編 3:長編 4:超長編）
@@ -159,28 +195,28 @@ package object model {
   case class SearchParams(
       word: Option[String] = None,
       notword: Option[String] = None,
-      biggenre: Option[Int] = None,
-      notbiggenre: Option[Int] = None,
-      genre: Option[Int] = None,
-      notgenre: Option[Int] = None,
+      biggenre: Option[BigGenre] = None,
+      notbiggenre: Option[BigGenre] = None,
+      genre: Option[Genre] = None,
+      notgenre: Option[Genre] = None,
       userid: Option[Int] = None,
       ncode: Option[String] = None,
       title: Option[String] = None,
       ex: Option[String] = None,
       keyword: Option[String] = None,
       wname: Option[String] = None,
-      isr15: Option[Int] = None,
-      isbl: Option[Int] = None,
-      isgl: Option[Int] = None,
-      iszankoku: Option[Int] = None,
-      istensei: Option[Int] = None,
-      istenni: Option[Int] = None,
-      notr15: Option[Int] = None,
-      notbl: Option[Int] = None,
-      notgl: Option[Int] = None,
-      notzankoku: Option[Int] = None,
-      nottensei: Option[Int] = None,
-      nottenni: Option[Int] = None,
+      isr15: Option[Boolean] = None,
+      isbl: Option[Boolean] = None,
+      isgl: Option[Boolean] = None,
+      iszankoku: Option[Boolean] = None,
+      istensei: Option[Boolean] = None,
+      istenni: Option[Boolean] = None,
+      notr15: Option[Boolean] = None,
+      notbl: Option[Boolean] = None,
+      notgl: Option[Boolean] = None,
+      notzankoku: Option[Boolean] = None,
+      nottensei: Option[Boolean] = None,
+      nottenni: Option[Boolean] = None,
       minlen: Option[Int] = None,
       maxlen: Option[Int] = None,
       length: Option[Int] = None,
@@ -189,11 +225,11 @@ package object model {
       time: Option[Int] = None,
       kaiwaritu: Option[Int] = None,
       sasie: Option[Int] = None,
-      `type`: Option[Int] = None,
+      `type`: Option[NovelType] = None,
       buntai: Option[Int] = None,
-      stop: Option[Int] = None,
-      ncode_out: Option[Int] = None,
-      pickup: Option[Int] = None,
+      stop: Option[Boolean] = None,
+      ncode_out: Option[Boolean] = None,
+      pickup: Option[Boolean] = None,
       lastup: Option[String] = None,
       firstup: Option[String] = None,
       impdate: Option[String] = None,
@@ -202,6 +238,48 @@ package object model {
       st: Option[Int] = None,
       opt: Option[String] = None
   )
+
+  // Enum用のコンパニオンオブジェクトを追加
+  object BigGenre {
+    def fromId(id: Int): Option[BigGenre] = BigGenre.values.find(_.id == id)
+  }
+
+  object Genre {
+    def fromId(id: Int): Option[Genre] = Genre.values.find(_.id == id)
+  }
+
+  object NovelType {
+    def fromId(id: Int): Option[NovelType] = NovelType.values.find(_.id == id)
+  }
+
+  // カスタムデコーダー/エンコーダー
+  implicit val bigGenreDecoder: Decoder[BigGenre] = Decoder
+    .decodeInt
+    .emap { id =>
+      BigGenre.fromId(id).toRight(s"Invalid BigGenre id: $id")
+    }
+
+  implicit val bigGenreEncoder: Encoder[BigGenre] = Encoder.encodeInt.contramap(_.id)
+
+  implicit val genreDecoder: Decoder[Genre] = Decoder
+    .decodeInt
+    .emap { id =>
+      Genre.fromId(id).toRight(s"Invalid Genre id: $id")
+    }
+
+  implicit val genreEncoder: Encoder[Genre] = Encoder.encodeInt.contramap(_.id)
+
+  implicit val novelTypeDecoder: Decoder[NovelType] = Decoder
+    .decodeInt
+    .emap { id =>
+      NovelType.fromId(id).toRight(s"Invalid NovelType id: $id")
+    }
+
+  implicit val novelTypeEncoder: Encoder[NovelType] = Encoder.encodeInt.contramap(_.id)
+
+  // Boolean型のAPIフィールド用（0/1 <-> Boolean）
+  implicit val booleanFromIntDecoder: Decoder[Boolean] = Decoder.decodeInt.map(_ == 1)
+  implicit val booleanToIntEncoder: Encoder[Boolean]   = Encoder.encodeInt.contramap(if (_) 1 else 0)
 
   implicit val novelInfoDecoder: Decoder[NovelInfo] = deriveDecoder[NovelInfo]
   implicit val novelInfoEncoder: Encoder[NovelInfo] = deriveEncoder[NovelInfo]
