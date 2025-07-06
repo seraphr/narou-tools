@@ -8,7 +8,7 @@ object NarouApiClientPlatform {
 
   /** JS用のクライアントを作成する */
   def create(): Task[NarouApiClient] = {
-    Task.now(new NarouApiClientImpl(FetchMonixBackend()))
+    Task.now(new NarouApiClientImpl(FetchMonixBackend(), gzipDecoder = None))
   }
 
 }

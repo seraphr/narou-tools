@@ -191,9 +191,7 @@ package object model {
       order: Option[String] = None,
       lim: Option[Int] = None,
       st: Option[Int] = None,
-      of: Option[String] = None,
-      opt: Option[String] = None,
-      out: Option[String] = None
+      opt: Option[String] = None
   )
 
   implicit val novelInfoDecoder: Decoder[NovelInfo] = deriveDecoder[NovelInfo]

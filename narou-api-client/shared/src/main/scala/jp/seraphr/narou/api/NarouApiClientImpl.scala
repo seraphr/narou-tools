@@ -7,25 +7,32 @@ import jp.seraphr.narou.api.model.given
 
 import monix.eval.Task
 import sttp.client4._
-import sttp.client4.circe.asJson
+import sttp.client4.circe.{ asJson, deserializeJson }
 
 /** なろう小説APIクライアントの実装 */
-class NarouApiClientImpl(backend: Backend[Task]) extends NarouApiClient {
+class NarouApiClientImpl(backend: Backend[Task], gzipDecoder: Option[Array[Byte] => Array[Byte]]) extends NarouApiClient {
 
-  private val baseUrl = "https://api.syosetu.com/novelapi/api/"
+  private val baseUrl    = "https://api.syosetu.com/novelapi/api/"
+  private val mGzipQuery = Option.when(gzipDecoder.isDefined)("gzip=5")
 
   override def search(aParams: SearchParams): Task[NovelApiResponse] = {
     val tQueryParams = buildQueryParams(aParams)
     val tFullUrl     = s"$baseUrl?$tQueryParams"
 
-    val tRequest = basicRequest.get(uri"$tFullUrl").response(asJson[NovelApiResponse]).readTimeout(30.seconds)
+    val tAsJson  = gzipDecoder match {
+      case Some(d) =>
+        asByteArray.mapRight((ba: Array[Byte]) => new String(d(ba))).map(_.flatMap(deserializeJson[NovelApiResponse]))
+      case None    => asJson[NovelApiResponse]
+    }
+    val tRequest = basicRequest.get(uri"$tFullUrl").response(tAsJson).readTimeout(30.seconds)
 
     backend
       .send(tRequest)
       .map { tResponse =>
         tResponse.body match {
-          case Right(tApiResponse) => tApiResponse
-          case Left(tError)        => throw new RuntimeException(s"API request failed: $tError")
+          case Right(tApiResponse)     => tApiResponse
+          case Left(tError: Throwable) => throw new RuntimeException(s"API request failed", tError)
+          case Left(tError)            => throw new RuntimeException(s"API request failed: $tError")
         }
       }
   }
@@ -75,13 +82,11 @@ class NarouApiClientImpl(backend: Backend[Task]) extends NarouApiClient {
       "order"       -> aParams.order,
       "lim"         -> aParams.lim.map(_.toString),
       "st"          -> aParams.st.map(_.toString),
-      "of"          -> aParams.of,
       "opt"         -> aParams.opt
     ).collect { case (tKey, Some(tValue)) => s"$tKey=$tValue" }
 
     // 常にJSON出力を要求
-    val tOutParam  = aParams.out.getOrElse("json")
-    val tAllParams = tBaseQueryMap ++ Seq(s"out=$tOutParam")
+    val tAllParams = tBaseQueryMap ++ Seq(Option("out=json"), mGzipQuery).flatten
 
     tAllParams.mkString("&")
   }

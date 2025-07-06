@@ -1,7 +1,5 @@
 package jp.seraphr.narou.api
 
-import scala.concurrent.duration._
-
 import jp.seraphr.narou.api.model.SearchParams
 
 import monix.eval.Task
