@@ -3,18 +3,12 @@ package jp.seraphr.narou.api
 import jp.seraphr.narou.api.model.SearchParams
 
 import monix.eval.Task
-import monix.execution.Scheduler.Implicits.global
-import org.scalatest.BeforeAndAfterAll
+import monix.execution.Scheduler
 import org.scalatest.freespec.AsyncFreeSpec
 import org.scalatest.matchers.should.Matchers
 
-class NarouApiClientIntegrationTest extends AsyncFreeSpec with Matchers with BeforeAndAfterAll {
-
-  var clientOpt: Option[NarouApiClient] = None
-
-  override def beforeAll(): Unit = {
-    super.beforeAll()
-  }
+class NarouApiClientIntegrationTest extends AsyncFreeSpec with Matchers {
+  implicit override def executionContext: Scheduler = Scheduler.global
 
   private val client: Task[NarouApiClient] = NarouApiClientPlatform.create()
 
