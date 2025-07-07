@@ -47,7 +47,7 @@ class NarouApiClientIntegrationTest extends AsyncFreeSpec with Matchers {
       for {
         client <- this.client
         _      <- client
-                    .searchByWord("魔法", limit = 1)
+                    .searchByWord("魔法", aLimit = 1)
                     .map { result =>
                       result.allcount should be >= 0
 
@@ -90,7 +90,7 @@ class NarouApiClientIntegrationTest extends AsyncFreeSpec with Matchers {
       for {
         client <- this.client
         _      <- client
-                    .searchByWord("小説", limit = 1)
+                    .searchByWord("小説", aLimit = 1)
                     .flatMap { searchResult =>
                       if (searchResult.allcount > 0) {
                         val ncode = searchResult.novels.head.ncode

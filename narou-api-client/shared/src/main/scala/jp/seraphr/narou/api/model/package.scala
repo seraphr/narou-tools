@@ -257,15 +257,21 @@ package object model {
 
   // Enum用のコンパニオンオブジェクトを追加
   object BigGenre {
-    def fromId(id: Int): Option[BigGenre] = BigGenre.values.find(_.id == id)
+
+    /** IDからBigGenreを取得します */
+    def fromId(aId: Int): Option[BigGenre] = BigGenre.values.find(_.id == aId)
   }
 
   object Genre {
-    def fromId(id: Int): Option[Genre] = Genre.values.find(_.id == id)
+
+    /** IDからGenreを取得します */
+    def fromId(aId: Int): Option[Genre] = Genre.values.find(_.id == aId)
   }
 
   object NovelType {
-    def fromId(id: Int): Option[NovelType] = NovelType.values.find(_.id == id)
+
+    /** IDからNovelTypeを取得します */
+    def fromId(aId: Int): Option[NovelType] = NovelType.values.find(_.id == aId)
   }
 
   // カスタムデコーダー/エンコーダー

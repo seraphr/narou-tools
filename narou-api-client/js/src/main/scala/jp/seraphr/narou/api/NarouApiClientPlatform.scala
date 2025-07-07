@@ -14,78 +14,76 @@ object NarouApiClientPlatform {
 
   /** JS用のクライアントを作成する */
   def create(): Task[NarouApiClient] = {
-    Task.now(new NarouApiClientJS(FetchMonixBackend(), gzipDecoder = None))
+    Task.now(new NarouApiClientJS(FetchMonixBackend(), aGzipDecoder = None))
   }
 
   /** JS用の具象実装 */
-  private class NarouApiClientJS(backend: sttp.client4.Backend[Task], gzipDecoder: Option[Array[Byte] => Array[Byte]])
-      extends NarouApiClientImpl(backend, gzipDecoder) {
+  private class NarouApiClientJS(aBackend: sttp.client4.Backend[Task], aGzipDecoder: Option[Array[Byte] => Array[Byte]])
+      extends NarouApiClientImpl(aBackend, aGzipDecoder) {
 
-    override protected def parseNovelTablePlatform(html: String, ncode: String): List[NovelBody] = {
-      if (html.isEmpty) {
+    override protected def parseNovelTablePlatform(aHtml: String, aNcode: String): List[NovelBody] = {
+      if (aHtml.isEmpty) {
         List.empty
       } else {
-        val parser   = new dom.DOMParser()
-        val doc      = parser.parseFromString(html, org.scalajs.dom.MIMEType.`text/html`)
-        val indexBox = doc.querySelector(".index_box")
-        if (indexBox != null) {
-          val elements = indexBox.children
-          val result   = scala.collection.mutable.ListBuffer[NovelBody]()
+        val tParser   = new dom.DOMParser()
+        val tDoc      = tParser.parseFromString(aHtml, org.scalajs.dom.MIMEType.`text/html`)
+        val tIndexBox = tDoc.querySelector(".index_box")
+        if (tIndexBox != null) {
+          val tElements = tIndexBox.children
 
-          for (i <- 0 until elements.length) {
-            val element = elements(i)
-            element.asInstanceOf[org.scalajs.dom.html.Element].className match {
+          (0 until tElements.length).foldLeft(List.empty[NovelBody]) { (tAcc, tIndex) =>
+            val tElement = tElements(tIndex)
+            tElement.asInstanceOf[org.scalajs.dom.html.Element].className match {
               case "chapter_title"  =>
-                result += NovelBody(
-                  ncode = ncode,
-                  title = element.textContent,
+                tAcc :+ NovelBody(
+                  ncode = aNcode,
+                  title = tElement.textContent,
                   isChapter = true
                 )
               case "novel_sublist2" =>
-                val linkElement = element.querySelector(".subtitle a")
-                if (linkElement != null) {
-                  val href  = linkElement.getAttribute("href")
-                  val parts = href.split("/")
-                  if (parts.length >= 3) {
-                    val pageNumber =
-                      try { parts(2).toInt }
+                val tLinkElement = tElement.querySelector(".subtitle a")
+                if (tLinkElement != null) {
+                  val tHref  = tLinkElement.getAttribute("href")
+                  val tParts = tHref.split("/")
+                  if (tParts.length >= 3) {
+                    val tPageNumber =
+                      try { tParts(2).toInt }
                       catch { case _: NumberFormatException => 0 }
-                    if (pageNumber > 0) {
-                      result += NovelBody(
-                        ncode = ncode,
-                        page = pageNumber,
-                        title = linkElement.textContent,
+                    if (tPageNumber > 0) {
+                      tAcc :+ NovelBody(
+                        ncode = aNcode,
+                        page = tPageNumber,
+                        title = tLinkElement.textContent,
                         isChapter = false
                       )
-                    }
-                  }
-                }
-              case _                => // その他の要素は無視
+                    } else tAcc
+                  } else tAcc
+                } else tAcc
+              case _                => tAcc // その他の要素は無視
             }
           }
-          result.toList
         } else {
           List.empty
         }
       }
     }
 
-    override protected def parseNovelBodyPlatform(html: String, ncode: String, page: Int): NovelBody = {
-      if (html.isEmpty) {
-        NovelBody(ncode = ncode, page = page)
+    override protected def parseNovelBodyPlatform(aHtml: String, aNcode: String, aPage: Int): NovelBody = {
+      if (aHtml.isEmpty) {
+        NovelBody(ncode = aNcode, page = aPage)
       } else {
-        val parser = new dom.DOMParser()
-        val doc    = parser.parseFromString(html, org.scalajs.dom.MIMEType.`text/html`)
+        val tParser = new dom.DOMParser()
+        val tDoc    = tParser.parseFromString(aHtml, org.scalajs.dom.MIMEType.`text/html`)
 
         // タイトル取得
-        val titleElement = doc.querySelector(".novel_subtitle")
-        val title        = if (titleElement != null) titleElement.textContent else ""
+        val tTitleElement = tDoc.querySelector(".novel_subtitle")
+        val tTitle        = if (tTitleElement != null) tTitleElement.textContent else ""
 
         // 本文取得
-        val bodyElement = doc.getElementById("novel_honbun")
-        val body        = if (bodyElement != null) {
-          val rawBody = bodyElement.innerHTML
-          rawBody
+        val tBodyElement = tDoc.getElementById("novel_honbun")
+        val tBody        = if (tBodyElement != null) {
+          val tRawBody = tBodyElement.innerHTML
+          tRawBody
             .replaceAll("<ruby>", "")
             .replaceAll("</ruby>", "")
             .replaceAll("<rb>", "")
@@ -98,10 +96,10 @@ object NarouApiClientPlatform {
         } else ""
 
         NovelBody(
-          ncode = ncode,
-          page = page,
-          title = title,
-          body = body,
+          ncode = aNcode,
+          page = aPage,
+          title = tTitle,
+          body = tBody,
           isChapter = false
         )
       }

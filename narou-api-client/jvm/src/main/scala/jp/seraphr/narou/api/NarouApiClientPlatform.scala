@@ -14,83 +14,83 @@ import sttp.client4.httpclient.monix.HttpClientMonixBackend
 /** JVM用のNarouApiClient実装 */
 object NarouApiClientPlatform {
 
-  private def decompressGzip(data: Array[Byte]): Array[Byte] = {
-    new GZIPInputStream(new ByteArrayInputStream(data)).readAllBytes()
+  private def decompressGzip(aData: Array[Byte]): Array[Byte] = {
+    new GZIPInputStream(new ByteArrayInputStream(aData)).readAllBytes()
   }
 
   /** JVM用のクライアントを作成する */
   def create(): Task[NarouApiClient] = {
-    HttpClientMonixBackend().map(backend => new NarouApiClientJVM(backend, gzipDecoder = Some(decompressGzip)))
+    HttpClientMonixBackend().map(aBackend => new NarouApiClientJVM(aBackend, aGzipDecoder = Some(decompressGzip)))
   }
 
   /** JVM用の具象実装 */
-  private class NarouApiClientJVM(backend: sttp.client4.Backend[Task], gzipDecoder: Option[Array[Byte] => Array[Byte]])
-      extends NarouApiClientImpl(backend, gzipDecoder) {
+  private class NarouApiClientJVM(aBackend: sttp.client4.Backend[Task], aGzipDecoder: Option[Array[Byte] => Array[Byte]])
+      extends NarouApiClientImpl(aBackend, aGzipDecoder) {
 
-    override protected def parseNovelTablePlatform(html: String, ncode: String): List[NovelBody] = {
-      if (html.isEmpty) {
+    override protected def parseNovelTablePlatform(aHtml: String, aNcode: String): List[NovelBody] = {
+      if (aHtml.isEmpty) {
         List.empty
       } else {
-        val document = Jsoup.parse(html)
-        val indexBox = document.select(".index_box").first()
-        if (indexBox != null) {
-          val elements = indexBox.children()
-          val result   = scala.collection.mutable.ListBuffer[NovelBody]()
+        val tDocument = Jsoup.parse(aHtml)
+        val tIndexBox = tDocument.select(".index_box").first()
+        if (tIndexBox != null) {
+          val tElements = tIndexBox.children()
 
-          for (element <- elements.asScala) {
-            element.className() match {
-              case "chapter_title"  =>
-                result += NovelBody(
-                  ncode = ncode,
-                  title = element.ownText(),
-                  isChapter = true
-                )
-              case "novel_sublist2" =>
-                val linkElement = element.select(".subtitle a").first()
-                if (linkElement != null) {
-                  val href  = linkElement.attr("href")
-                  val parts = href.split("/")
-                  if (parts.length >= 3) {
-                    val pageNumber =
-                      try { parts(2).toInt }
-                      catch { case _: NumberFormatException => 0 }
-                    if (pageNumber > 0) {
-                      result += NovelBody(
-                        ncode = ncode,
-                        page = pageNumber,
-                        title = linkElement.ownText(),
-                        isChapter = false
-                      )
-                    }
-                  }
-                }
-              case _                => // その他の要素は無視
+          tElements
+            .asScala
+            .foldLeft(List.empty[NovelBody]) { (tAcc, tElement) =>
+              tElement.className() match {
+                case "chapter_title"  =>
+                  tAcc :+ NovelBody(
+                    ncode = aNcode,
+                    title = tElement.ownText(),
+                    isChapter = true
+                  )
+                case "novel_sublist2" =>
+                  val tLinkElement = tElement.select(".subtitle a").first()
+                  if (tLinkElement != null) {
+                    val tHref  = tLinkElement.attr("href")
+                    val tParts = tHref.split("/")
+                    if (tParts.length >= 3) {
+                      val tPageNumber =
+                        try { tParts(2).toInt }
+                        catch { case _: NumberFormatException => 0 }
+                      if (tPageNumber > 0) {
+                        tAcc :+ NovelBody(
+                          ncode = aNcode,
+                          page = tPageNumber,
+                          title = tLinkElement.ownText(),
+                          isChapter = false
+                        )
+                      } else tAcc
+                    } else tAcc
+                  } else tAcc
+                case _                => tAcc // その他の要素は無視
+              }
             }
-          }
-          result.toList
         } else {
           List.empty
         }
       }
     }
 
-    override protected def parseNovelBodyPlatform(html: String, ncode: String, page: Int): NovelBody = {
-      if (html.isEmpty) {
-        NovelBody(ncode = ncode, page = page)
+    override protected def parseNovelBodyPlatform(aHtml: String, aNcode: String, aPage: Int): NovelBody = {
+      if (aHtml.isEmpty) {
+        NovelBody(ncode = aNcode, page = aPage)
       } else {
-        val document = Jsoup.parse(html)
+        val tDocument = Jsoup.parse(aHtml)
 
         // タイトル取得
-        val titleElement = document.select(".novel_subtitle").first()
-        val title        = if (titleElement != null) titleElement.ownText() else ""
+        val tTitleElement = tDocument.select(".novel_subtitle").first()
+        val tTitle        = if (tTitleElement != null) tTitleElement.ownText() else ""
 
         // 本文取得
-        val bodyElement = document.getElementById("novel_honbun")
-        val body        = if (bodyElement != null) {
-          val rawBody       = bodyElement.html()
-          val lineSeparator = System.getProperty("line.separator")
-          rawBody
-            .replaceAll(lineSeparator, "")
+        val tBodyElement = tDocument.getElementById("novel_honbun")
+        val tBody        = if (tBodyElement != null) {
+          val tRawBody       = tBodyElement.html()
+          val tLineSeparator = System.getProperty("line.separator")
+          tRawBody
+            .replaceAll(tLineSeparator, "")
             .replaceAll("<ruby>", "")
             .replaceAll("</ruby>", "")
             .replaceAll("<rb>", "")
@@ -99,14 +99,14 @@ object NarouApiClientPlatform {
             .replaceAll("</rt>", "")
             .replaceAll("<rp>", "")
             .replaceAll("</rp>", "")
-            .replaceAll("<br>", lineSeparator)
+            .replaceAll("<br>", tLineSeparator)
         } else ""
 
         NovelBody(
-          ncode = ncode,
-          page = page,
-          title = title,
-          body = body,
+          ncode = aNcode,
+          page = aPage,
+          title = tTitle,
+          body = tBody,
           isChapter = false
         )
       }

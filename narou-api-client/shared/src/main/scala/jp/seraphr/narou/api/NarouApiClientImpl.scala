@@ -9,25 +9,29 @@ import monix.eval.Task
 import sttp.client4._
 import sttp.client4.circe.{ asJson, deserializeJson }
 
-/** なろう小説APIクライアントの実装 */
-abstract class NarouApiClientImpl(backend: Backend[Task], gzipDecoder: Option[Array[Byte] => Array[Byte]])
+/**
+ * なろう小説APIクライアントの実装
+ * @param aBackend HTTPリクエストを処理するバックエンド
+ * @param aGzipDecoder GZIP圧縮データを解凍する関数（オプション）
+ */
+abstract class NarouApiClientImpl(aBackend: Backend[Task], aGzipDecoder: Option[Array[Byte] => Array[Byte]])
     extends NarouApiClient {
 
   private val baseUrl    = "https://api.syosetu.com/novelapi/api/"
-  private val mGzipQuery = Option.when(gzipDecoder.isDefined)("gzip=5")
+  private val mGzipQuery = Option.when(aGzipDecoder.isDefined)("gzip=5")
 
   override def search(aParams: SearchParams): Task[NovelApiResponse] = {
     val tQueryParams = buildQueryParams(aParams)
     val tFullUrl     = s"$baseUrl?$tQueryParams"
 
-    val tAsJson  = gzipDecoder match {
+    val tAsJson  = aGzipDecoder match {
       case Some(d) =>
         asByteArray.mapRight((ba: Array[Byte]) => new String(d(ba))).map(_.flatMap(deserializeJson[NovelApiResponse]))
       case None    => asJson[NovelApiResponse]
     }
     val tRequest = basicRequest.get(uri"$tFullUrl").response(tAsJson).readTimeout(30.seconds)
 
-    backend
+    aBackend
       .send(tRequest)
       .map { tResponse =>
         tResponse.body match {
@@ -92,50 +96,50 @@ abstract class NarouApiClientImpl(backend: Backend[Task], gzipDecoder: Option[Ar
     tAllParams.mkString("&")
   }
 
-  override def getNovelTable(ncode: String): Task[List[NovelBody]] = {
-    val tUrl     = s"https://ncode.syosetu.com/$ncode/"
+  override def getNovelTable(aNcode: String): Task[List[NovelBody]] = {
+    val tUrl     = s"https://ncode.syosetu.com/$aNcode/"
     val tRequest = basicRequest.get(uri"$tUrl").readTimeout(30.seconds)
 
-    backend
+    aBackend
       .send(tRequest)
       .map { tResponse =>
         tResponse.body match {
-          case Right(tHtml) => parseNovelTable(tHtml, ncode)
+          case Right(tHtml) => parseNovelTable(tHtml, aNcode)
           case Left(tError) => throw new RuntimeException(s"Failed to fetch novel table: $tError")
         }
       }
   }
 
-  override def getNovelBody(ncode: String, page: Int): Task[NovelBody] = {
-    if (page == 0) {
+  override def getNovelBody(aNcode: String, aPage: Int): Task[NovelBody] = {
+    if (aPage == 0) {
       Task.raiseError(new IllegalArgumentException("Page number must be greater than 0"))
     } else {
-      val tUrl     = s"https://ncode.syosetu.com/$ncode/$page/"
+      val tUrl     = s"https://ncode.syosetu.com/$aNcode/$aPage/"
       val tRequest = basicRequest.get(uri"$tUrl").readTimeout(30.seconds)
 
-      backend
+      aBackend
         .send(tRequest)
         .map { tResponse =>
           tResponse.body match {
-            case Right(tHtml) => parseNovelBody(tHtml, ncode, page)
+            case Right(tHtml) => parseNovelBody(tHtml, aNcode, aPage)
             case Left(tError) => throw new RuntimeException(s"Failed to fetch novel body: $tError")
           }
         }
     }
   }
 
-  private def parseNovelTable(html: String, ncode: String): List[NovelBody] = {
+  private def parseNovelTable(aHtml: String, aNcode: String): List[NovelBody] = {
     // HTMLパースは各プラットフォームで実装する（プラットフォーム固有のHTMLパーサーを使用）
-    parseNovelTablePlatform(html, ncode)
+    parseNovelTablePlatform(aHtml, aNcode)
   }
 
-  private def parseNovelBody(html: String, ncode: String, page: Int): NovelBody = {
+  private def parseNovelBody(aHtml: String, aNcode: String, aPage: Int): NovelBody = {
     // HTMLパースは各プラットフォームで実装する（プラットフォーム固有のHTMLパーサーを使用）
-    parseNovelBodyPlatform(html, ncode, page)
+    parseNovelBodyPlatform(aHtml, aNcode, aPage)
   }
 
   // プラットフォーム固有のHTMLパース機能（各プラットフォームで実装）
-  protected def parseNovelTablePlatform(html: String, ncode: String): List[NovelBody]
-  protected def parseNovelBodyPlatform(html: String, ncode: String, page: Int): NovelBody
+  protected def parseNovelTablePlatform(aHtml: String, aNcode: String): List[NovelBody]
+  protected def parseNovelBodyPlatform(aHtml: String, aNcode: String, aPage: Int): NovelBody
 
 }
