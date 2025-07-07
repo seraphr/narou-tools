@@ -41,11 +41,11 @@ object NarouApiClientPlatform {
             .foldLeft(List.empty[NovelBody]) { (tAcc, tElement) =>
               tElement.className() match {
                 case "chapter_title"  =>
-                  tAcc :+ NovelBody(
+                  NovelBody(
                     ncode = aNcode,
                     title = tElement.ownText(),
                     isChapter = true
-                  )
+                  ) :: tAcc
                 case "novel_sublist2" =>
                   val tLinkElement = tElement.select(".subtitle a").first()
                   if (tLinkElement != null) {
@@ -56,18 +56,19 @@ object NarouApiClientPlatform {
                         try { tParts(2).toInt }
                         catch { case _: NumberFormatException => 0 }
                       if (tPageNumber > 0) {
-                        tAcc :+ NovelBody(
+                        NovelBody(
                           ncode = aNcode,
                           page = tPageNumber,
                           title = tLinkElement.ownText(),
                           isChapter = false
-                        )
+                        ) :: tAcc
                       } else tAcc
                     } else tAcc
                   } else tAcc
                 case _                => tAcc // その他の要素は無視
               }
             }
+            .reverse
         } else {
           List.empty
         }

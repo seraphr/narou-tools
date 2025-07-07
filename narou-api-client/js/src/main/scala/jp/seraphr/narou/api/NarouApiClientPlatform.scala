@@ -31,37 +31,39 @@ object NarouApiClientPlatform {
         if (tIndexBox != null) {
           val tElements = tIndexBox.children
 
-          (0 until tElements.length).foldLeft(List.empty[NovelBody]) { (tAcc, tIndex) =>
-            val tElement = tElements(tIndex)
-            tElement.asInstanceOf[org.scalajs.dom.html.Element].className match {
-              case "chapter_title"  =>
-                tAcc :+ NovelBody(
-                  ncode = aNcode,
-                  title = tElement.textContent,
-                  isChapter = true
-                )
-              case "novel_sublist2" =>
-                val tLinkElement = tElement.querySelector(".subtitle a")
-                if (tLinkElement != null) {
-                  val tHref  = tLinkElement.getAttribute("href")
-                  val tParts = tHref.split("/")
-                  if (tParts.length >= 3) {
-                    val tPageNumber =
-                      try { tParts(2).toInt }
-                      catch { case _: NumberFormatException => 0 }
-                    if (tPageNumber > 0) {
-                      tAcc :+ NovelBody(
-                        ncode = aNcode,
-                        page = tPageNumber,
-                        title = tLinkElement.textContent,
-                        isChapter = false
-                      )
+          (0 until tElements.length)
+            .foldLeft(List.empty[NovelBody]) { (tAcc, tIndex) =>
+              val tElement = tElements(tIndex)
+              tElement.asInstanceOf[org.scalajs.dom.html.Element].className match {
+                case "chapter_title"  =>
+                  NovelBody(
+                    ncode = aNcode,
+                    title = tElement.textContent,
+                    isChapter = true
+                  ) :: tAcc
+                case "novel_sublist2" =>
+                  val tLinkElement = tElement.querySelector(".subtitle a")
+                  if (tLinkElement != null) {
+                    val tHref  = tLinkElement.getAttribute("href")
+                    val tParts = tHref.split("/")
+                    if (tParts.length >= 3) {
+                      val tPageNumber =
+                        try { tParts(2).toInt }
+                        catch { case _: NumberFormatException => 0 }
+                      if (tPageNumber > 0) {
+                        NovelBody(
+                          ncode = aNcode,
+                          page = tPageNumber,
+                          title = tLinkElement.textContent,
+                          isChapter = false
+                        ) :: tAcc
+                      } else tAcc
                     } else tAcc
                   } else tAcc
-                } else tAcc
-              case _                => tAcc // その他の要素は無視
+                case _                => tAcc // その他の要素は無視
+              }
             }
-          }
+            .reverse
         } else {
           List.empty
         }
