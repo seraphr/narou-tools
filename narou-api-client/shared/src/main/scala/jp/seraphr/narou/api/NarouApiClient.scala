@@ -1,6 +1,6 @@
 package jp.seraphr.narou.api
 
-import jp.seraphr.narou.api.model.{ NovelApiResponse, SearchParams }
+import jp.seraphr.narou.api.model.{ NovelApiResponse, NovelBody, SearchParams }
 
 import monix.eval.Task
 
@@ -32,6 +32,21 @@ trait NarouApiClient {
   def getByNcode(ncode: String): Task[NovelApiResponse] = {
     search(SearchParams(ncode = Some(ncode)))
   }
+
+  /**
+   * 指定した小説の目次を取得する
+   * @param ncode Nコード
+   * @return 目次リスト
+   */
+  def getNovelTable(ncode: String): Task[List[NovelBody]]
+
+  /**
+   * 指定した小説の指定ページの本文を取得する
+   * @param ncode Nコード
+   * @param page ページ番号
+   * @return 本文情報
+   */
+  def getNovelBody(ncode: String, page: Int): Task[NovelBody]
 
 }
 

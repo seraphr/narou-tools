@@ -3,19 +3,22 @@ package jp.seraphr.narou
 import java.text.NumberFormat
 import java.util.concurrent.atomic.AtomicInteger
 
-import narou4j.entities.Novel
-import narou4j.enums.OutputOrder
+import jp.seraphr.narou.api.NarouApiClient
+import jp.seraphr.narou.model.NarouNovel
 
-class AllNovelCollector(aIntervalMillis: Long) extends HasLogger {
+import monix.eval.Task
+import monix.execution.Scheduler
+
+class AllNovelCollector(aIntervalMillis: Long)(implicit scheduler: Scheduler) extends HasLogger {
   private val mLimit   = 500
   private val mMaxSkip = 2000
 
-  def collect(aBuilder: NarouClientBuilder): Iterator[Novel] = {
+  def collect(aBuilder: NarouClientBuilder, client: NarouApiClient): Iterator[NarouNovel] = {
     val tAdjuster = new IntervalAdjuster(aIntervalMillis)
     val tCounter  = new AtomicInteger(0)
     val tFormat   = NumberFormat.getNumberInstance()
 
-    def collectOne(aMinLength: Int, aSkip: Int, aRemainRetry: Int = 4): Vector[Novel] = {
+    def collectOne(aMinLength: Int, aSkip: Int, aRemainRetry: Int = 4): Vector[NarouNovel] = {
       tAdjuster.adjust()
       val tCount = tCounter.incrementAndGet()
       if (tCount % 100 == 0) {
@@ -23,19 +26,18 @@ class AllNovelCollector(aIntervalMillis: Long) extends HasLogger {
         logger.info(s"${tCount} 回目の呼び出しです。 minLength=${aMinLength}, skip=${aSkip} limit*count=${tNovelCount}")
       }
 
-      val tOrder = OutputOrder.CHARACTER_LENGTH_ASC
+      val tOrder = "length" // 文字数昇順
 
-      import scala.jdk.CollectionConverters._
       try {
-        aBuilder
+        val result = aBuilder
           .order(tOrder)
           .length(Some(aMinLength), None)
           .skipLim(aSkip, mLimit)
-          .buildFromEmpty
-          .getNovels
-          .asScala
-          .tail
-          .toVector // 先頭はallcountだけが入っているデータなので削る
+          .search(client)
+          .runSyncUnsafe()
+
+        import ApiNovelConverter._
+        result.novels.map(_.asScala).toVector
       } catch {
         case e: Throwable if 0 < aRemainRetry =>
           logger.warn(s"[retry] 例外が発生したため、リトライを行います。 remain = ${aRemainRetry}: ${e.getMessage}")
@@ -48,10 +50,10 @@ class AllNovelCollector(aIntervalMillis: Long) extends HasLogger {
       }
     }
 
-    def collectAll(aMinLength: Int = 0, aSkip: Int = 0): Iterator[Novel] = {
+    def collectAll(aMinLength: Int = 0, aSkip: Int = 0): Iterator[NarouNovel] = {
       val tCollected  = collectOne(aMinLength, aSkip)
-      val tHeadLength = tCollected.head.getNumberOfChar
-      val tLastLength = tCollected.last.getNumberOfChar
+      val tHeadLength = tCollected.head.length
+      val tLastLength = tCollected.last.length
 
       logger.debug(
         s"found ${tCollected.size}, minLength=${aMinLength}, aSkip=${aSkip}, head=${tHeadLength}, last=${tLastLength}"

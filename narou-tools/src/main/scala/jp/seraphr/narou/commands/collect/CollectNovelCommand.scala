@@ -115,9 +115,12 @@ class CollectNovelCommand(aDefaultArg: CollectNovelCommandArg)(implicit schedule
     logger.info(s"小説リストの収集を開始します。 初期ノベル数: ${tInitSize}")
 
     import jp.seraphr.narou.model.NarouNovelConverter._
+    import jp.seraphr.narou.api.NarouApiClient
+    import monix.execution.Scheduler.Implicits.global
+
+    val client      = NarouApiClient().runSyncUnsafe()
     val tResultMap  = tCollector
-      .collect(NarouClientBuilder.init)
-      .map(_.asScala)
+      .collect(NarouClientBuilder.init, client)
       .filter(tNovelPredicate)
       .take(aArg.limit)
       .foldLeft(tInitMap) { (m, n) =>

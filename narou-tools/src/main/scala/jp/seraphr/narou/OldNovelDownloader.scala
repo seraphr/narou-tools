@@ -68,13 +68,7 @@ object OldNovelDownloaderMain extends App {
     import CollectionConverters._
 
     val tFiltered =
-      NarouClientBuilder
-        .init
-        .n(_.setNCode(aNovels.map(_.getNcode).toArray))
-        .skipLim(0, 500)
-        .build(new Narou)
-        .getNovels
-        .asScala
+      NarouClientBuilder.init.setNCode(aNovels.map(_.getNcode).toArray).skipLim(0, 500).buildFromEmpty.getNovels
 
     // 先頭は、allCountのみが含まれている奴なので、削る
     tFiltered.tail.iterator

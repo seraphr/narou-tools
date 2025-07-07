@@ -6,6 +6,22 @@ import io.circe.generic.semiauto.{ deriveDecoder, deriveEncoder }
 package object model {
 
   /**
+   * 小説の本文や目次に関する情報
+   * @param ncode Nコード
+   * @param page ページ番号
+   * @param title タイトル（章タイトルまたは話数タイトル）
+   * @param body 本文（章の場合は空）
+   * @param isChapter 章かどうか
+   */
+  case class NovelBody(
+      ncode: String = "",
+      page: Int = 0,
+      title: String = "",
+      body: String = "",
+      isChapter: Boolean = false
+  )
+
+  /**
    * 小説APIのレスポンス（配列形式）
    * APIは [{"allcount": ...}, {"title": ..., "ncode": ...}, ...] の形式で返す
    */
@@ -316,6 +332,9 @@ package object model {
   }
 
   implicit val novelApiResponseEncoder: Encoder[NovelApiResponse] = deriveEncoder[NovelApiResponse]
+
+  implicit val novelBodyDecoder: Decoder[NovelBody] = deriveDecoder[NovelBody]
+  implicit val novelBodyEncoder: Encoder[NovelBody] = deriveEncoder[NovelBody]
 
   implicit val searchParamsEncoder: Encoder[SearchParams] = deriveEncoder[SearchParams]
 }

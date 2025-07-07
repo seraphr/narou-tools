@@ -2,7 +2,7 @@ package jp.seraphr.narou.api
 
 import scala.concurrent.duration._
 
-import jp.seraphr.narou.api.model.{ NovelApiResponse, SearchParams }
+import jp.seraphr.narou.api.model.{ NovelApiResponse, NovelBody, SearchParams }
 import jp.seraphr.narou.api.model.given
 
 import monix.eval.Task
@@ -10,7 +10,8 @@ import sttp.client4._
 import sttp.client4.circe.{ asJson, deserializeJson }
 
 /** なろう小説APIクライアントの実装 */
-class NarouApiClientImpl(backend: Backend[Task], gzipDecoder: Option[Array[Byte] => Array[Byte]]) extends NarouApiClient {
+abstract class NarouApiClientImpl(backend: Backend[Task], gzipDecoder: Option[Array[Byte] => Array[Byte]])
+    extends NarouApiClient {
 
   private val baseUrl    = "https://api.syosetu.com/novelapi/api/"
   private val mGzipQuery = Option.when(gzipDecoder.isDefined)("gzip=5")
@@ -90,5 +91,51 @@ class NarouApiClientImpl(backend: Backend[Task], gzipDecoder: Option[Array[Byte]
 
     tAllParams.mkString("&")
   }
+
+  override def getNovelTable(ncode: String): Task[List[NovelBody]] = {
+    val tUrl     = s"https://ncode.syosetu.com/$ncode/"
+    val tRequest = basicRequest.get(uri"$tUrl").readTimeout(30.seconds)
+
+    backend
+      .send(tRequest)
+      .map { tResponse =>
+        tResponse.body match {
+          case Right(tHtml) => parseNovelTable(tHtml, ncode)
+          case Left(tError) => throw new RuntimeException(s"Failed to fetch novel table: $tError")
+        }
+      }
+  }
+
+  override def getNovelBody(ncode: String, page: Int): Task[NovelBody] = {
+    if (page == 0) {
+      Task.raiseError(new IllegalArgumentException("Page number must be greater than 0"))
+    } else {
+      val tUrl     = s"https://ncode.syosetu.com/$ncode/$page/"
+      val tRequest = basicRequest.get(uri"$tUrl").readTimeout(30.seconds)
+
+      backend
+        .send(tRequest)
+        .map { tResponse =>
+          tResponse.body match {
+            case Right(tHtml) => parseNovelBody(tHtml, ncode, page)
+            case Left(tError) => throw new RuntimeException(s"Failed to fetch novel body: $tError")
+          }
+        }
+    }
+  }
+
+  private def parseNovelTable(html: String, ncode: String): List[NovelBody] = {
+    // HTMLパースは各プラットフォームで実装する（プラットフォーム固有のHTMLパーサーを使用）
+    parseNovelTablePlatform(html, ncode)
+  }
+
+  private def parseNovelBody(html: String, ncode: String, page: Int): NovelBody = {
+    // HTMLパースは各プラットフォームで実装する（プラットフォーム固有のHTMLパーサーを使用）
+    parseNovelBodyPlatform(html, ncode, page)
+  }
+
+  // プラットフォーム固有のHTMLパース機能（各プラットフォームで実装）
+  protected def parseNovelTablePlatform(html: String, ncode: String): List[NovelBody]
+  protected def parseNovelBodyPlatform(html: String, ncode: String, page: Int): NovelBody
 
 }

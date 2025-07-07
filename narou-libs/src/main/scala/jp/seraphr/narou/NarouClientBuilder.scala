@@ -1,16 +1,17 @@
 package jp.seraphr.narou
 
-import narou4j.Narou
-import narou4j.enums.{ NovelBigGenre, NovelGenre, OutputOrder }
+import jp.seraphr.narou.api.NarouApiClient
+import jp.seraphr.narou.api.model.{ BigGenre, Genre, NovelApiResponse, SearchParams }
+
+import monix.eval.Task
 
 /**
  */
-case class NarouClientBuilder(build: Narou => Narou) {
-  def buildFromEmpty: Narou = build(new Narou)
+case class NarouClientBuilder(build: SearchParams => SearchParams) {
+  def buildParams: SearchParams = build(SearchParams())
 
-  def n[U](f: Narou => U): NarouClientBuilder = {
-    val g: Narou => Narou = _.tap(f)
-    this.copy(build = build andThen g)
+  def n(f: SearchParams => SearchParams): NarouClientBuilder = {
+    this.copy(build = build andThen f)
   }
 
   def opt[A](f: NarouClientBuilder => A => NarouClientBuilder)(aOptA: Option[A]): NarouClientBuilder = {
@@ -21,20 +22,45 @@ case class NarouClientBuilder(build: Narou => Narou) {
     aSeq.foldLeft(this)((builder, a) => f(builder)(a))
   }
 
-  def order(aOrder: OutputOrder)       = this.n(_.setOrder(aOrder))
+  def order(aOrder: String)            = this.n(_.copy(order = Some(aOrder)))
   def skipLim(aSkip: Int, aLimit: Int) = {
-    val tSkipped = if (aSkip == 0) this else this.n(_.setSt(aSkip))
-    tSkipped.n(_.setLim(aLimit))
+    val withSt = if (aSkip == 0) this else this.n(_.copy(st = Some(aSkip)))
+    withSt.n(_.copy(lim = Some(aLimit)))
   }
 
-  def pickup(aIsPickup: Boolean)                   = this.n(_.setPickup(aIsPickup))
-  def genre(aGenre: NovelGenre)                    = this.n(_.setGenre(aGenre))
-  def bigGenre(aGenre: NovelBigGenre)              = this.n(_.setBigGenre(aGenre))
+  def pickup(aIsPickup: Boolean)                   = this.n(_.copy(pickup = Some(aIsPickup)))
+  def genre(aGenre: Genre)                         = this.n(_.copy(genre = Some(aGenre)))
+  def bigGenre(aGenre: BigGenre)                   = this.n(_.copy(biggenre = Some(aGenre)))
   def length(aMin: Option[Int], aMax: Option[Int]) = {
-    val tMin = aMin.getOrElse(0)
-    val tMax = aMax.getOrElse(Int.MaxValue)
+    this.n(params => params.copy(minlen = aMin, maxlen = aMax))
+  }
 
-    this.n(_.setCharacterLength(tMin, tMax))
+  def ncodes(aNCodes: Array[String]) = {
+    this.n(_.copy(ncode = Some(aNCodes.mkString("-"))))
+  }
+
+  // 旧APIとの互換性のため
+  def setNCode(aNCodes: Array[String]) = ncodes(aNCodes)
+
+  def search(client: NarouApiClient): Task[NovelApiResponse] = {
+    client.search(buildParams)
+  }
+
+  // 旧APIとの互換性のため（deprecated）
+  def buildFromEmpty: CompatWrapper = {
+    new CompatWrapper(buildParams)
+  }
+
+  def build(narou: narou4j.Narou): CompatWrapper = {
+    new CompatWrapper(buildParams)
+  }
+
+  class CompatWrapper(params: SearchParams) {
+    def getNovels: List[narou4j.entities.Novel] = {
+      // 実装は後で行う
+      throw new NotImplementedError("This compatibility method is not yet implemented")
+    }
+
   }
 
 }

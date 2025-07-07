@@ -5,6 +5,8 @@ import java.nio.charset.StandardCharsets
 
 import scala.jdk.CollectionConverters
 
+import jp.seraphr.narou.GenreConverter
+
 import com.fasterxml.jackson.core.JsonGenerator
 import com.fasterxml.jackson.databind.{ ObjectMapper, SerializerProvider }
 import com.fasterxml.jackson.databind.module.SimpleModule
@@ -32,7 +34,14 @@ object OldNovelCollector {
       val tGenre = aSetting.genre
       val tOrder = aSetting.order
       val tSkip  = aSetting.skip
-      aBuilder.genre(tGenre).opt(_.order)(tOrder).skipLim(tSkip, 500).build(new Narou).getNovels.asScala.tail.toVector // 先頭はallcountだけが入っているデータなので削る
+      aBuilder
+        .genre(GenreConverter.convertToNewGenre(tGenre))
+        .opt(_.order)(tOrder.map(_.getId))
+        .skipLim(tSkip, 500)
+        .buildFromEmpty
+        .getNovels
+        .tail
+        .toVector // 先頭はallcountだけが入っているデータなので削る
     }
 
     def collectBySettings(aRemainSettings: List[Setting]): Iterator[Novel] = aRemainSettings match {

@@ -56,13 +56,7 @@ class NovelDownloader(aTargetDir: File, aIntervalMillis: Long) extends HasLogger
       import scala.jdk.CollectionConverters._
 
       val tFiltered =
-        NarouClientBuilder
-          .init
-          .n(_.setNCode(aNovels.map(_.getNcode).toArray))
-          .skipLim(0, 500)
-          .buildFromEmpty
-          .getNovels
-          .asScala
+        NarouClientBuilder.init.setNCode(aNovels.map(_.getNcode).toArray).skipLim(0, 500).buildFromEmpty.getNovels
 
       // 先頭は、allCountのみが含まれている奴なので、削る
       tFiltered.tail.iterator

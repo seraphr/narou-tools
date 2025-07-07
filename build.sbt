@@ -84,6 +84,11 @@ lazy val `narou-api-client` = crossProject(JVMPlatform, JSPlatform)
       scalajs.scalatest.value % "test"
     ) ++ scalajs.circe.value ++ scalajs.sttp.value
   )
+  .jvmSettings(
+    libraryDependencies ++= Seq(
+      jvm.jsoup
+    )
+  )
   .settings(commonSettings)
 
 lazy val `narou-api-clientJVM` = `narou-api-client`.jvm
@@ -100,7 +105,8 @@ lazy val `narou-libs` = (project in file("narou-libs"))
   )
   .settings(commonSettings)
   .dependsOn(
-    modelJVM
+    modelJVM,
+    `narou-api-clientJVM`
   )
 
 lazy val `narou-tools` = (project in file("narou-tools"))
@@ -118,10 +124,13 @@ lazy val `narou-tools` = (project in file("narou-tools"))
   .settings(commonSettings)
   .dependsOn(
     `narou-libs`,
-    modelJVM
+    modelJVM,
+    `narou-api-clientJVM`
   )
 
-lazy val `narou-rank` = (project in file("narou-rank")).settings(commonSettings).dependsOn(`narou-libs`)
+lazy val `narou-rank` = (project in file("narou-rank"))
+  .settings(commonSettings)
+  .dependsOn(`narou-libs`, `narou-api-clientJVM`)
 
 // -----------------------
 
@@ -192,4 +201,4 @@ lazy val `narou-webui` = (project in file("narou-webui"))
       f.isDirectory && f.getName == "narou_novels"
     }
   )
-  .dependsOn(modelJS)
+  .dependsOn(modelJS, `narou-api-clientJS`)
