@@ -72,9 +72,12 @@ This is a multi-module Scala 3 project using SBT with cross-platform compilation
 
 ## Testing
 
-Tests use ScalaTest with ScalaCheck property-based testing. Key test file:
+### Tests use ScalaTest with ScalaCheck property-based testing. Key test file:
 
 - `NovelConditionParserTest.scala` - Comprehensive parser tests with property-based testing
+
+### その他
+
 - テストには`AsyncFreeSpec` / `AnyFreeSpec`を利用する
 
 ## Development Notes
@@ -142,7 +145,7 @@ numbers.reduceLeft(0)((tAcc, tNum) => tAcc + tNum)
 ### テスト
 
 - テスト名には日本語を使用する
-- テスト名は以下の例の様に`〇〇である時、□□をすると、～であること`など、どういう性質をテストしているのかが分かりやすい名前にすること
+- テスト名は`〇〇である時、□□をすると、～であること`など、どういう性質をテストしているのかが分かりやすい名前にすること
 - コードを追加・修正するときは、それに対応するユニットテストを常に追加・修正する
 
 ### コメント
