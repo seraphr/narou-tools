@@ -5,13 +5,10 @@ import java.nio.charset.StandardCharsets
 
 import scala.jdk.CollectionConverters
 
-import jp.seraphr.narou.GenreConverter
-
 import com.fasterxml.jackson.core.JsonGenerator
 import com.fasterxml.jackson.databind.{ ObjectMapper, SerializerProvider }
 import com.fasterxml.jackson.databind.module.SimpleModule
 import com.fasterxml.jackson.databind.ser.std.StdSerializer
-import narou4j.Narou
 import narou4j.entities.Novel
 import narou4j.enums.{ NovelGenre, OutputOrder }
 

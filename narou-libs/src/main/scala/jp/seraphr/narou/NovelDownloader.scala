@@ -53,8 +53,6 @@ class NovelDownloader(aTargetDir: File, aIntervalMillis: Long) extends HasLogger
 
   def downloadNovels(aNovels: Iterator[Novel], aOverride: Boolean = false): Iterator[DownloadResult] = {
     def filterExists(aNovels: Seq[Novel]): Iterator[Novel] = {
-      import scala.jdk.CollectionConverters._
-
       val tFiltered =
         NarouClientBuilder.init.setNCode(aNovels.map(_.getNcode).toArray).skipLim(0, 500).buildFromEmpty.getNovels
 

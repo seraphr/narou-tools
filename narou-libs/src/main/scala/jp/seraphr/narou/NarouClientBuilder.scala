@@ -55,10 +55,10 @@ case class NarouClientBuilder(build: SearchParams => SearchParams) {
     new CompatWrapper(buildParams)
   }
 
-  class CompatWrapper(params: SearchParams) {
+  class CompatWrapper(aParams: SearchParams) {
     def getNovels: List[narou4j.entities.Novel] = {
-      // 実装は後で行う
-      throw new NotImplementedError("This compatibility method is not yet implemented")
+      // TODO: aParamsを使用して新しいAPIから旧APIの形式に変換する実装を追加
+      throw new NotImplementedError(s"This compatibility method is not yet implemented for params: $aParams")
     }
 
   }

@@ -114,7 +114,6 @@ class CollectNovelCommand(aDefaultArg: CollectNovelCommandArg)(implicit schedule
     val tInitSize  = tInitMap.size
     logger.info(s"小説リストの収集を開始します。 初期ノベル数: ${tInitSize}")
 
-    import jp.seraphr.narou.model.NarouNovelConverter._
     import jp.seraphr.narou.api.NarouApiClient
     import monix.execution.Scheduler.Implicits.global
 

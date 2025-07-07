@@ -1,8 +1,6 @@
 package jp.seraphr.narou.api
 
 import org.scalajs.dom
-import scala.scalajs.js
-import scala.scalajs.js.annotation.JSGlobal
 
 import jp.seraphr.narou.api.model.NovelBody
 

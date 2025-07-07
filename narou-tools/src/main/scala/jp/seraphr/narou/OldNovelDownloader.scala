@@ -4,10 +4,8 @@ import java.io.File
 import java.nio.charset.StandardCharsets
 
 import scala.io.Source
-import scala.jdk.CollectionConverters
 
 import com.fasterxml.jackson.databind.ObjectMapper
-import narou4j.Narou
 import narou4j.entities.Novel
 import org.apache.commons.io.FileUtils
 
@@ -65,8 +63,6 @@ object OldNovelDownloaderMain extends App {
     .map(tMapper.readValue[Novel](_, new TypeReference[Novel]() {}))
 
   def filterExists(aNovels: Seq[Novel]): Iterator[Novel] = {
-    import CollectionConverters._
-
     val tFiltered =
       NarouClientBuilder.init.setNCode(aNovels.map(_.getNcode).toArray).skipLim(0, 500).buildFromEmpty.getNovels
 
