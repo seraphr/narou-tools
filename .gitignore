@@ -8,3 +8,5 @@ target/
 .metals/
 mcp.json
 metals.sbt
+
+.agent/repos
