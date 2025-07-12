@@ -128,10 +128,6 @@ lazy val `narou-tools` = (project in file("narou-tools"))
     `narou-api-clientJVM`
   )
 
-lazy val `narou-rank` = (project in file("narou-rank"))
-  .settings(commonSettings)
-  .dependsOn(`narou-libs`, `narou-api-clientJVM`)
-
 // -----------------------
 
 val buildResult = settingKey[File]("")
