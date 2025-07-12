@@ -73,22 +73,8 @@ case class NarouClientBuilder(build: SearchParams => SearchParams) {
     client.search(buildParams)
   }
 
-  // 旧APIとの互換性のため（deprecated）
-  def buildFromEmpty: CompatWrapper = {
-    new CompatWrapper(buildParams)
-  }
-
-  def build(narou: narou4j.Narou): CompatWrapper = {
-    new CompatWrapper(buildParams)
-  }
-
-  class CompatWrapper(aParams: SearchParams) {
-    def getNovels: List[narou4j.entities.Novel] = {
-      // TODO: aParamsを使用して新しいAPIから旧APIの形式に変換する実装を追加
-      throw new NotImplementedError(s"This compatibility method is not yet implemented for params: $aParams")
-    }
-
-  }
+  // 新しいAPIクライアントでの検索実行（推奨）
+  def buildFromEmpty: SearchParams = buildParams
 
 }
 

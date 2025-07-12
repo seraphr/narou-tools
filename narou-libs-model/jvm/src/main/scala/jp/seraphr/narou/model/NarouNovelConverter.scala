@@ -1,56 +1,52 @@
 package jp.seraphr.narou.model
 
-import narou4j.entities.Novel
+import jp.seraphr.narou.api.model.NovelInfo
 
 object NarouNovelConverter {
-  implicit class NovelOps(val n: Novel) extends AnyVal {
-    private def convertNovelType(aType: Int): NovelType = aType match {
-      case 1 => NovelType.ShortStory
-      case 2 => NovelType.Serially
-      case n => NovelType.Etc(n)
-    }
-
-    private def convertUploadType(aType: Int): UploadType = aType match {
-      case 1 => UploadType.CellularPhone
-      case 2 => UploadType.PC
-      case 3 => UploadType.Both
-      case n => UploadType.Etc(n)
+  implicit class NovelInfoOps(val n: NovelInfo) extends AnyVal {
+    private def convertUploadType(): UploadType = {
+      // narou-api-clientでは投稿手段情報がないため、PCを仮定
+      UploadType.PC
     }
 
     def asScala: NarouNovel = {
       NarouNovel(
-        n.getTitle,
-        n.getNcode,
-        n.getUserId,
-        n.getWriter,
-        n.getStory,
-        Genre.fromId(n.getGenre.getId).fold(s => throw new RuntimeException(s), identity),
-        if (n.getGensaku == 0) "" else n.getGensaku.toString,
-        n.getKeyword.split(" ").toVector,
-        n.getFirstUploadDate,
-        n.getLastUploadDate,
-        convertNovelType(n.getNovelType),
-        n.getIsNovelContinue == 0,
-        n.getAllNumberOfNovel,
-        n.getNumberOfChar,
-        n.getTime,
-        n.getIsr15 == 1,
-        n.getIsbl == 1,
-        n.getIsgl == 1,
-        n.getIszankoku == 1,
-        n.getIstensei == 1,
-        n.getIstenni == 1,
-        convertUploadType(n.getUploadType),
-        n.getGlobalPoint,
-        n.getFavCount,
-        n.getReviewCount,
-        n.getAllPoint,
-        n.getAllHyokaCount,
-        n.getSasieCount,
-        n.getNobelUpdatedAt,
-        n.getUpdatedAt
+        n.title,
+        n.ncode,
+        n.userid.toString,
+        n.writer,
+        n.story,
+        Genre.fromApiGenre(n.genre),
+        n.gensaku,
+        n.keyword.split(" ").toVector.filter(_.nonEmpty),
+        n.general_firstup,
+        n.general_lastup,
+        convertNovelType(n.novel_type),
+        n.end,
+        n.general_all_no,
+        n.length,
+        n.time,
+        n.isr15,
+        n.isbl,
+        n.isgl,
+        n.iszankoku,
+        n.istensei,
+        n.istenni,
+        convertUploadType(),
+        n.global_point,
+        n.fav_novel_cnt,
+        n.review_cnt,
+        n.all_point,
+        n.all_hyoka_cnt,
+        n.sasie_cnt,
+        n.novelupdated_at,
+        n.updated_at
       )
     }
 
+    private def convertNovelType(aType: jp.seraphr.narou.api.model.NovelType): NovelType = aType match {
+      case jp.seraphr.narou.api.model.NovelType.Short => NovelType.ShortStory
+      case jp.seraphr.narou.api.model.NovelType.Serial => NovelType.Serially
+    }
   }
 }

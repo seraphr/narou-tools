@@ -55,7 +55,6 @@ lazy val `narou-libs-model` = crossProject(JVMPlatform, JSPlatform)
   .settings(commonSettings)
   .jvmSettings(
     libraryDependencies ++= Seq(
-      jvm.narou4j,
       jvm.commonsIO,
       jvm.scalajsStubs,
       jvm.dropbox
@@ -71,6 +70,7 @@ lazy val `narou-libs-model` = crossProject(JVMPlatform, JSPlatform)
     webpack / version   := Dependencies.js.webpack,
     stTypescriptVersion := Dependencies.js.typescript
   )
+  .dependsOn(`narou-api-client`)
 
 lazy val modelJVM = `narou-libs-model`.jvm
 lazy val modelJS  = `narou-libs-model`.js
@@ -97,7 +97,6 @@ lazy val `narou-api-clientJS`  = `narou-api-client`.js
 lazy val `narou-libs` = (project in file("narou-libs"))
   .settings(
     libraryDependencies ++= Seq(
-      jvm.narou4j,
       jvm.commonsIO,
       jvm.slf4j,
       jvm.scalaTest % Test

@@ -2,11 +2,9 @@ package jp.seraphr.narou
 
 import jp.seraphr.narou.api.model.{ Genre => NewGenre }
 
-import narou4j.enums.{ NovelGenre => OldGenre }
-
 object GenreConverter {
-  def convertToNewGenre(oldGenre: OldGenre): NewGenre = {
-    oldGenre.getId match {
+  def convertToNewGenre(genreId: Int): NewGenre = {
+    genreId match {
       case 101  => NewGenre.RomanceIsekai
       case 102  => NewGenre.RomanceReality
       case 201  => NewGenre.HighFantasy

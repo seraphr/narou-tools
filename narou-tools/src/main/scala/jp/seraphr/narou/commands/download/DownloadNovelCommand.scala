@@ -12,17 +12,22 @@ import jp.seraphr.command.Command
 import jp.seraphr.narou.{ HasLogger, NovelDownloader }
 import jp.seraphr.narou.NovelDownloader.DownloadResult
 import jp.seraphr.narou.commands.download.DownloadNovelCommand.DownloadNovelCommandArg
+import jp.seraphr.narou.model.NarouNovel
 
-import com.fasterxml.jackson.databind.ObjectMapper
-import narou4j.entities.Novel
+import monix.execution.Scheduler
+
+import io.circe.parser._
+import io.circe.generic.auto._
 
 /**
+ * 小説ダウンロードコマンド
  */
 class DownloadNovelCommand(aDefaultArg: DownloadNovelCommandArg) extends Command with HasLogger {
   override val name        = "download"
   override val description = "collectコマンドにより収集した小説一覧を元に、小説をダウンロードし、ファイルに保存します"
   override val version     = "0.1.0"
   private val mParser      = new OptionParser(aDefaultArg)
+  implicit val scheduler: Scheduler = Scheduler.global
 
   override def run(aArgs: Seq[String]): Try[Unit] = {
     mParser.parse(aArgs) match {
@@ -41,19 +46,9 @@ class DownloadNovelCommand(aDefaultArg: DownloadNovelCommandArg) extends Command
           case NonFatal(e) => logger.warn("[skip] リソースのクローズに失敗しました。 この例外を無視します。 ", e)
         }
     }
-
   }
 
-  implicit class IteratorOps[A](itr: Iterator[A]) {
-    def tee[U](f: A => U): Iterator[A] = itr.map { a =>
-      f(a); a
-    }
-
-  }
-
-  import scala.concurrent.ExecutionContext.Implicits.global
   private def download(aArgs: DownloadNovelCommandArg): Try[Unit] = Try {
-    import com.fasterxml.jackson.core.`type`.TypeReference
     val tDownloader  = new NovelDownloader(aArgs.output, aArgs.intervalMillis)
     val tStopBoolean = new AtomicBoolean(false)
 
@@ -63,26 +58,28 @@ class DownloadNovelCommand(aDefaultArg: DownloadNovelCommandArg) extends Command
       tStopBoolean.set(true)
     }
 
-    val tMapper: ObjectMapper = new ObjectMapper
-
     val tResult =
       Source
         .fromFile(aArgs.input, "UTF-8")
         .loan { tLines =>
-          val tNovels =
-            tLines.getLines().map(tMapper.readValue[Novel](_, new TypeReference[Novel]() {}))
+          val tNovels = tLines.getLines()
+            .map(line => decode[NarouNovel](line))
+            .collect { case Right(novel) => novel }
 
+          val downloadTask = tDownloader.downloadNovels(tNovels, aArgs.overwrite)
+          val results = downloadTask.runSyncUnsafe()
+          
           var tLastResult = DownloadResult(0, 0)
-          import jp.seraphr.narou.IteratorUtils._
-          tDownloader
-            .downloadNovels(tNovels, aArgs.overwrite)
-            .takeWhileOne(_.novelCount < aArgs.maxNovels && !tStopBoolean.get())
-            .tee(r =>
+          results
+            .takeWhile(_.novelCount < aArgs.maxNovels && !tStopBoolean.get())
+            .foreach { r =>
               if (tLastResult != r) {
-                tLastResult = r; logger.info(s"${r.novelCount} / ${aArgs.maxNovels} (${r.pageCount} pages)")
+                tLastResult = r
+                logger.info(s"${r.novelCount} / ${aArgs.maxNovels} (${r.pageCount} pages)")
               }
-            )
-            .foldLeft(DownloadResult(0, 0))((_, r) => r)
+            }
+          
+          tLastResult
         }
 
     logger.info(s"${tResult.novelCount} 小説 合計${tResult.pageCount}話のダウンロードを行いました")

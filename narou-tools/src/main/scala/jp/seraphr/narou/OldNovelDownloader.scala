@@ -5,81 +5,95 @@ import java.nio.charset.StandardCharsets
 
 import scala.io.Source
 
-import com.fasterxml.jackson.databind.ObjectMapper
-import narou4j.entities.Novel
+import jp.seraphr.narou.api.NarouApiClient
+import jp.seraphr.narou.api.model.{ NovelInfo, SearchParams }
+import jp.seraphr.narou.model.{ NarouNovel, NovelType }
+import jp.seraphr.narou.model.NarouNovelConverter._
+import monix.eval.Task
+import monix.execution.Scheduler
+import monix.reactive.Observable
 import org.apache.commons.io.FileUtils
 
+import io.circe.parser._
+import io.circe.generic.auto._
+
 /**
+ * 旧式の小説ダウンローダー（互換性維持用）
  */
 class OldNovelDownloader(aRootDir: File) {
   private val mInvalidCharSet = """\/:*?"<>|.""".toSet
+  private val myNarou = new MyNarou
+  implicit val scheduler: Scheduler = Scheduler.global
 
   /**
-   * @param aNovel
-   * @param aOverride
+   * 小説をダウンロードする
+   * @param aNarouNovel 小説情報
+   * @param aOverride 既存ファイルを上書きするか
    * @return 一つ以上のファイルをダウンロードしたらtrue
    */
-  def downloadNovel(aNovel: Novel, aOverride: Boolean = false): Boolean = {
+  def downloadNovel(aNarouNovel: NarouNovel, aOverride: Boolean = false): Boolean = {
     val tNovelDir  = new File(
       aRootDir,
-      s"${aNovel.getNcode}_${aNovel.getTitle.filterNot(c => c.isControl || mInvalidCharSet(c)).take(10).trim}"
+      s"${aNarouNovel.ncode}_${aNarouNovel.title.filterNot(c => c.isControl || mInvalidCharSet(c)).take(10).trim}"
     )
     tNovelDir.mkdirs()
-    val tClient    = new MyNarou
-    val tAllNovels = 1 to aNovel.getAllNumberOfNovel
+    val tAllNovels = 1 to aNarouNovel.chapterCount
 
     // 1秒に1回しかアクセスさせない
     val tAdjuster = new IntervalAdjuster(2000)
     var tResult   = false
 
-    val tMaxPage = tNovelDir.list().map(_.toInt).reduceOption(_ max _).getOrElse(0)
+    val tMaxPage = Option(tNovelDir.list()).getOrElse(Array.empty[String]).flatMap(_.toIntOption).maxOption.getOrElse(0)
 
     tAllNovels
       .filter(tMaxPage < _ || aOverride)
       .foreach { i =>
         val tNovelFile = new File(tNovelDir, i.toString)
-        println(s"${aNovel.getNcode} ${i} / ${aNovel.getAllNumberOfNovel}")
+        println(s"${aNarouNovel.ncode} ${i} / ${aNarouNovel.chapterCount}")
         tAdjuster.adjust()
         tResult = true
         FileUtils.deleteQuietly(tNovelFile)
-        val tBody      = tClient.getNovelBody(aNovel.getNcode, i)
-        FileUtils.write(tNovelFile, tBody.getBody, StandardCharsets.UTF_8)
+        val tBody = myNarou.getNovelBody(aNarouNovel.ncode, i).runSyncUnsafe()
+        FileUtils.write(tNovelFile, tBody.body, StandardCharsets.UTF_8)
       }
 
     if (tResult) println()
     tResult
   }
-
 }
 
 object OldNovelDownloaderMain extends App {
+  import monix.execution.Scheduler.Implicits.global
 
-  import com.fasterxml.jackson.core.`type`.TypeReference
-
-  val tMapper: ObjectMapper = new ObjectMapper
-  val tNovels               = Source
+  val client = NarouApiClient().runSyncUnsafe()
+  val tNovels = Source
     .fromFile(new File("./novellist"), "UTF-8")
     .getLines()
-    .map(tMapper.readValue[Novel](_, new TypeReference[Novel]() {}))
+    .map(line => decode[NarouNovel](line))
+    .collect { case Right(novel) => novel }
 
-  def filterExists(aNovels: Seq[Novel]): Iterator[Novel] = {
-    val tFiltered =
-      NarouClientBuilder.init.setNCode(aNovels.map(_.getNcode).toArray).skipLim(0, 500).buildFromEmpty.getNovels
-
-    // 先頭は、allCountのみが含まれている奴なので、削る
-    tFiltered.tail.iterator
+  def filterExists(aNovels: Seq[NarouNovel]): Task[Iterator[NovelInfo]] = {
+    val params = SearchParams(ncode = aNovels.map(_.ncode), lim = Some(500))
+    client.search(params).map(_.novels.iterator)
   }
 
-  tNovels
-    .filter(_.getNovelType == 1) // 短編がgetNovelBodyに失敗するので、とりあえず取らない
-    .grouped(40)
-    .flatMap(filterExists)       // 40小説ずつ、存在するものだけを残す
+  val task = Observable.fromIterator(Task.pure(tNovels))
+    .filter(_.novelType == NovelType.Serially) // 短編がgetNovelBodyに失敗するので、とりあえず取らない
+    .bufferTumbling(40)
+    .mapEval { group =>
+      filterExists(group).map { existingNovels =>
+        val existingNcodes = existingNovels.map(_.ncode).toSet
+        group.filter(n => existingNcodes.contains(n.ncode))
+      }
+    }
+    .flatMap(Observable.fromIterable)
     .map { n =>
       new OldNovelDownloader(new File("./novels")).downloadNovel(n)
     }
-    .filter(identity)            // ダウンロードが1つ以上行われたものを数える
-    .take(500)                   // とりあえず1000ノベルダウンロード
+    .filter(identity) // ダウンロードが1つ以上行われたものを数える
+    .take(500)        // とりあえず500ノベルダウンロード
     .zipWithIndex
-    .foreach(println)
+    .foreachL(println)
 
+  task.runSyncUnsafe()
 }
