@@ -21,6 +21,21 @@ package object model {
       isChapter: Boolean = false
   )
 
+  enum ParamRange {
+
+    /** min 以上のものを検索する */
+    case MinOnly(min: Int)
+
+    /** max 以下のものを検索する */
+    case MaxOnly(max: Int)
+
+    /** min 以上、max 以下のものを検索する */
+    case MinMax(min: Int, max: Int)
+
+    /** exact の値と完全一致するものを検索する */
+    case Exact(value: Int)
+  }
+
   /**
    * 小説APIのレスポンス（配列形式）
    * APIは [{"allcount": ...}, {"title": ..., "ncode": ...}, ...] の形式で返す
