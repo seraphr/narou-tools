@@ -3,6 +3,7 @@ package jp.seraphr.narou.model
 import scala.scalajs.js.annotation.JSExportAll
 
 enum Genre(val id: Int, val text: String, val bigGenre: BigGenre) {
+  case Unselected          extends Genre(0, "未選択", BigGenre.Other)
   case AnotherWorldRomance extends Genre(101, "異世界〔恋愛〕", BigGenre.Romance)
   case Romance             extends Genre(102, "現実世界〔恋愛〕", BigGenre.Romance)
   case HighFantasy         extends Genre(201, "ハイファンタジー〔ファンタジー〕", BigGenre.Fantasy)
@@ -54,7 +55,7 @@ object Genre {
       case jp.seraphr.narou.api.model.Genre.Replay         => Genre.Replay
       case jp.seraphr.narou.api.model.Genre.OtherMisc      => Genre.Other
       case jp.seraphr.narou.api.model.Genre.NonGenreDetail => Genre.NonGenre
-      case jp.seraphr.narou.api.model.Genre.Unselected     => Genre.Other
+      case jp.seraphr.narou.api.model.Genre.Unselected     => Genre.Unselected
     }
   }
 }
