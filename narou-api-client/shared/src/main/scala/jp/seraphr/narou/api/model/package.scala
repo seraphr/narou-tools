@@ -32,7 +32,7 @@ package object model {
     /** min 以上、max 以下のものを検索する */
     case MinMax(min: Int, max: Int)
 
-    /** exact の値と完全一致するものを検索する */
+    /** value の値と完全一致するものを検索する */
     case Exact(value: Int)
   }
 
