@@ -111,7 +111,13 @@ This is a multi-module Scala 3 project using SBT with cross-platform compilation
 - a - メソッド引数：aArgs, aBuilder, aMinLength, aSkip
 - m - プライベートフィールド：mLimit, mMaxSkip, mParser
 
-ただし、意味的に引数でも
+ただし、意味的に引数でも、コンビネータに渡す関数リテラルの引数は`t`をプレフィックスとする
+
+```scala
+array.foreach { tElement =>
+  println(tElement)
+}
+```
 
 #### 変数名
 
@@ -132,7 +138,7 @@ def search(aHumanFilter: Human => boolean): Seq[Human]
 ###### コレクションの添字や for のループ変数に`i`, `j`, `k`などの１文字の変数を利用しても良い
 
 ```scala
-array.zipWithIndex.foreach((tElement, i) => println(`${i}: ${element}`))
+array.zipWithIndex.foreach((tElement, i) => println(s"${i}: ${tElement}"))
 ```
 
 ###### 十分にスコープが小さい時、その適切な名前の略語や先頭 1 文字の変数を使っても良い
