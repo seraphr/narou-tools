@@ -1,6 +1,6 @@
 package jp.seraphr.narou.api
 
-import jp.seraphr.narou.api.model.{ BigGenre, SearchParams, OrderType }
+import jp.seraphr.narou.api.model.{ BigGenre, OrderType, SearchParams }
 
 import monix.eval.Task
 import monix.execution.Scheduler

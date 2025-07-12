@@ -9,20 +9,18 @@ import jp.seraphr.narou.api.NarouApiClient
 import jp.seraphr.narou.api.model.{ NovelInfo, SearchParams }
 import jp.seraphr.narou.model.{ NarouNovel, NovelType }
 import jp.seraphr.narou.model.NarouNovelConverter._
+
+import io.circe.generic.auto._
+import io.circe.parser._
 import monix.eval.Task
 import monix.execution.Scheduler
 import monix.reactive.Observable
 import org.apache.commons.io.FileUtils
 
-import io.circe.parser._
-import io.circe.generic.auto._
-
-/**
- * 旧式の小説ダウンローダー（互換性維持用）
- */
+/** 旧式の小説ダウンローダー（互換性維持用） */
 class OldNovelDownloader(aRootDir: File) {
-  private val mInvalidCharSet = """\/:*?"<>|.""".toSet
-  private val myNarou = new MyNarou
+  private val mInvalidCharSet       = """\/:*?"<>|.""".toSet
+  private val myNarou               = new MyNarou
   implicit val scheduler: Scheduler = Scheduler.global
 
   /**
@@ -53,19 +51,20 @@ class OldNovelDownloader(aRootDir: File) {
         tAdjuster.adjust()
         tResult = true
         FileUtils.deleteQuietly(tNovelFile)
-        val tBody = myNarou.getNovelBody(aNarouNovel.ncode, i).runSyncUnsafe()
+        val tBody      = myNarou.getNovelBody(aNarouNovel.ncode, i).runSyncUnsafe()
         FileUtils.write(tNovelFile, tBody.body, StandardCharsets.UTF_8)
       }
 
     if (tResult) println()
     tResult
   }
+
 }
 
 object OldNovelDownloaderMain extends App {
   import monix.execution.Scheduler.Implicits.global
 
-  val client = NarouApiClient().runSyncUnsafe()
+  val client  = NarouApiClient().runSyncUnsafe()
   val tNovels = Source
     .fromFile(new File("./novellist"), "UTF-8")
     .getLines()
@@ -77,7 +76,8 @@ object OldNovelDownloaderMain extends App {
     client.search(params).map(_.novels.iterator)
   }
 
-  val task = Observable.fromIterator(Task.pure(tNovels))
+  val task = Observable
+    .fromIterator(Task.pure(tNovels))
     .filter(_.novelType == NovelType.Serially) // 短編がgetNovelBodyに失敗するので、とりあえず取らない
     .bufferTumbling(40)
     .mapEval { group =>
@@ -90,8 +90,8 @@ object OldNovelDownloaderMain extends App {
     .map { n =>
       new OldNovelDownloader(new File("./novels")).downloadNovel(n)
     }
-    .filter(identity) // ダウンロードが1つ以上行われたものを数える
-    .take(500)        // とりあえず500ノベルダウンロード
+    .filter(identity)                          // ダウンロードが1つ以上行われたものを数える
+    .take(500)                                 // とりあえず500ノベルダウンロード
     .zipWithIndex
     .foreachL(println)
 

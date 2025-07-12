@@ -14,19 +14,16 @@ import jp.seraphr.narou.NovelDownloader.DownloadResult
 import jp.seraphr.narou.commands.download.DownloadNovelCommand.DownloadNovelCommandArg
 import jp.seraphr.narou.model.NarouNovel
 
+import io.circe.generic.auto._
+import io.circe.parser._
 import monix.execution.Scheduler
 
-import io.circe.parser._
-import io.circe.generic.auto._
-
-/**
- * 小説ダウンロードコマンド
- */
+/** 小説ダウンロードコマンド */
 class DownloadNovelCommand(aDefaultArg: DownloadNovelCommandArg) extends Command with HasLogger {
-  override val name        = "download"
-  override val description = "collectコマンドにより収集した小説一覧を元に、小説をダウンロードし、ファイルに保存します"
-  override val version     = "0.1.0"
-  private val mParser      = new OptionParser(aDefaultArg)
+  override val name                 = "download"
+  override val description          = "collectコマンドにより収集した小説一覧を元に、小説をダウンロードし、ファイルに保存します"
+  override val version              = "0.1.0"
+  private val mParser               = new OptionParser(aDefaultArg)
   implicit val scheduler: Scheduler = Scheduler.global
 
   override def run(aArgs: Seq[String]): Try[Unit] = {
@@ -46,6 +43,7 @@ class DownloadNovelCommand(aDefaultArg: DownloadNovelCommandArg) extends Command
           case NonFatal(e) => logger.warn("[skip] リソースのクローズに失敗しました。 この例外を無視します。 ", e)
         }
     }
+
   }
 
   private def download(aArgs: DownloadNovelCommandArg): Try[Unit] = Try {
@@ -62,13 +60,11 @@ class DownloadNovelCommand(aDefaultArg: DownloadNovelCommandArg) extends Command
       Source
         .fromFile(aArgs.input, "UTF-8")
         .loan { tLines =>
-          val tNovels = tLines.getLines()
-            .map(line => decode[NarouNovel](line))
-            .collect { case Right(novel) => novel }
+          val tNovels = tLines.getLines().map(line => decode[NarouNovel](line)).collect { case Right(novel) => novel }
 
           val downloadTask = tDownloader.downloadNovels(tNovels, aArgs.overwrite)
-          val results = downloadTask.runSyncUnsafe()
-          
+          val results      = downloadTask.runSyncUnsafe()
+
           var tLastResult = DownloadResult(0, 0)
           results
             .takeWhile(_.novelCount < aArgs.maxNovels && !tStopBoolean.get())
@@ -78,7 +74,7 @@ class DownloadNovelCommand(aDefaultArg: DownloadNovelCommandArg) extends Command
                 logger.info(s"${r.novelCount} / ${aArgs.maxNovels} (${r.pageCount} pages)")
               }
             }
-          
+
           tLastResult
         }
 

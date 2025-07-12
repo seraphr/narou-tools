@@ -58,6 +58,7 @@ object Genre {
       case jp.seraphr.narou.api.model.Genre.Unselected     => Genre.Unselected
     }
   }
+
 }
 
 enum BigGenre(val id: Int) {

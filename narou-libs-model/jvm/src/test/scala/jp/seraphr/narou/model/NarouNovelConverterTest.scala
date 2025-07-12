@@ -1,7 +1,8 @@
 package jp.seraphr.narou.model
 
-import org.scalatest.freespec.AnyFreeSpec
 import jp.seraphr.narou.api.model.{ Genre => ApiGenre }
+
+import org.scalatest.freespec.AnyFreeSpec
 
 class NarouNovelConverterTest extends AnyFreeSpec {
 
@@ -14,12 +15,13 @@ class NarouNovelConverterTest extends AnyFreeSpec {
       allApiGenres.foreach { apiGenre =>
         // 変換実行（例外が発生しないことを確認）
         val domainGenre = Genre.fromApiGenre(apiGenre)
-        
+
         // 変換結果が適切であることを確認
         assert(domainGenre != null, s"変換結果がnullです: ${apiGenre}")
-        
+
         // ログ出力（デバッグ用）
-        println(s"${apiGenre.getClass.getSimpleName} (ID: ${apiGenre.id}) -> ${domainGenre.getClass.getSimpleName} (ID: ${domainGenre.id})")
+        println(s"${apiGenre.getClass.getSimpleName} (ID: ${apiGenre
+            .id}) -> ${domainGenre.getClass.getSimpleName} (ID: ${domainGenre.id})")
       }
     }
 
@@ -98,10 +100,11 @@ class NarouNovelConverterTest extends AnyFreeSpec {
 
       apiGenresToCheck.foreach { case (apiGenre, expectedDomainGenre) =>
         val actualDomainGenre = Genre.fromApiGenre(apiGenre)
-        assert(actualDomainGenre == expectedDomainGenre, 
-          s"変換結果が期待値と異なります: ${apiGenre} -> ${actualDomainGenre}, 期待値: ${expectedDomainGenre}")
-        assert(apiGenre.id == actualDomainGenre.id, 
-          s"IDが一致しません: ${apiGenre.id} != ${actualDomainGenre.id}")
+        assert(
+          actualDomainGenre == expectedDomainGenre,
+          s"変換結果が期待値と異なります: ${apiGenre} -> ${actualDomainGenre}, 期待値: ${expectedDomainGenre}"
+        )
+        assert(apiGenre.id == actualDomainGenre.id, s"IDが一致しません: ${apiGenre.id} != ${actualDomainGenre.id}")
       }
     }
   }

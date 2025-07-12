@@ -141,18 +141,18 @@ package object model {
     case SevenDay  extends DateRange("sevenday", "過去7日間")
     case ThisMonth extends DateRange("thismonth", "今月")
     case LastMonth extends DateRange("lastmonth", "先月")
-    
+
     /** UNIXタイムスタンプ範囲（例: 1262271600-1264949999） */
     case TimestampRange(start: Long, end: Long) extends DateRange(s"$start-$end", s"$start-$end")
   }
 
   /** 作品種別 */
   enum NovelTypeFilter(val value: String, val name: String) {
-    case Short              extends NovelTypeFilter("t", "短編")
-    case Serial             extends NovelTypeFilter("r", "連載中")
-    case CompletedSerial    extends NovelTypeFilter("er", "完結済連載作品")
-    case AllSerial          extends NovelTypeFilter("re", "すべての連載作品（連載中および完結済）")
-    case ShortAndCompleted  extends NovelTypeFilter("ter", "短編と完結済連載作品")
+    case Short             extends NovelTypeFilter("t", "短編")
+    case Serial            extends NovelTypeFilter("r", "連載中")
+    case CompletedSerial   extends NovelTypeFilter("er", "完結済連載作品")
+    case AllSerial         extends NovelTypeFilter("re", "すべての連載作品（連載中および完結済）")
+    case ShortAndCompleted extends NovelTypeFilter("ter", "短編と完結済連載作品")
   }
 
   /**
@@ -289,23 +289,23 @@ package object model {
       // 検索キーワード系
       word: Option[String] = None,
       notword: Option[String] = None,
-      
+
       // 検索対象指定系
       title: Option[SearchTargetFlag] = None,
       ex: Option[SearchTargetFlag] = None,
       keyword: Option[SearchTargetFlag] = None,
       wname: Option[SearchTargetFlag] = None,
-      
+
       // ジャンル系（複数指定可能）
       biggenre: Seq[BigGenre] = Seq.empty,
       notbiggenre: Seq[BigGenre] = Seq.empty,
       genre: Seq[Genre] = Seq.empty,
       notgenre: Seq[Genre] = Seq.empty,
-      
+
       // 作者・作品特定系（複数指定可能）
       userid: Seq[String] = Seq.empty,
       ncode: Seq[String] = Seq.empty,
-      
+
       // 内容要素系（含む）
       isr15: Option[Boolean] = None,
       isbl: Option[Boolean] = None,
@@ -314,7 +314,7 @@ package object model {
       istensei: Option[Boolean] = None,
       istenni: Option[Boolean] = None,
       istt: Option[Boolean] = None,
-      
+
       // 内容要素系（除外）
       notr15: Option[Boolean] = None,
       notbl: Option[Boolean] = None,
@@ -322,7 +322,7 @@ package object model {
       notzankoku: Option[Boolean] = None,
       nottensei: Option[Boolean] = None,
       nottenni: Option[Boolean] = None,
-      
+
       // 文字数・時間系
       minlen: Option[Int] = None,
       maxlen: Option[Int] = None,
@@ -330,21 +330,21 @@ package object model {
       mintime: Option[Int] = None,
       maxtime: Option[Int] = None,
       time: Option[ParamRange] = None,
-      
+
       // 作品特徴系
       kaiwaritu: Option[ParamRange] = None,
       sasie: Option[ParamRange] = None,
       `type`: Option[NovelTypeFilter] = None,
       buntai: Seq[BuntaiType] = Seq.empty,
       stop: Option[StopStatus] = None,
-      
+
       // 特殊系
       ispickup: Option[Boolean] = None,
-      
+
       // 日付系
       lastup: Option[DateRange] = None,
       lastupdate: Option[DateRange] = None,
-      
+
       // 出力制御系
       order: Option[OrderType] = None,
       lim: Option[Int] = None,
@@ -408,21 +408,24 @@ package object model {
 
     /** 値からDateRangeを取得します */
     def fromValue(aValue: String): Option[DateRange] = {
-      predefinedValues.find(_.value == aValue).orElse {
-        // UNIXタイムスタンプ範囲の場合
-        if (aValue.contains("-") && aValue.forall(c => c.isDigit || c == '-')) {
-          aValue.split("-").toList match {
-            case start :: end :: Nil if start.nonEmpty && end.nonEmpty =>
-              try {
-                Some(DateRange.TimestampRange(start.toLong, end.toLong))
-              } catch {
-                case _: NumberFormatException => None
-              }
-            case _ => None
-          }
-        } else None
-      }
+      predefinedValues
+        .find(_.value == aValue)
+        .orElse {
+          // UNIXタイムスタンプ範囲の場合
+          if (aValue.contains("-") && aValue.forall(c => c.isDigit || c == '-')) {
+            aValue.split("-").toList match {
+              case start :: end :: Nil if start.nonEmpty && end.nonEmpty =>
+                try {
+                  Some(DateRange.TimestampRange(start.toLong, end.toLong))
+                } catch {
+                  case _: NumberFormatException => None
+                }
+              case _                                                     => None
+            }
+          } else None
+        }
     }
+
   }
 
   object NovelTypeFilter {
@@ -506,27 +509,29 @@ package object model {
   implicit val novelTypeFilterEncoder: Encoder[NovelTypeFilter] = Encoder.encodeString.contramap(_.value)
 
   // ParamRange用の特殊なエンコーダー（API形式への変換）
-  implicit val paramRangeEncoder: Encoder[ParamRange] = Encoder.encodeString.contramap { range =>
-    range match {
-      case ParamRange.MinOnly(min)     => s"$min-"
-      case ParamRange.MaxOnly(max)     => s"-$max"
-      case ParamRange.MinMax(min, max) => s"$min-$max"
-      case ParamRange.Exact(value)     => value.toString
+  implicit val paramRangeEncoder: Encoder[ParamRange] = Encoder
+    .encodeString
+    .contramap { range =>
+      range match {
+        case ParamRange.MinOnly(min)     => s"$min-"
+        case ParamRange.MaxOnly(max)     => s"-$max"
+        case ParamRange.MinMax(min, max) => s"$min-$max"
+        case ParamRange.Exact(value)     => value.toString
+      }
     }
-  }
 
   implicit val paramRangeDecoder: Decoder[ParamRange] = Decoder
     .decodeString
     .emap { str =>
       if (str.contains("-")) {
         str.split("-").toList match {
-          case "" :: max :: Nil if max.nonEmpty =>
+          case "" :: max :: Nil if max.nonEmpty                  =>
             try {
               Right(ParamRange.MaxOnly(max.toInt))
             } catch {
               case _: NumberFormatException => Left(s"Invalid max value in ParamRange: $max")
             }
-          case min :: "" :: Nil if min.nonEmpty =>
+          case min :: "" :: Nil if min.nonEmpty                  =>
             try {
               Right(ParamRange.MinOnly(min.toInt))
             } catch {
@@ -538,7 +543,7 @@ package object model {
             } catch {
               case _: NumberFormatException => Left(s"Invalid min-max values in ParamRange: $min-$max")
             }
-          case _ => Left(s"Invalid ParamRange format: $str")
+          case _                                                 => Left(s"Invalid ParamRange format: $str")
         }
       } else {
         try {

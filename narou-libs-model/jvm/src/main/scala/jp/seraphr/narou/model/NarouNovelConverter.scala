@@ -45,8 +45,9 @@ object NarouNovelConverter {
     }
 
     private def convertNovelType(aType: jp.seraphr.narou.api.model.NovelType): NovelType = aType match {
-      case jp.seraphr.narou.api.model.NovelType.Short => NovelType.ShortStory
+      case jp.seraphr.narou.api.model.NovelType.Short  => NovelType.ShortStory
       case jp.seraphr.narou.api.model.NovelType.Serial => NovelType.Serially
     }
+
   }
 }

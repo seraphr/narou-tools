@@ -10,11 +10,10 @@ import jp.seraphr.command.Command
 import jp.seraphr.narou.{ DefaultNarouNovelsWriter, FileNovelDataAccessor, HasLogger }
 import jp.seraphr.narou.model.{ NarouNovel, NovelType, UploadType }
 
+import io.circe.generic.auto._
+import io.circe.parser._
 import monix.execution.Scheduler.Implicits.global
 import monix.reactive.Observable
-
-import io.circe.parser._
-import io.circe.generic.auto._
 
 class SandboxCommand(aDefaultArg: SandboxCommandArg) extends Command with HasLogger {
   private val mParser                             = new OptionParser(aDefaultArg)
@@ -60,13 +59,7 @@ class SandboxCommand(aDefaultArg: SandboxCommandArg) extends Command with HasLog
   @unused
   private def showKeywords(aNovels: Vector[NarouNovel]): Unit = {
     logger.info(s"keyword情報取得")
-    val tSortedKeywords = aNovels
-      .flatMap(_.keywords)
-      .groupBy(identity)
-      .view
-      .mapValues(_.size)
-      .toSeq
-      .sortBy(-_._2)
+    val tSortedKeywords = aNovels.flatMap(_.keywords).groupBy(identity).view.mapValues(_.size).toSeq.sortBy(-_._2)
     val tKeywordCount   = tSortedKeywords.size
     logger.info(s"総キーワード数: ${tKeywordCount}")
 

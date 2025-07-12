@@ -7,18 +7,17 @@ import jp.seraphr.narou.NovelDownloader.DownloadResult
 import jp.seraphr.narou.api.NarouApiClient
 import jp.seraphr.narou.api.model.{ NovelInfo, SearchParams }
 import jp.seraphr.narou.model.NarouNovel
+
 import monix.eval.Task
 import monix.execution.Scheduler
 import org.apache.commons.io.FileUtils
 
-/**
- * 小説ダウンローダー
- */
+/** 小説ダウンローダー */
 class NovelDownloader(aTargetDir: File, aIntervalMillis: Long) extends HasLogger {
-  private val mInvalidCharSet = """\/:*?"<>|.""".toSet
+  private val mInvalidCharSet       = """\/:*?"<>|.""".toSet
   implicit val scheduler: Scheduler = Scheduler.global
-  private val client = NarouApiClient().runSyncUnsafe()
-  private val myNarou = new MyNarou
+  private val client                = NarouApiClient().runSyncUnsafe()
+  private val myNarou               = new MyNarou
 
   /**
    * 小説をダウンロードする
@@ -44,17 +43,21 @@ class NovelDownloader(aTargetDir: File, aIntervalMillis: Long) extends HasLogger
       logger.info(s"${aNarouNovel.ncode} ${i} / ${aNarouNovel.chapterCount}")
       tAdjuster.adjust()
       FileUtils.deleteQuietly(tNovelFile)
-      
-      myNarou.getNovelBody(aNarouNovel.ncode, i).map { tBody =>
-        FileUtils.write(tNovelFile, tBody.body, StandardCharsets.UTF_8)
-      }
+
+      myNarou
+        .getNovelBody(aNarouNovel.ncode, i)
+        .map { tBody =>
+          FileUtils.write(tNovelFile, tBody.body, StandardCharsets.UTF_8)
+        }
     }
 
-    Task.sequence(downloadTasks).map { _ =>
-      val tPageCount  = tAllNovels.size
-      val tNovelCount = if (0 < tPageCount) 1 else 0
-      DownloadResult(tNovelCount, tPageCount)
-    }
+    Task
+      .sequence(downloadTasks)
+      .map { _ =>
+        val tPageCount  = tAllNovels.size
+        val tNovelCount = if (0 < tPageCount) 1 else 0
+        DownloadResult(tNovelCount, tPageCount)
+      }
   }
 
   class LazyDownload(aNarouNovel: NarouNovel, aOverride: Boolean) {
@@ -77,8 +80,8 @@ class NovelDownloader(aTargetDir: File, aIntervalMillis: Long) extends HasLogger
       .map { group =>
         filterExists(group).flatMap { existingNovels =>
           val existingNcodes = existingNovels.map(_.ncode).toSet
-          val filteredGroup = group.filter(n => existingNcodes.contains(n.ncode))
-          
+          val filteredGroup  = group.filter(n => existingNcodes.contains(n.ncode))
+
           Task.sequence(filteredGroup.map { novel =>
             downloadNovel(novel, aOverride)
           })
@@ -87,6 +90,7 @@ class NovelDownloader(aTargetDir: File, aIntervalMillis: Long) extends HasLogger
 
     Task.sequence(groupedTasks.toList).map(_.flatten.iterator)
   }
+
 }
 
 object NovelDownloader {
