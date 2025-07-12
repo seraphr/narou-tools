@@ -11,6 +11,7 @@ import com.fasterxml.jackson.databind.module.SimpleModule
 import com.fasterxml.jackson.databind.ser.std.StdSerializer
 import narou4j.entities.Novel
 import narou4j.enums.{ NovelGenre, OutputOrder }
+import jp.seraphr.narou.api.model.OrderType
 
 /**
  */
@@ -31,9 +32,35 @@ object OldNovelCollector {
       val tGenre = aSetting.genre
       val tOrder = aSetting.order
       val tSkip  = aSetting.skip
+      
+      // OutputOrderからOrderTypeへの変換
+      def convertOrder(outputOrder: OutputOrder): OrderType = outputOrder.getId match {
+        case "new"           => OrderType.New
+        case "favnovelcnt"   => OrderType.FavNovelCnt
+        case "reviewcnt"     => OrderType.ReviewCnt
+        case "hyoka"         => OrderType.Hyoka
+        case "hyokaasc"      => OrderType.HyokaAsc
+        case "dailypoint"    => OrderType.DailyPoint
+        case "weeklypoint"   => OrderType.WeeklyPoint
+        case "monthlypoint"  => OrderType.MonthlyPoint
+        case "quarterpoint"  => OrderType.QuarterPoint
+        case "yearlypoint"   => OrderType.YearlyPoint
+        case "impressioncnt" => OrderType.ImpressionCnt
+        case "hyokacnt"      => OrderType.HyokaCnt
+        case "hyokacntasc"   => OrderType.HyokaCntAsc
+        case "weekly"        => OrderType.Weekly
+        case "lengthdesc"    => OrderType.LengthDesc
+        case "lengthasc"     => OrderType.LengthAsc
+        case "generalfirstup"=> OrderType.GeneralFirstUp
+        case "ncodeasc"      => OrderType.NcodeAsc
+        case "ncodedesc"     => OrderType.NcodeDesc
+        case "old"           => OrderType.Old
+        case _               => OrderType.New // デフォルト
+      }
+      
       aBuilder
         .genre(GenreConverter.convertToNewGenre(tGenre))
-        .opt(_.order)(tOrder.map(_.getId))
+        .opt(_.order)(tOrder.map(convertOrder))
         .skipLim(tSkip, 500)
         .buildFromEmpty
         .getNovels

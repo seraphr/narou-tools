@@ -26,7 +26,8 @@ class AllNovelCollector(aIntervalMillis: Long)(implicit scheduler: Scheduler) ex
         logger.info(s"${tCount} 回目の呼び出しです。 minLength=${aMinLength}, skip=${aSkip} limit*count=${tNovelCount}")
       }
 
-      val tOrder = "length" // 文字数昇順
+      import jp.seraphr.narou.api.model.OrderType
+      val tOrder = OrderType.LengthAsc // 文字数昇順
 
       try {
         val result = aBuilder

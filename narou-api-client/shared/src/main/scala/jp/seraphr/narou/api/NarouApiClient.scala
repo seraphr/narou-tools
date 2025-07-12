@@ -30,7 +30,7 @@ trait NarouApiClient {
    * @return 小説情報
    */
   def getByNcode(aNcode: String): Task[NovelApiResponse] = {
-    search(SearchParams(ncode = Some(aNcode)))
+    search(SearchParams(ncode = Seq(aNcode)))
   }
 
   /**

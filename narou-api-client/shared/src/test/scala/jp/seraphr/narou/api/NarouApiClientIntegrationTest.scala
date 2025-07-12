@@ -1,6 +1,6 @@
 package jp.seraphr.narou.api
 
-import jp.seraphr.narou.api.model.{ BigGenre, SearchParams }
+import jp.seraphr.narou.api.model.{ BigGenre, SearchParams, OrderType }
 
 import monix.eval.Task
 import monix.execution.Scheduler
@@ -114,9 +114,9 @@ class NarouApiClientIntegrationTest extends AsyncFreeSpec with Matchers {
 
     "複数の検索パラメータを組み合わせたテスト" in {
       val params = SearchParams(
-        biggenre = Some(BigGenre.Romance), // 恋愛
+        biggenre = Seq(BigGenre.Romance), // 恋愛
         lim = Some(1),
-        order = Some("hyoka")              // 評価順
+        order = Some(OrderType.Hyoka)     // 評価順
       )
 
       for {
