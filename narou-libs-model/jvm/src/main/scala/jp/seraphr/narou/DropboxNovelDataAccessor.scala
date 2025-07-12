@@ -68,12 +68,12 @@ class DropboxNovelDataAccessor(aClient: DbxClientV2, aRootPath: String) extends 
     .onErrorHandle(_ => false) // 存在しないディレクトリにlistFolderをすると例外が返る
 
   override def writeExtractedMeta(aMetaString: String): Task[Unit] = {
-    println(s"extractedMetadataPath = ${extractedMetadataPath}")
+    // TODO: ログ出力機能を統合する場合はここでログを出力
     uploadString(extractedMetadataPath, aMetaString)
   }
 
   override def writeMetadata(aDir: String, aMetaString: String): Task[Unit] = {
-    println(s"metadataPath(aDir) = ${metadataPath(aDir)}")
+    // TODO: ログ出力機能を統合する場合はここでログを出力
     uploadString(metadataPath(aDir), aMetaString)
   }
 

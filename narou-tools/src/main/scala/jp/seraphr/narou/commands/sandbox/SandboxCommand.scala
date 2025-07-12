@@ -8,11 +8,12 @@ import scala.util.{ Failure, Try, Using }
 
 import jp.seraphr.command.Command
 import jp.seraphr.narou.{ DefaultNarouNovelsWriter, FileNovelDataAccessor, HasLogger }
+import jp.seraphr.narou.model.{ NarouNovel, NovelType, UploadType }
 
-import com.fasterxml.jackson.databind.ObjectMapper
+import io.circe.generic.auto._
+import io.circe.parser._
 import monix.execution.Scheduler.Implicits.global
 import monix.reactive.Observable
-import narou4j.entities.Novel
 
 class SandboxCommand(aDefaultArg: SandboxCommandArg) extends Command with HasLogger {
   private val mParser                             = new OptionParser(aDefaultArg)
@@ -32,12 +33,9 @@ class SandboxCommand(aDefaultArg: SandboxCommandArg) extends Command with HasLog
   }
 
   private def runSandbox(aArgs: SandboxCommandArg): Try[Unit] = Try {
-    import com.fasterxml.jackson.core.`type`.TypeReference
-    val tMapper: ObjectMapper = new ObjectMapper
-
     logger.info(s"小説情報の読み込み ${aArgs.input}")
     val tNovels = Using(Source.fromFile(aArgs.input, "UTF-8")) { tLines =>
-      tLines.getLines().map(tMapper.readValue[Novel](_, new TypeReference[Novel]() {})).toVector
+      tLines.getLines().map(line => decode[NarouNovel](line)).collect { case Right(novel) => novel }.toVector
     }.get
 
     //    showKeywords(tNovels)
@@ -46,28 +44,22 @@ class SandboxCommand(aDefaultArg: SandboxCommandArg) extends Command with HasLog
   }
 
   @unused
-  private def findUploadType0(aNovels: Vector[Novel]): Unit = {
-    val tFiltered = aNovels.filter(_.getUploadType == 0)
+  private def findUploadType0(aNovels: Vector[NarouNovel]): Unit = {
+    val tFiltered = aNovels.filter(_.uploadType == UploadType.Etc(0))
     logger.info(s"count = ${tFiltered.size}")
-    logger.info(s"全短編数 = ${aNovels.count(_.getNovelType == 2)}")
-    logger.info(s"短編 = ${tFiltered.count(_.getNovelType == 2)}")
-    logger.info(s"長編 = ${tFiltered.count(_.getNovelType == 1)}")
+    logger.info(s"全短編数 = ${aNovels.count(_.novelType == NovelType.ShortStory)}")
+    logger.info(s"短編 = ${tFiltered.count(_.novelType == NovelType.ShortStory)}")
+    logger.info(s"長編 = ${tFiltered.count(_.novelType == NovelType.Serially)}")
     tFiltered
-      .filter(_.getNovelType == 1)
+      .filter(_.novelType == NovelType.Serially)
       .take(10)
-      .foreach(n => logger.info(s"ncode=${n.getNcode}, length=${n.getNumberOfChar}"))
+      .foreach(n => logger.info(s"ncode=${n.ncode}, length=${n.length}"))
   }
 
   @unused
-  private def showKeywords(aNovels: Vector[Novel]): Unit = {
+  private def showKeywords(aNovels: Vector[NarouNovel]): Unit = {
     logger.info(s"keyword情報取得")
-    val tSortedKeywords = aNovels
-      .flatMap(_.getKeyword.split(" "))
-      .groupBy(identity)
-      .view
-      .mapValues(_.size)
-      .toSeq
-      .sortBy(-_._2)
+    val tSortedKeywords = aNovels.flatMap(_.keywords).groupBy(identity).view.mapValues(_.size).toSeq.sortBy(-_._2)
     val tKeywordCount   = tSortedKeywords.size
     logger.info(s"総キーワード数: ${tKeywordCount}")
 
@@ -82,9 +74,8 @@ class SandboxCommand(aDefaultArg: SandboxCommandArg) extends Command with HasLog
   }
 
   @unused
-  private def convertNovelList(aNovels: Vector[Novel], aOutputDir: File): Unit = {
+  private def convertNovelList(aNovels: Vector[NarouNovel], aOutputDir: File): Unit = {
     logger.info(s"novelの変換を行います: Novel数=${aNovels.size}")
-    import jp.seraphr.narou.model.NarouNovelConverter._
 
     val tNovels = Observable
       .fromIterable(aNovels)
@@ -94,7 +85,7 @@ class SandboxCommand(aDefaultArg: SandboxCommandArg) extends Command with HasLog
         if (tCount % 5000 == 0) {
           logger.info(s"変換: ${tCount}")
         }
-        tNovel.asScala
+        tNovel
       }
 
     val tDataWriter = new FileNovelDataAccessor(aOutputDir.getParentFile)

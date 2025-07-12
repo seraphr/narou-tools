@@ -1,51 +1,26 @@
 package jp.seraphr.narou
 
-import narou4j.Narou
-import narou4j.entities.NovelBody
-import narou4j.network.NarouApiClient
-import okhttp3.Response
-import org.jsoup.Jsoup
-import org.jsoup.nodes.{ Document, Element }
+import jp.seraphr.narou.api.NarouApiClient
+import jp.seraphr.narou.api.model.NovelBody
 
-/**
- */
-class MyNarou extends Narou {
-  override def getNovelBody(ncode: String, page: Int): NovelBody = {
-    if (page <= 0) throw new RuntimeException("pageは1以上である必要があります")
-    val client = new NarouApiClient
+import monix.eval.Task
+import monix.execution.Scheduler
 
-    val response: Response = client.getNovelBody(ncode, page)
-    val html: String       = response.body.string
-    if (html.isEmpty) {
-      throw new RuntimeException("empty body")
-    }
+/** 小説本文取得のためのクライアント */
+class MyNarou {
+  implicit val scheduler: Scheduler = Scheduler.global
+  private val client                = NarouApiClient().runSyncUnsafe()
 
-    val result: NovelBody  = new NovelBody
-    result.setNcode(ncode)
-    result.setPage(page)
-    val document: Document = Jsoup.parse(html)
-    val title: String      = document.select(".novel_subtitle").first.ownText
-    result.setTitle(title)
-    val element: Element   = document.getElementById("novel_honbun")
-    var body: String       = element.html
-
-    //    if(page <= 3)
-    //      FileUtils.write(new File(s"./orig_${ncode}_${page}"), body, "UTF-8")
-
-    body = body.replaceAll("\n", "")
-    body = body.replaceAll("\r", "")
-    body = body
-      .replaceAll("<ruby>", "")
-      .replaceAll("</ruby>", "")
-      .replaceAll("<rb>", "")
-      .replaceAll("</rb>", "")
-      .replaceAll("<rt>", "")
-      .replaceAll("</rt>", "")
-      .replaceAll("<rp>", "")
-      .replaceAll("</rp>", "")
-    body = body.replaceAll("<br>", "\n")
-    result.setBody(body)
-    return result
+  /**
+   * 指定された小説の指定ページの本文を取得する
+   *
+   * @param ncode 小説コード
+   * @param page ページ番号（1以上）
+   * @return 小説本文データ
+   */
+  def getNovelBody(ncode: String, page: Int): Task[NovelBody] = {
+    if (page <= 0) Task.raiseError(new RuntimeException("pageは1以上である必要があります"))
+    else client.getNovelBody(ncode, page)
   }
 
 }

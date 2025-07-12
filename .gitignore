@@ -4,3 +4,9 @@
 .idea/
 target/
 .bsp/
+.bloop/
+.metals/
+mcp.json
+metals.sbt
+
+.agent/repos

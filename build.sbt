@@ -55,7 +55,6 @@ lazy val `narou-libs-model` = crossProject(JVMPlatform, JSPlatform)
   .settings(commonSettings)
   .jvmSettings(
     libraryDependencies ++= Seq(
-      jvm.narou4j,
       jvm.commonsIO,
       jvm.scalajsStubs,
       jvm.dropbox
@@ -71,14 +70,33 @@ lazy val `narou-libs-model` = crossProject(JVMPlatform, JSPlatform)
     webpack / version   := Dependencies.js.webpack,
     stTypescriptVersion := Dependencies.js.typescript
   )
+  .dependsOn(`narou-api-client`)
 
 lazy val modelJVM = `narou-libs-model`.jvm
 lazy val modelJS  = `narou-libs-model`.js
 
+lazy val `narou-api-client` = crossProject(JVMPlatform, JSPlatform)
+  .crossType(CrossType.Full)
+  .in(file("narou-api-client"))
+  .settings(
+    libraryDependencies ++= Seq(
+      scalajs.monixReactive.value,
+      scalajs.scalatest.value % "test"
+    ) ++ scalajs.circe.value ++ scalajs.sttp.value
+  )
+  .jvmSettings(
+    libraryDependencies ++= Seq(
+      jvm.jsoup
+    )
+  )
+  .settings(commonSettings)
+
+lazy val `narou-api-clientJVM` = `narou-api-client`.jvm
+lazy val `narou-api-clientJS`  = `narou-api-client`.js
+
 lazy val `narou-libs` = (project in file("narou-libs"))
   .settings(
     libraryDependencies ++= Seq(
-      jvm.narou4j,
       jvm.commonsIO,
       jvm.slf4j,
       jvm.scalaTest % Test
@@ -86,7 +104,8 @@ lazy val `narou-libs` = (project in file("narou-libs"))
   )
   .settings(commonSettings)
   .dependsOn(
-    modelJVM
+    modelJVM,
+    `narou-api-clientJVM`
   )
 
 lazy val `narou-tools` = (project in file("narou-tools"))
@@ -104,10 +123,9 @@ lazy val `narou-tools` = (project in file("narou-tools"))
   .settings(commonSettings)
   .dependsOn(
     `narou-libs`,
-    modelJVM
+    modelJVM,
+    `narou-api-clientJVM`
   )
-
-lazy val `narou-rank` = (project in file("narou-rank")).settings(commonSettings).dependsOn(`narou-libs`)
 
 // -----------------------
 
@@ -178,4 +196,4 @@ lazy val `narou-webui` = (project in file("narou-webui"))
       f.isDirectory && f.getName == "narou_novels"
     }
   )
-  .dependsOn(modelJS)
+  .dependsOn(modelJS, `narou-api-clientJS`)

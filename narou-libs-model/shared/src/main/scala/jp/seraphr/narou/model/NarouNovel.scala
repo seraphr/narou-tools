@@ -3,6 +3,7 @@ package jp.seraphr.narou.model
 import scala.scalajs.js.annotation.JSExportAll
 
 enum Genre(val id: Int, val text: String, val bigGenre: BigGenre) {
+  case Unselected          extends Genre(0, "未選択", BigGenre.Other)
   case AnotherWorldRomance extends Genre(101, "異世界〔恋愛〕", BigGenre.Romance)
   case Romance             extends Genre(102, "現実世界〔恋愛〕", BigGenre.Romance)
   case HighFantasy         extends Genre(201, "ハイファンタジー〔ファンタジー〕", BigGenre.Fantasy)
@@ -29,6 +30,33 @@ enum Genre(val id: Int, val text: String, val bigGenre: BigGenre) {
 object Genre {
   def fromId(id: Int): Either[String, Genre] = {
     Genre.values.find(_.id == id).toRight(s"invalid genre id: $id")
+  }
+
+  def fromApiGenre(apiGenre: jp.seraphr.narou.api.model.Genre): Genre = {
+    apiGenre match {
+      case jp.seraphr.narou.api.model.Genre.RomanceIsekai  => Genre.AnotherWorldRomance
+      case jp.seraphr.narou.api.model.Genre.RomanceReality => Genre.Romance
+      case jp.seraphr.narou.api.model.Genre.HighFantasy    => Genre.HighFantasy
+      case jp.seraphr.narou.api.model.Genre.LowFantasy     => Genre.LowFantasy
+      case jp.seraphr.narou.api.model.Genre.PureLiterature => Genre.PureLiterature
+      case jp.seraphr.narou.api.model.Genre.HumanDrama     => Genre.HumanDrama
+      case jp.seraphr.narou.api.model.Genre.History        => Genre.History
+      case jp.seraphr.narou.api.model.Genre.Mystery        => Genre.Detective
+      case jp.seraphr.narou.api.model.Genre.Horror         => Genre.Horror
+      case jp.seraphr.narou.api.model.Genre.Action         => Genre.Action
+      case jp.seraphr.narou.api.model.Genre.Comedy         => Genre.Comedy
+      case jp.seraphr.narou.api.model.Genre.VRGame         => Genre.VRGame
+      case jp.seraphr.narou.api.model.Genre.Space          => Genre.Space
+      case jp.seraphr.narou.api.model.Genre.Science        => Genre.SF
+      case jp.seraphr.narou.api.model.Genre.Panic          => Genre.Panic
+      case jp.seraphr.narou.api.model.Genre.Fairy          => Genre.FairyTale
+      case jp.seraphr.narou.api.model.Genre.Poetry         => Genre.Poem
+      case jp.seraphr.narou.api.model.Genre.Essay          => Genre.Essay
+      case jp.seraphr.narou.api.model.Genre.Replay         => Genre.Replay
+      case jp.seraphr.narou.api.model.Genre.OtherMisc      => Genre.Other
+      case jp.seraphr.narou.api.model.Genre.NonGenreDetail => Genre.NonGenre
+      case jp.seraphr.narou.api.model.Genre.Unselected     => Genre.Unselected
+    }
   }
 
 }

@@ -4,85 +4,91 @@ import java.io.File
 import java.nio.charset.StandardCharsets
 
 import jp.seraphr.narou.NovelDownloader.DownloadResult
+import jp.seraphr.narou.api.NarouApiClient
+import jp.seraphr.narou.api.model.{ NovelInfo, SearchParams }
+import jp.seraphr.narou.model.NarouNovel
 
-import narou4j.entities.Novel
+import monix.eval.Task
+import monix.execution.Scheduler
 import org.apache.commons.io.FileUtils
 
-/**
- */
+/** 小説ダウンローダー */
 class NovelDownloader(aTargetDir: File, aIntervalMillis: Long) extends HasLogger {
-  private val mInvalidCharSet = """\/:*?"<>|.""".toSet
+  private val mInvalidCharSet       = """\/:*?"<>|.""".toSet
+  implicit val scheduler: Scheduler = Scheduler.global
+  private val client                = NarouApiClient().runSyncUnsafe()
+  private val myNarou               = new MyNarou
 
   /**
-   * @param aNovel
-   * @param aOverride
-   * @return
+   * 小説をダウンロードする
+   * @param aNarouNovel 小説情報
+   * @param aOverride 既存ファイルを上書きするか
+   * @return ダウンロード結果
    */
-  def downloadNovel(aNovel: Novel, aOverride: Boolean = false): DownloadResult = {
+  def downloadNovel(aNarouNovel: NarouNovel, aOverride: Boolean = false): Task[DownloadResult] = {
     val tNovelDir = new File(
       aTargetDir,
-      s"${aNovel.getNcode}_${aNovel.getTitle.filterNot(c => c.isControl || mInvalidCharSet(c)).take(10).trim}"
+      s"${aNarouNovel.ncode}_${aNarouNovel.title.filterNot(c => c.isControl || mInvalidCharSet(c)).take(10).trim}"
     )
     tNovelDir.mkdirs()
-    val tClient   = new MyNarou
 
     // アクセス頻度の調整
     val tAdjuster = new IntervalAdjuster(aIntervalMillis)
 
-    val tMaxPage   = tNovelDir.list().map(_.toInt).reduceOption(_ max _).getOrElse(0)
-    val tAllNovels = (1 to aNovel.getAllNumberOfNovel).filter(tMaxPage < _ || aOverride)
+    val tMaxPage   = Option(tNovelDir.list()).getOrElse(Array.empty[String]).flatMap(_.toIntOption).maxOption.getOrElse(0)
+    val tAllNovels = (1 to aNarouNovel.chapterCount).filter(tMaxPage < _ || aOverride)
 
-    tAllNovels.foreach { i =>
+    val downloadTasks = tAllNovels.map { i =>
       val tNovelFile = new File(tNovelDir, i.toString)
-      logger.info(s"${aNovel.getNcode} ${i} / ${aNovel.getAllNumberOfNovel}")
+      logger.info(s"${aNarouNovel.ncode} ${i} / ${aNarouNovel.chapterCount}")
       tAdjuster.adjust()
       FileUtils.deleteQuietly(tNovelFile)
-      val tBody      = tClient.getNovelBody(aNovel.getNcode, i)
-      FileUtils.write(tNovelFile, tBody.getBody, StandardCharsets.UTF_8)
+
+      myNarou
+        .getNovelBody(aNarouNovel.ncode, i)
+        .map { tBody =>
+          FileUtils.write(tNovelFile, tBody.body, StandardCharsets.UTF_8)
+        }
     }
 
-    val tPageCount  = tAllNovels.size
-    val tNovelCount = if (0 < tPageCount) 1 else 0
-    DownloadResult(tNovelCount, tPageCount)
+    Task
+      .sequence(downloadTasks)
+      .map { _ =>
+        val tPageCount  = tAllNovels.size
+        val tNovelCount = if (0 < tPageCount) 1 else 0
+        DownloadResult(tNovelCount, tPageCount)
+      }
   }
 
-  class LazyDownload(aNovel: Novel, aOverride: Boolean) {
-    lazy val mResult        = downloadNovel(aNovel, aOverride)
+  class LazyDownload(aNarouNovel: NarouNovel, aOverride: Boolean) {
+    lazy val mResult        = downloadNovel(aNarouNovel, aOverride).runSyncUnsafe()
     def get: DownloadResult = mResult
   }
 
-  def downloadNovels(aNovels: Iterator[Novel], aOverride: Boolean = false): Iterator[DownloadResult] = {
-    def filterExists(aNovels: Seq[Novel]): Iterator[Novel] = {
-      import scala.jdk.CollectionConverters._
-
-      val tFiltered =
-        NarouClientBuilder
-          .init
-          .n(_.setNCode(aNovels.map(_.getNcode).toArray))
-          .skipLim(0, 500)
-          .buildFromEmpty
-          .getNovels
-          .asScala
-
-      // 先頭は、allCountのみが含まれている奴なので、削る
-      tFiltered.tail.iterator
+  def downloadNovels(aNarouNovels: Iterator[NarouNovel], aOverride: Boolean = false): Task[Iterator[DownloadResult]] = {
+    def filterExists(aNarouNovels: Seq[NarouNovel]): Task[Iterator[NovelInfo]] = {
+      val params = SearchParams(ncode = aNarouNovels.map(_.ncode), lim = Some(500))
+      client.search(params).map(_.novels.iterator)
     }
 
-    aNovels
-      .filter(_.getNovelType == 1) // 短編がgetNovelBodyに失敗するので、とりあえず取らない
+    val novelSeq = aNarouNovels
+      .filter(_.novelType == jp.seraphr.narou.model.NovelType.Serially) // 短編は除外
+      .toSeq
+
+    val groupedTasks = novelSeq
       .grouped(40)
-      .flatMap(filterExists)       // 40小説ずつ、存在するものだけを残す
-      .map(new LazyDownload(_, aOverride))
-      .scanLeft(() => DownloadResult(0, 0)) { (tAccThunk, tResult) =>
-        // * scanLeftを噛ませると、最小限必要な要素よりも1個多く値の評価を行ってしまうのに対応するため、関数に包む
-        // * 単純に行うと
-        // ** 要素数が多い時にstackoverflowする
-        // ** downloadが何度も評価されてしまう
-        // * ので LazyDownloadで2度目の評価を抑制 & 関数外で評価 する
-        val tAcc = tAccThunk()
-        () => tAcc merge tResult.get
+      .map { group =>
+        filterExists(group).flatMap { existingNovels =>
+          val existingNcodes = existingNovels.map(_.ncode).toSet
+          val filteredGroup  = group.filter(n => existingNcodes.contains(n.ncode))
+
+          Task.sequence(filteredGroup.map { novel =>
+            downloadNovel(novel, aOverride)
+          })
+        }
       }
-      .map(_())
+
+    Task.sequence(groupedTasks.toList).map(_.flatten.iterator)
   }
 
 }

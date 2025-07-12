@@ -11,10 +11,10 @@ object Dependencies {
   val circeVersion         = "0.14.14"
   val monixVersion         = "3.4.1"
   val monocleVersion       = "3.3.0"
+  val sttpVersion          = "4.0.9"
 
   object jvm {
     val scalaTest     = "org.scalatest"    %% "scalatest"        % scalatestVersion
-    val narou4j       = "net.nashihara"     % "narou4j"          % "1.2.6"
     val commonsIO     = "commons-io"        % "commons-io"       % "2.19.0"
     val scopt         = "com.github.scopt" %% "scopt"            % "4.1.0"
     val slf4j         = "org.slf4j"         % "slf4j-api"        % "1.7.+"
@@ -22,6 +22,7 @@ object Dependencies {
     val monix         = "io.monix"         %% "monix"            % monixVersion
     val monixReactive = "io.monix"         %% "monix-reactive"   % monixVersion
     val dropbox       = "com.dropbox.core"  % "dropbox-core-sdk" % "7.0.0"
+    val jsoup         = "org.jsoup"         % "jsoup"            % "1.18.1"
 
     val circe = Seq(
       "io.circe" %% "circe-core",
@@ -61,6 +62,14 @@ object Dependencies {
     )
 
     val fastparse = Def.setting("com.lihaoyi" %%% "fastparse" % "3.1.1")
+    val sttp      = Def.setting(
+      Seq(
+        "com.softwaremill.sttp.client4" %%% "core",
+        "com.softwaremill.sttp.client4" %%% "circe",
+        "com.softwaremill.sttp.client4" %%% "monix"
+      ).map(_ % sttpVersion)
+    )
+
   }
 
   object js {

@@ -6,6 +6,8 @@ case class NovelConditionWithSource(condition: NovelCondition, source: String)  
   def predicate = condition.predicate
 }
 case class NovelCondition(id: String, name: String, predicate: NarouNovel => Boolean) {
+
+  /** 条件を論理AND結合します */
   def and(aThat: NovelCondition): NovelCondition = {
     NovelCondition(
       s"${this.id}_and_${aThat.id}",
@@ -14,10 +16,12 @@ case class NovelCondition(id: String, name: String, predicate: NarouNovel => Boo
     )
   }
 
+  /** 条件を論理AND結合します（名前を変更しません） */
   def andQuietly(aThat: NovelCondition): NovelCondition = {
     this.copy(predicate = n => this.predicate(n) && aThat.predicate(n))
   }
 
+  /** 条件を論理OR結合します */
   def or(aThat: NovelCondition): NovelCondition = {
     NovelCondition(
       s"${this.id}_or_${aThat.id}",
@@ -26,6 +30,7 @@ case class NovelCondition(id: String, name: String, predicate: NarouNovel => Boo
     )
   }
 
+  /** 条件を論理NOT反転します */
   def not: NovelCondition = {
     if (this == NovelCondition.finished) NovelCondition.notFinished
     else if (this == NovelCondition.notFinished) NovelCondition.finished
@@ -84,13 +89,13 @@ object NovelConditionParser {
 
   }
 
-  private def genFilter(toValue: NarouNovel => Int, op: FilterOp, value: Int): NarouNovel => Boolean = op match {
-    case FilterOp.EQ => toValue(_) == value
-    case FilterOp.NQ => toValue(_) != value
-    case FilterOp.GE => toValue(_) >= value
-    case FilterOp.GQ => toValue(_) > value
-    case FilterOp.LE => toValue(_) <= value
-    case FilterOp.LQ => toValue(_) < value
+  private def genFilter(aToValue: NarouNovel => Int, aOp: FilterOp, aValue: Int): NarouNovel => Boolean = aOp match {
+    case FilterOp.EQ => aToValue(_) == aValue
+    case FilterOp.NQ => aToValue(_) != aValue
+    case FilterOp.GE => aToValue(_) >= aValue
+    case FilterOp.GQ => aToValue(_) > aValue
+    case FilterOp.LE => aToValue(_) <= aValue
+    case FilterOp.LQ => aToValue(_) < aValue
   }
 
   private type GenCondition = (FilterOp, Int) => NovelCondition
@@ -173,8 +178,8 @@ object NovelConditionParser {
     def field[S: P]   = mFilterValues.keys.foldLeft[P[Unit]](Fail)(_ | P(_))
     def op[S: P]      = StringIn("==", "!=", ">=", ">", "<=", "<")
     def value[S: P]   = CharsWhile(_.isDigit, min = 1)
-    def tFilter[S: P] = P(field.! ~ op.! ~ value.!).map { (tField, tOp, tValue) =>
-      mFilterValues(tField)(FilterOp.fromString(tOp), tValue.toInt)
+    def tFilter[S: P] = P(field.! ~ op.! ~ value.!).map { (aField, aOp, aValue) =>
+      mFilterValues(aField)(FilterOp.fromString(aOp), aValue.toInt)
     }
 
     def tNot[S: P] = P("!" ~ factor).map(_.not)
@@ -192,10 +197,11 @@ object NovelConditionParser {
     tBoolean | tParen | trueLiteral | allLiteral | falseLiteral
   }
 
-  def apply(source: String): Either[String, NovelConditionWithSource] = {
+  /** 文字列からNovelConditionをパースします */
+  def apply(aSource: String): Either[String, NovelConditionWithSource] = {
     def parser[$: P] = P(expr ~ End)
-    parse(source, parser(_)) match {
-      case Parsed.Success(tResult, _)  => Right(NovelConditionWithSource(tResult, source))
+    parse(aSource, parser(_)) match {
+      case Parsed.Success(tResult, _)  => Right(NovelConditionWithSource(tResult, aSource))
       case Parsed.Failure(_, _, extra) => Left(extra.trace().longAggregateMsg)
     }
   }
