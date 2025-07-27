@@ -39,7 +39,7 @@ object Dependencies {
   }
 
   object scalajs {
-    val scalajsDom    = Def.setting("org.scala-js" %%% "scalajs-dom" % "2.8.0")
+    val scalajsDom    = Def.setting("org.scala-js" %%% "scalajs-dom" % "2.8.1")
     val scalatest     = Def.setting("org.scalatest" %%% "scalatest" % scalatestVersion)
     val scalacheck    = Def.setting("org.scalatestplus" %%% "scalacheck-1-18" % scalatestplusVersion)
     val reactjs       = Def.setting("com.github.japgolly.scalajs-react" %%% "core" % "2.1.2")
