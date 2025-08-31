@@ -22,7 +22,7 @@ object Dependencies {
     val monix         = "io.monix"         %% "monix"            % monixVersion
     val monixReactive = "io.monix"         %% "monix-reactive"   % monixVersion
     val dropbox       = "com.dropbox.core"  % "dropbox-core-sdk" % "7.0.0"
-    val jsoup         = "org.jsoup"         % "jsoup"            % "1.18.3"
+    val jsoup         = "org.jsoup"         % "jsoup"            % "1.21.2"
 
     val circe = Seq(
       "io.circe" %% "circe-core",
