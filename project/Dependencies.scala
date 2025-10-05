@@ -8,7 +8,7 @@ object Dependencies {
   val reactVersion         = "17.0.2"
   val scalatestVersion     = "3.2.19"
   val scalatestplusVersion = s"${scalatestVersion}.0"
-  val circeVersion         = "0.14.14"
+  val circeVersion         = "0.14.15"
   val monixVersion         = "3.4.1"
   val monocleVersion       = "3.3.0"
   val sttpVersion          = "4.0.12"
