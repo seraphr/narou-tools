@@ -125,9 +125,9 @@ object ScatterData {
         }
         .toVector
         .sortBy(_._1)
-        .map(_._2)                                  // 値で昇順にsortして
+        .map(_._2) // 値で昇順にsortして
         .concat(Seq.fill(tMinCount - 1)(Seq.empty)) // 後ろにslidingに必要なだけ空列をつなげて
-        .sliding(tMinCount)                         // slidingすることで、各グループごとにmapする
+        .sliding(tMinCount) // slidingすることで、各グループごとにmapする
         .map { tNovelss =>
           // 最低数に達するまで、結合する = 足らない場合は移動平均にする
           tNovelss.foldLeft(Vector[NarouNovel]()) {

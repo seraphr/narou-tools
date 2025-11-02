@@ -116,7 +116,7 @@ class NarouApiClientIntegrationTest extends AsyncFreeSpec with Matchers {
       val params = SearchParams(
         biggenre = Seq(BigGenre.Romance), // 恋愛
         lim = Some(1),
-        order = Some(OrderType.Hyoka)     // 評価順
+        order = Some(OrderType.Hyoka) // 評価順
       )
 
       for {
