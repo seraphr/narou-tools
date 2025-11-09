@@ -95,7 +95,6 @@ object NovelScatterChart {
         .withReuse
         .autoRefresh
         .map { input =>
-
           console.debug(s"create scatter props !!")
           input
             .scatters
