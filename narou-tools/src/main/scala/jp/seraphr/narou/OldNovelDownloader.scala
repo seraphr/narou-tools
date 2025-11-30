@@ -90,8 +90,8 @@ object OldNovelDownloaderMain extends App {
     .map { n =>
       new OldNovelDownloader(new File("./novels")).downloadNovel(n)
     }
-    .filter(identity) // ダウンロードが1つ以上行われたものを数える
-    .take(500) // とりあえず500ノベルダウンロード
+    .filter(identity)                          // ダウンロードが1つ以上行われたものを数える
+    .take(500)                                 // とりあえず500ノベルダウンロード
     .zipWithIndex
     .foreachL(println)
 
