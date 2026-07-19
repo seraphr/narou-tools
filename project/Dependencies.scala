@@ -11,7 +11,7 @@ object Dependencies {
   val circeVersion         = "0.14.16"
   val monixVersion         = "3.4.1"
   val monocleVersion       = "3.3.0"
-  val sttpVersion          = "4.0.25"
+  val sttpVersion          = "4.0.26"
 
   object jvm {
     val scalaTest     = "org.scalatest"    %% "scalatest"        % scalatestVersion
