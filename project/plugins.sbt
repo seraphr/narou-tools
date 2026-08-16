@@ -7,4 +7,4 @@ addSbtPlugin("org.scala-js"       % "sbt-scalajs"              % "1.22.0")
 addSbtPlugin("org.portable-scala" % "sbt-scalajs-crossproject" % "1.4.0")
 addSbtPlugin("ch.epfl.scala"      % "sbt-scalajs-bundler"      % "0.21.1")
 
-addSbtPlugin("com.github.sbt" % "sbt-ghpages" % "0.9.0")
+addSbtPlugin("com.github.sbt" % "sbt-ghpages" % "0.10.0")
