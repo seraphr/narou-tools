@@ -10,3 +10,4 @@ mcp.json
 metals.sbt
 
 .agent/repos
+.agent/temp
