@@ -8,21 +8,21 @@ object Dependencies {
   val reactVersion         = "17.0.2"
   val scalatestVersion     = "3.2.20"
   val scalatestplusVersion = s"${scalatestVersion}.0"
-  val circeVersion         = "0.14.15"
+  val circeVersion         = "0.14.16"
   val monixVersion         = "3.4.1"
   val monocleVersion       = "3.3.0"
-  val sttpVersion          = "4.0.19"
+  val sttpVersion          = "4.0.26"
 
   object jvm {
     val scalaTest     = "org.scalatest"    %% "scalatest"        % scalatestVersion
-    val commonsIO     = "commons-io"        % "commons-io"       % "2.21.0"
+    val commonsIO     = "commons-io"        % "commons-io"       % "2.22.0"
     val scopt         = "com.github.scopt" %% "scopt"            % "4.1.0"
     val slf4j         = "org.slf4j"         % "slf4j-api"        % "1.7.+"
-    val logback       = "ch.qos.logback"    % "logback-classic"  % "1.5.32"
+    val logback       = "ch.qos.logback"    % "logback-classic"  % "1.6.3"
     val monix         = "io.monix"         %% "monix"            % monixVersion
     val monixReactive = "io.monix"         %% "monix-reactive"   % monixVersion
-    val dropbox       = "com.dropbox.core"  % "dropbox-core-sdk" % "7.0.0"
-    val jsoup         = "org.jsoup"         % "jsoup"            % "1.21.2"
+    val dropbox       = "com.dropbox.core"  % "dropbox-core-sdk" % "8.0.2"
+    val jsoup         = "org.jsoup"         % "jsoup"            % "1.23.1"
 
     val circe = Seq(
       "io.circe" %% "circe-core",
@@ -42,8 +42,8 @@ object Dependencies {
     val scalajsDom    = Def.setting("org.scala-js" %%% "scalajs-dom" % "2.8.1")
     val scalatest     = Def.setting("org.scalatest" %%% "scalatest" % scalatestVersion)
     val scalacheck    = Def.setting("org.scalatestplus" %%% "scalacheck-1-19" % scalatestplusVersion)
-    val reactjs       = Def.setting("com.github.japgolly.scalajs-react" %%% "core" % "2.1.3")
-    val reactjsExtra  = Def.setting("com.github.japgolly.scalajs-react" %%% "extra" % "2.1.3")
+    val reactjs       = Def.setting("com.github.japgolly.scalajs-react" %%% "core" % "2.1.4")
+    val reactjsExtra  = Def.setting("com.github.japgolly.scalajs-react" %%% "extra" % "2.1.4")
     val monixReactive = Def.setting("io.monix" %%% "monix-reactive" % monixVersion)
     val monoids       = Def.setting("org.typelevel" %%% "monoids" % "0.2.0")
     val circe         = Def.setting(
