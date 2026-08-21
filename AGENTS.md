@@ -34,7 +34,7 @@ Scala 3 と SBT を利用した、JVM / Scala.js クロスプラットフォー�
 ./sbt reformatCheck
 
 # Web UI のローカルプレビュー（http://localhost:4000/）
-./sbt narou-webui/previewSite
+./previewSite
 
 # パッケージング後の CLI 実行例
 ./narou-tools/target/pack/bin/narou collect --help
