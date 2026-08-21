@@ -1,0 +1,7 @@
+#!/bin/sh
+
+# WSL2からWindowsへIPv6のlocalhost待受が転送されないため、このコマンドだけIPv4を使用する
+JAVA_TOOL_OPTIONS="${JAVA_TOOL_OPTIONS:+$JAVA_TOOL_OPTIONS }-Djava.net.preferIPv4Stack=true"
+export JAVA_TOOL_OPTIONS
+
+exec ./sbt narou-webui/previewSite "$@"

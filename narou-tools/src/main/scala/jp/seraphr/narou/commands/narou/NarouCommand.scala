@@ -37,7 +37,7 @@ object NarouCommand extends HasLogger {
       CollectNovelCommandArg(
         CollectNovelCommand.Dropbox(None),
         CollectNovelCommand.Update,
-        1000,
+        intervalMillis = 8000, // 2026/08/22 現在、おそらくAPI側で4秒に1回にアクセスが制限されている。 その倍程度の数値をデフォルトとして設定した。
         limit = Int.MaxValue,
         novelsPerFile = 10000,
         withAll = false

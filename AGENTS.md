@@ -34,7 +34,7 @@ Scala 3 と SBT を利用した、JVM / Scala.js クロスプラットフォー�
 ./sbt reformatCheck
 
 # Web UI のローカルプレビュー（http://localhost:4000/）
-./sbt narou-webui/previewSite
+./previewSite
 
 # パッケージング後の CLI 実行例
 ./narou-tools/target/pack/bin/narou collect --help
@@ -141,3 +141,5 @@ array.foreach { tElement =>
 ## その他
 
 - Git のコミットメッセージは基本的に日本語で記述する
+- 機能の追加や修正を行い編集が完了した場合、CIで行っているチェックが通るかどうかを必ず確認し、通らない場合は通るように修正すること
+    - `./sbt reformatCheck test makeSite`
