@@ -1,117 +1,94 @@
-# CLAUDE.md
+# AGENTS.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+## プロジェクト概要
 
-## Build System and Commands
+Scala 3 と SBT を利用した、JVM / Scala.js クロスプラットフォームのマルチモジュールプロジェクトです。
 
-This is a multi-module Scala 3 project using SBT with cross-platform compilation (JVM/JS).
+### モジュール構成
 
-### Essential Commands
+- `narou-api-client`: なろう API クライアント。JVM / Scala.js 共通のモデルとクライアントを提供する
+- `narou-libs-model`: JVM / Scala.js で共有するドメインモデルとデータアクセス抽象を提供する
+- `narou-libs`: 小説の収集・加工を行う JVM 向けのコアロジックを提供する
+- `narou-tools`: コマンドラインインターフェースを提供する JVM アプリケーション
+- `narou-webui`: scalajs-react、Recharts、Ant Design を利用した Scala.js 製 Web UI
+
+依存ライブラリとそのバージョンは `build.sbt` と `project/Dependencies.scala` を正とします。
+
+## 主要コマンド
 
 ```bash
-# Build and package CLI tools
+# CLI のビルドとパッケージング
 ./sbt narou-tools/pack
 
-# Run tests
+# 全テスト
 ./sbt test
 
-# Run tests for specific module
+# モジュール単位のテスト
 ./sbt narou-libs-modelJS/test
 
-# Run tests for specific file in specific module
+# テストクラス単位の実行
 ./sbt "narou-libs-modelJVM/testOnly jp.seraphr.narou.model.NovelConditionParserTest"
 
-# Code formatting
-./sbt reformatAll          # Format all code
-./sbt reformatCheck        # Check formatting
+# フォーマット
+./sbt reformatAll
+./sbt reformatCheck
 
-# Web UI development
-./sbt narou-webui/previewSite    # Preview at http://localhost:4000/
-./sbt clean makeSite ghpagesPushSite  # Build and deploy to GitHub Pages
+# Web UI のローカルプレビュー（http://localhost:4000/）
+./sbt narou-webui/previewSite
 
-# CLI usage after packaging
+# パッケージング後の CLI 実行例
 ./narou-tools/target/pack/bin/narou collect --help
 ./narou-tools/target/pack/bin/narou collect --novelsPerFile 30000
 ```
 
-## Project Architecture
+GitHub Pages への公開は、明示的に依頼された場合だけ次のコマンドで行います。
 
-### Module Structure
+```bash
+./sbt clean makeSite ghpagesPushSite
+```
 
-- **`narou-libs-model`** - Cross-platform (JVM/JS) shared models and data access abstractions
-- **`narou-libs`** - JVM-only core business logic for novel collection and processing
-- **`narou-tools`** - CLI application with command-line interface
-- **`narou-webui`** - React-based web UI built with Scala.js
-- **`narou-rank`** - Ranking and analysis utilities
+## アーキテクチャ
 
-### Key Dependencies
+- 収集処理は CLI から `narou-api-client` を通じてなろう API を呼び出し、JSON ファイルをローカルまたは Dropbox に保存する
+- 分析・表示処理はローカルまたは Dropbox のデータを読み込み、加工して Web UI に表示する
+- `NovelDataReader`、`NovelDataWriter`、`NovelDataAccessor` でデータソースを抽象化し、プラットフォーム固有の実装を JVM / Scala.js の各ソースディレクトリに置く
+- 非同期処理には主に Monix の `Task` と `Observable`、不変データの操作には Monocle を利用する
+- CLI コマンドは `Command` trait を基底とする
+- Web UI の状態は `AppState` と `StoreProvider` で管理する。ローカル開発ではダミーデータ、本番では Dropbox のデータを利用する
 
-- **Cross-platform**: Circe (JSON), Monix (reactive), Monocle (optics), ScalaTest
-- **JVM-only**: narou4j (API client), Dropbox SDK, Apache Commons IO, Logback
-- **JS-only**: ScalaJS React, Recharts, Ant Design, Dropbox JS SDK
+### 主要ドメインモデル
 
-### Data Flow Architecture
+- `NarouNovel`: 小説のメタデータを表す中心的なドメインモデル
+- `NovelCondition`: 小説を絞り込むためのドメイン固有クエリ
+- `Genre`、`NovelType`、`UploadType`: ドメイン上の意味を持つ列挙型
 
-1. **Collection Pipeline**: CLI → Narou API → JSON files → Dropbox storage
-2. **Analysis Pipeline**: Dropbox/Local data → Processing → Web UI visualization
-3. **Cross-platform abstractions**: `NovelDataAccessor` trait with platform-specific implementations
+## 実装上の制約
 
-### Core Domain Models
+### クロスプラットフォーム
 
-- **`NarouNovel`** - Main domain object representing a web novel with metadata
-- **`NovelCondition`** - Domain-specific query language for filtering novels
-- **`Genre`**, **`NovelType`**, **`UploadType`** - Enumerated types with semantic meaning
-- **Platform abstraction**: `NovelDataReader` trait for different data sources (Ajax, File, Dropbox)
+- 共有モデルは JVM と Scala.js の両方で動作するように実装する
+- プラットフォーム固有の実装は `jvm/` または `js/` のソースディレクトリに置く
+- Web UI の CSS とアセットは既存の webpack 設定に従って扱う
 
-### Key Patterns
+### 外部 API と Dropbox
 
-- **Functional Reactive Programming**: Monix `Task` and `Observable` for async operations
-- **Lens-based data manipulation**: Monocle for immutable data transformations
-- **Command Pattern**: CLI commands extend base `Command` trait
-- **Cross-platform abstractions**: Shared traits with JVM/JS-specific implementations
-
-## Testing
-
-### Tests use ScalaTest with ScalaCheck property-based testing. Key test file:
-
-- `NovelConditionParserTest.scala` - Comprehensive parser tests with property-based testing
-
-### その他
-
-- テストには`AsyncFreeSpec` / `AnyFreeSpec`を利用する
-
-## Development Notes
-
-### Cross-Platform Considerations
-
-- Model classes must work on both JVM and JS platforms
-- Platform-specific implementations in separate source folders (`jvm/`, `js/`)
-- Webpack configuration for CSS/asset handling in web UI
-
-### API Integration
-
-- Narou API has rate limiting - use `IntervalAdjuster` for throttling
-- Dropbox integration uses embedded read-only credentials for public data access
-- Error handling with `Either` and `Task` monads
-
-### Web UI Development
-
-- React components built with `scalajs-react`
-- State management using custom `AppState` with `StoreProvider`
-- Visualization with Recharts for scatter plots and data analysis
-- Local development uses dummy data, production connects to Dropbox
+- なろう API のレート制限を守り、連続アクセスには `IntervalAdjuster` を利用する
+- なろう API クライアントは STTP を利用し、JVM 固有の HTML 処理には jsoup を利用する
+- CLI 用 Dropbox の secret と refresh token は環境変数から読み込む
+- Web UI には公開データへアクセスするための読み取り専用 Dropbox 資格情報を意図的に埋め込んでいる
+- エラー処理には `Either` や `Task` を利用し、副作用を局所化する
 
 ## コーディング規約
 
 ### 命名規則
 
-#### 変数名プレフィックス
+変数名には次のプレフィックスを利用します。
 
-- t - 一時的・ローカル変数：tConditions, tNovelPredicate, tConfig
-- a - メソッド引数：aArgs, aBuilder, aMinLength, aSkip
-- m - プライベートフィールド：mLimit, mMaxSkip, mParser
+- `t`: 一時的・ローカル変数（例: `tConditions`、`tNovelPredicate`、`tConfig`）
+- `a`: メソッド引数（例: `aArgs`、`aBuilder`、`aMinLength`、`aSkip`）
+- `m`: private フィールド（例: `mLimit`、`mMaxSkip`、`mParser`）
 
-ただし、意味的に引数でも、コンビネータに渡す関数リテラルの引数は`t`をプレフィックスとする
+コンビネータに渡す関数リテラルの引数は、意味上メソッド引数に相当しても `t` を付けます。
 
 ```scala
 array.foreach { tElement =>
@@ -119,58 +96,48 @@ array.foreach { tElement =>
 }
 ```
 
-#### 変数名
+変数名には名詞句または動詞句を使います。基本的に関数名には動詞句、それ以外には名詞句を使い、名前に記号は使いません。class、trait、object のメンバーにも同じ規則を適用します。
 
-変数名には名詞句もしくは動詞句を利用する。
-基本的には関数名には動詞句を利用し、それ以外には名詞句を利用する。
-名前に記号は利用しない。
+次の場合は例外とします。
 
-class、trait、object のメンバーも同様である。
+- 関数を第一級関数の値として扱う場合、その変数名に名詞句を使ってよい
 
-##### 例外
+  ```scala
+  def search(aHumanFilter: Human => Boolean): Seq[Human]
+  ```
 
-###### 関数が、第一級関数の値として持ち運ばれるとき、その変数を名詞句としても良い
+- コレクションの添字や `for` のループ変数には `i`、`j`、`k` などの一文字名を使ってよい
 
-```scala
-def search(aHumanFilter: Human => boolean): Seq[Human]
-```
+  ```scala
+  array.zipWithIndex.foreach((tElement, i) => println(s"${i}: ${tElement}"))
+  ```
 
-###### コレクションの添字や for のループ変数に`i`, `j`, `k`などの１文字の変数を利用しても良い
+- 十分に狭いスコープでは、意味が明確な略語や先頭一文字を使ってよい
 
-```scala
-array.zipWithIndex.foreach((tElement, i) => println(s"${i}: ${tElement}"))
-```
-
-###### 十分にスコープが小さい時、その適切な名前の略語や先頭 1 文字の変数を使っても良い
-
-```scala
-conditions.foreach(c => c.apply(object))
-numbers.reduceLeft(0)((tAcc, tNum) => tAcc + tNum)
-```
+  ```scala
+  conditions.foreach(c => c.apply(obj))
+  numbers.reduceLeft(0)((tAcc, tNum) => tAcc + tNum)
+  ```
 
 ### テスト
 
-- テスト名には日本語を使用する
-- テスト名は`〇〇である時、□□をすると、～であること`など、どういう性質をテストしているのかが分かりやすい名前にすること
-- コードを追加・修正するときは、それに対応するユニットテストを常に追加・修正する
+- ScalaTest と ScalaCheck を利用する
+- テストクラスには `AsyncFreeSpec` または `AnyFreeSpec` を利用する
+- テスト名は日本語で、`〇〇である時、□□をすると、～であること` のように検証する性質が分かる名前にする
+- コードを追加・変更した場合は、対応するユニットテストも追加・変更する
 
-### コメント
+### コメントと型注釈
 
 - コメントは日本語で記述する
-- public なメンバーには必ずコメントを記述する
-  - 特に、型情報ではわからない値は、フォーマットや単位を明記する。
+- public メンバーにはコメントを記述し、型情報だけでは分からない値にはフォーマットや単位を明記する
+- public / protected メンバーには型注釈を付ける
 
-### 関数型プログラミングを重視する
+### 設計方針
 
-- 純粋関数を優先
-- 基本的に不変データ構造を利用・定義する
-- 副作用の分離と局所化を行う
+- 純粋関数と不変データ構造を優先する
+- 副作用を分離・局所化する
 - 型安全性を確保する
-
-### 型アノテーション
-
-- public / protected なメンバーには、必ず型アノテーションを書く
 
 ## その他
 
-- git のコミットコメントは基本的に日本語で記述する
+- Git のコミットメッセージは基本的に日本語で記述する
