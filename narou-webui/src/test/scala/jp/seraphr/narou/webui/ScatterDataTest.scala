@@ -2,6 +2,7 @@ package jp.seraphr.narou.webui
 
 import jp.seraphr.narou.model.{ Genre, NarouNovel, NovelCondition, NovelType, UploadType }
 import jp.seraphr.narou.webui.ScatterData.RangeFilter
+
 import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.should.Matchers
 
@@ -77,13 +78,13 @@ class ScatterDataTest extends AnyFreeSpec with Matchers {
     }
 
     "対象が先頭・中央・末尾にある時、抽出すると、範囲内へずらした局所ウィンドウを使うこと" in {
-      val tNovels = (1 to 5).map(tIndex => createNovel(f"N$tIndex%03d", tIndex, tIndex * 10))
+      val tNovels          = (1 to 5).map(tIndex => createNovel(f"N$tIndex%03d", tIndex, tIndex * 10))
       val tExpectedWindows = Map(
         10 -> Seq(10, 20, 30),
         30 -> Seq(20, 30, 40),
         50 -> Seq(30, 40, 50)
       )
-      val tFilter = RangeFilter(
+      val tFilter          = RangeFilter(
         "ウィンドウ検証",
         (tValues, tValue) => tExpectedWindows.get(tValue).contains(tValues)
       )
@@ -124,11 +125,11 @@ class ScatterDataTest extends AnyFreeSpec with Matchers {
         createNovel("N003-missing-y", 3, 30),
         createNovel("N004-filtered", 4, 40, aIsFinished = false)
       )
-      val tXAxis = AxisData(
+      val tXAxis  = AxisData(
         tNovel => Option.when(tNovel.ncode != "N002-missing-x")(tNovel.bookmarkCount),
         "x"
       )
-      val tYAxis = AxisData(
+      val tYAxis  = AxisData(
         tNovel => Option.when(tNovel.ncode != "N003-missing-y")(tNovel.evaluationPoint),
         "y"
       )
@@ -153,18 +154,24 @@ class ScatterDataTest extends AnyFreeSpec with Matchers {
   "iqrBaseOutlier" - {
     "x軸順の局所ウィンドウに上側外れ値がある時、抽出すると、その値だけを返すこと" in {
       val tYValues = Seq(100, 0, 0, 0, 0, 100, 100, 100, 100)
-      val tNovels  = tYValues.zipWithIndex.map { case (tYValue, i) =>
-        createNovel(f"N${i + 1}%03d", i + 1, tYValue)
-      }.reverse
+      val tNovels  = tYValues
+        .zipWithIndex
+        .map { case (tYValue, i) =>
+          createNovel(f"N${i + 1}%03d", i + 1, tYValue)
+        }
+        .reverse
 
       extract(tNovels, 5, RangeFilter.iqrBaseOutlier(true, 1.5)).map(_.ncode) shouldBe Seq("N001")
     }
 
     "x軸順の局所ウィンドウに下側外れ値がある時、抽出すると、その値だけを返すこと" in {
       val tYValues = Seq(-100, 0, 0, 0, 0, -100, -100, -100, -100)
-      val tNovels  = tYValues.zipWithIndex.map { case (tYValue, i) =>
-        createNovel(f"N${i + 1}%03d", i + 1, tYValue)
-      }.reverse
+      val tNovels  = tYValues
+        .zipWithIndex
+        .map { case (tYValue, i) =>
+          createNovel(f"N${i + 1}%03d", i + 1, tYValue)
+        }
+        .reverse
 
       extract(tNovels, 5, RangeFilter.iqrBaseOutlier(false, 1.5)).map(_.ncode) shouldBe Seq("N001")
     }
