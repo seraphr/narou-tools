@@ -78,18 +78,20 @@ object ScatterData {
         upper: Boolean,
         factor: Double
     ): RangeFilter = {
+      require(!factor.isNaN && factor >= 0, "factorは0以上の数値である必要があります")
+
       def filter(from: Seq[Int], value: Int): Boolean = {
         val tSize    = from.size
         val tSorted  = from.sorted
         val tQ1Value = tSorted((tSize * 0.25).toInt)
         val tQ3Value = tSorted((tSize * 0.75).toInt)
-        val tIqr     = tQ3Value - tQ1Value
+        val tIqr     = tQ3Value.toDouble - tQ1Value.toDouble
         if (upper) {
           val tUpper = tQ3Value + tIqr * factor
-          tUpper <= value
+          tUpper < value
         } else {
-          val tLower = tQ1Value - tIqr - factor
-          value <= tLower
+          val tLower = tQ1Value - tIqr * factor
+          value < tLower
         }
       }
 
@@ -154,7 +156,7 @@ object ScatterData {
   }
 
   /**
-   * 各小説をyAxixの昇順に並べ、自身を中心とするWindow幅の小説がある範囲に含まれていた場合に残す
+   * 各小説をx軸値とncodeの昇順に並べ、自身を含む局所ウィンドウが指定された範囲にある場合に残す
    *
    * @param aCondition
    * @param aWindow
@@ -163,7 +165,9 @@ object ScatterData {
    * @return
    */
   def range(aCondition: Option[NovelCondition], aWindow: Int, aRange: RangeFilter, aColor: String): ScatterData = {
-    case class NovelWithValue(novel: NarouNovel, xValue: Int, yValue: Int, index: Int)
+    require(aWindow > 0, "aWindowは正数である必要があります")
+
+    case class NovelWithValue(novel: NarouNovel, xValue: Int, yValue: Int)
     def convert(aInput: ConvertInput): Seq[NarouNovel] = {
       val tBase   = aInput.novels
       val tNovels = aCondition.fold(tBase)(c => tBase.filter(c.predicate))
@@ -177,26 +181,21 @@ object ScatterData {
         .map { n =>
           (n, xValue(n), yValue(n))
         }
-        .zipWithIndex
-        .collect { case ((n, Some(xValue), Some(yValue)), i) =>
-          NovelWithValue(n, xValue, yValue, i)
+        .collect { case (n, Some(xValue), Some(yValue)) =>
+          NovelWithValue(n, xValue, yValue)
         }
-        .toIndexedSeq
+        .toVector
+        .sortBy(tValue => (tValue.xValue, tValue.novel.ncode))
 
-      val tSize = tNovelWithValues.size
+      val tSize       = tNovelWithValues.size
+      val tWindowSize = aWindow.min(tSize)
       (0 until tSize)
         .iterator
-        .map { // 各小説毎に、所属するグループ
-          case i if i < aWindow / 2           =>
-            // 前方に十分な数がないときは、先頭からwindowサイズだけ取る
-            (tNovelWithValues.take(aWindow), tNovelWithValues(i))
-          case i if (tSize - aWindow / 2) < i =>
-            // 後方に十分な数がないときは、末尾からwindowサイズだけ取る
-            (tNovelWithValues.takeRight(aWindow), tNovelWithValues(i))
-          case i                              =>
-            // 通常は、対象の小説を中心に、前後 (aWindow / 2)をとる
-            val tFrom = i - aWindow / 2
-            (tNovelWithValues.slice(tFrom, tFrom + aWindow), tNovelWithValues(i))
+        .map { i =>
+          val tCenteredFrom = i - tWindowSize / 2
+          val tFrom         = (tCenteredFrom max 0) min (tSize - tWindowSize)
+          val tWindow       = tNovelWithValues.slice(tFrom, tFrom + tWindowSize)
+          (tWindow, tNovelWithValues(i))
         }
         .filter { case (ns, n) =>
           val values = ns.map(_.yValue)
