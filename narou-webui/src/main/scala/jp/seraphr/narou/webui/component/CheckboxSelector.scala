@@ -4,8 +4,8 @@ import japgolly.scalajs.react.{ Callback, ScalaFnComponent }
 import japgolly.scalajs.react.facade.React
 import japgolly.scalajs.react.vdom.html_<^.*
 import typings.antd.components.{ Button, Checkbox, Divider, Popover }
-import typings.antd.libCheckboxGroupMod.CheckboxOptionType
-import typings.antd.libTooltipMod.TooltipPlacement
+import typings.antd.esCheckboxGroupMod.CheckboxOptionType
+import typings.antd.esTooltipMod.TooltipPlacement
 
 class CheckboxSelector[A] {
   case class OptionItem(name: String, value: A)
@@ -26,7 +26,7 @@ class CheckboxSelector[A] {
         private def toOptionValue: String = props.toOptionValue(a)
       }
 
-      val tGroupNameToOptions: Seq[(String, Seq[CheckboxOptionType])] = {
+      val tGroupNameToOptions: Seq[(String, Seq[CheckboxOptionType[String]])] = {
         props
           .options
           .map { case OptionGroup(tName, tOptions) =>
@@ -51,9 +51,10 @@ class CheckboxSelector[A] {
       val tPopupPanel =
         tGroupNameToOptions.flatMap { case (tGroupName, tOptions) =>
           Seq[VdomNode](
-            Divider.plain(true)(tGroupName),
+            Divider.plain(true).withKey(s"${tGroupName}-divider")(tGroupName),
             Checkbox
-              .Group
+              .Checkbox[String]()
+              .withKey(s"${tGroupName}-checkbox")
               .options(tOptions.toJSArray)
               .defaultValue(props.defaultSelected.map(_.toOptionValue).toJSArray)
               .build
@@ -61,7 +62,9 @@ class CheckboxSelector[A] {
         }
 
       Popover
-        .trigger("click")
+        .withProps(
+          scala.scalajs.js.Dynamic.literal(trigger = scala.scalajs.js.Array("click")).asInstanceOf[Popover.Props]
+        )
         .content(VdomArray(tPopupPanel: _*).rawNode)
         .placement(TooltipPlacement.bottomLeft)
         .apply(Button(props.title))

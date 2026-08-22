@@ -11,3 +11,4 @@ metals.sbt
 
 .agent/repos
 .agent/temp
+.playwright-cli

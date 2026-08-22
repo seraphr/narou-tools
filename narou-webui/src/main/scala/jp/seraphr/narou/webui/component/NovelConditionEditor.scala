@@ -25,7 +25,7 @@ object NovelConditionEditor {
 
       Input()
         .withKey(props.id)
-        .style(CSSProperties().setWidth("50%"))
+        .style(CSSProperties().setWidth("50vw"))
         .id(props.id)
         .defaultValue(props.condition.source)
         .status(tStatus)
