@@ -16,6 +16,7 @@ import jp.seraphr.narou.{
   ExtractedNarouNovelsWriter,
   FileNovelDataAccessor,
   HasLogger,
+  MinLength,
   NarouClientBuilder,
   NovelDataReader
 }
@@ -37,6 +38,11 @@ class CollectNovelCommand(aDefaultArg: CollectNovelCommandArg)(implicit schedule
   override val description = "なろう小説の一覧を収集し、ファイル or Dropboxに保存します"
   override val version     = "0.1.0"
   private val mParser      = new OptionParser(aDefaultArg)
+
+  /** なろうAPIクライアントを作成します。 */
+  protected def createNarouApiClient(): jp.seraphr.narou.api.NarouApiClient = {
+    jp.seraphr.narou.api.NarouApiClient().runSyncUnsafe()
+  }
 
   override def run(aArgs: Seq[String]): Try[Unit] = {
     mParser.parse(aArgs) match {
@@ -90,13 +96,13 @@ class CollectNovelCommand(aDefaultArg: CollectNovelCommandArg)(implicit schedule
 
     val tOutput             = aArg.output
     val tOutputDataAccessor = tOutput match {
-      case Local(file)   =>
-        logger.info(s"ローカルファイルシステムへの出力を行います: ${file}")
-        new FileNovelDataAccessor(file)
-      case Dropbox(path) =>
-        val tPath = path.getOrElse(LocalDate.now().toString)
-        logger.info(s"Dropboxへの出力を行います: ${tPath}")
-        new DropboxNovelDataAccessor(tDropboxClient, tPath)
+      case Local(tFile)   =>
+        logger.info(s"ローカルファイルシステムへの出力を行います: ${tFile}")
+        new FileNovelDataAccessor(tFile)
+      case Dropbox(tPath) =>
+        val tActualPath = tPath.getOrElse(LocalDate.now().toString)
+        logger.info(s"Dropboxへの出力を行います: ${tActualPath}")
+        new DropboxNovelDataAccessor(tDropboxClient, tActualPath)
     }
 
     val tInitMap = (tOutputDataAccessor.exists().runSyncUnsafe(), aArg.overwrite) match {
@@ -114,12 +120,11 @@ class CollectNovelCommand(aDefaultArg: CollectNovelCommandArg)(implicit schedule
     val tInitSize  = tInitMap.size
     logger.info(s"小説リストの収集を開始します。 初期ノベル数: ${tInitSize}")
 
-    import jp.seraphr.narou.api.NarouApiClient
     import monix.execution.Scheduler.Implicits.global
 
-    val client      = NarouApiClient().runSyncUnsafe()
+    val client      = createNarouApiClient()
     val tResultMap  = tCollector
-      .collect(NarouClientBuilder.init, client)
+      .collect(NarouClientBuilder.init, client, aArg.minLength)
       .filter(tNovelPredicate)
       .take(aArg.limit)
       .foldLeft(tInitMap) { (m, n) =>
@@ -127,6 +132,10 @@ class CollectNovelCommand(aDefaultArg: CollectNovelCommandArg)(implicit schedule
       }
     val tResultSize = tResultMap.size
     logger.info(s"収集が完了しました。 最終ノベル数: ${tResultSize}  増加ノベル数: ${tResultSize - tInitSize}")
+
+    if (tResultMap.isEmpty) {
+      throw new RuntimeException("収集後の小説データが0件のため、出力を中止します")
+    }
 
     val tNovels = Observable.fromIterable(tResultMap.values)
 
@@ -185,6 +194,16 @@ class CollectNovelCommand(aDefaultArg: CollectNovelCommandArg)(implicit schedule
       .text(s"取得する小説の最大数を指定します。 省略した場合は、${aDefaultArg.limit}です")
       .action((i, c) => c.copy(limit = i))
 
+    implicit private val mReadMinLength: Read[MinLength] = Read.reads { tInput =>
+      val tValue = tInput.toInt
+      MinLength.from(tValue).fold(tMessage => throw new IllegalArgumentException(tMessage), identity)
+    }
+
+    opt[MinLength]("minLength")
+      .optional()
+      .text(s"収集を開始する小説文字数（指定値を含む）を指定します。 省略した場合は、${aDefaultArg.minLength.value}です")
+      .action((tMinLength, tArg) => tArg.copy(minLength = tMinLength))
+
     opt[Int]("novelsPerFile")
       .optional()
       .text(s"1ファイルにいくつの小説を格納するかを指定します。。 省略した場合は、${aDefaultArg.novelsPerFile}です")
@@ -204,10 +223,15 @@ class CollectNovelCommand(aDefaultArg: CollectNovelCommandArg)(implicit schedule
       .action((o, c) => c.copy(overwrite = o))
 
     opt[Boolean]('a', "withAll").optional().text("指定した場合、全ノベルデータを出力に加えます").action((o, c) => c.copy(withAll = o))
+
   }
 }
 
 object CollectNovelCommand {
+
+  /** CLIでminLengthを省略した場合に使用する、小説文字数の下限です。 */
+  val defaultMinLength: MinLength = MinLength.from(5000).fold(tMessage => throw new AssertionError(tMessage), identity)
+
   sealed trait OverwriteOption {
     val text: String
   }
@@ -239,11 +263,17 @@ object CollectNovelCommand {
 
   }
 
+  /**
+   * collectコマンドの設定です。
+   *
+   * @param minLength 収集を開始する小説の文字数。この値を含む0以上の下限
+   */
   case class CollectNovelCommandArg(
       output: OutputOption,
       overwrite: OverwriteOption,
       intervalMillis: Long,
       limit: Int,
+      minLength: MinLength,
       novelsPerFile: Int,
       withAll: Boolean
   )

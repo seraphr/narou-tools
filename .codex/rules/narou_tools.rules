@@ -1,0 +1,4 @@
+prefix_rule(
+    pattern = ["./previewSite"],
+    decision = "allow",  # allow | prompt | forbidden
+)

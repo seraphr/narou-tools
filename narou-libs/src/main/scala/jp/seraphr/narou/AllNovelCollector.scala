@@ -13,7 +13,14 @@ class AllNovelCollector(aIntervalMillis: Long)(implicit scheduler: Scheduler) ex
   private val mLimit   = 500
   private val mMaxSkip = 2000
 
-  def collect(aBuilder: NarouClientBuilder, client: NarouApiClient): Iterator[NarouNovel] = {
+  /**
+   * 指定した文字数以上の小説を、文字数の昇順で収集します。
+   *
+   * @param aBuilder API検索条件の基礎となるビルダー
+   * @param aClient なろうAPIクライアント
+   * @param aMinLength 探索を開始する小説文字数。この値を含む
+   */
+  def collect(aBuilder: NarouClientBuilder, aClient: NarouApiClient, aMinLength: MinLength): Iterator[NarouNovel] = {
     val tAdjuster = new IntervalAdjuster(aIntervalMillis)
     val tCounter  = new AtomicInteger(0)
     val tFormat   = NumberFormat.getNumberInstance()
@@ -34,7 +41,7 @@ class AllNovelCollector(aIntervalMillis: Long)(implicit scheduler: Scheduler) ex
           .order(tOrder)
           .length(Some(aMinLength), None)
           .skipLim(aSkip, mLimit)
-          .search(client)
+          .search(aClient)
           .runSyncUnsafe()
 
         import ApiNovelConverter._
@@ -51,8 +58,14 @@ class AllNovelCollector(aIntervalMillis: Long)(implicit scheduler: Scheduler) ex
       }
     }
 
-    def collectAll(aMinLength: Int = 0, aSkip: Int = 0): Iterator[NarouNovel] = {
-      val tCollected  = collectOne(aMinLength, aSkip)
+    def collectAll(aMinLength: Int, aSkip: Int = 0): Iterator[NarouNovel] = {
+      val tCollected = collectOne(aMinLength, aSkip)
+
+      if (tCollected.isEmpty) {
+        logger.info(s"探索の終端に到達しました。 minLength=${aMinLength}, 検索結果は0件です")
+        return Iterator.empty
+      }
+
       val tHeadLength = tCollected.head.length
       val tLastLength = tCollected.last.length
 
@@ -80,7 +93,7 @@ class AllNovelCollector(aIntervalMillis: Long)(implicit scheduler: Scheduler) ex
       }
     }
 
-    collectAll()
+    collectAll(aMinLength.value)
   }
 
 }
