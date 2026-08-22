@@ -67,8 +67,10 @@ lazy val `narou-libs-model` = crossProject(JVMPlatform, JSPlatform)
     Compile / npmDependencies ++= Seq(
       js.dropbox
     ),
-    webpack / version   := Dependencies.js.webpack,
-    stTypescriptVersion := Dependencies.js.typescript
+    webpack / version               := Dependencies.js.webpack,
+    startWebpackDevServer / version := Dependencies.js.webpackDevServer,
+    stTypescriptVersion             := Dependencies.js.typescript,
+    stIgnore += "type-fest"
   )
   .dependsOn(`narou-api-client`)
 
@@ -143,42 +145,43 @@ lazy val `narou-webui` = (project in file("narou-webui"))
     scalacOptions ++= Seq(
       "-Wconf:cat=deprecation&msg=linkingInfo:i"
     ),
-    scalaJSUseMainModuleInitializer  := true,
+    scalaJSUseMainModuleInitializer      := true,
     libraryDependencies ++= Seq(
       scalajs.reactjs.value,
       scalajs.reactjsExtra.value
     ) ++ scalajs.circe.value ++ scalajs.monocle.value,
+    libraryDependencySchemes +=
+      "com.github.japgolly.scalajs-react" % "core_sjs1_3" % VersionScheme.Always,
     Compile / npmDependencies ++= Seq(
       js.react,
       js.reactDom,
+      js.reactType,
       js.reactDomType,
+      js.reactIs,
       js.recharts,
       js.antd,
       js.dropbox
     ),
-    Compile / npmDevDependencies ++= Seq(
-      js.`node-polyfill-webpack-plugin`
-    ),
-    stFlavour                        := Flavour.ScalajsReact,
-    stTypescriptVersion              := Dependencies.js.typescript,
+    stFlavour                            := Flavour.ScalajsReact,
+    stTypescriptVersion                  := Dependencies.js.typescript,
     stIgnore ++= List(
+      "@reduxjs/toolkit",
+      "react-is",
       "type-fest" // なんかエラーになるので、とりあえず取り除いておく
     ),
-    // css-load設定 fileとかurlは要らんが、scalablytypedデモプロジェクトからそのまま持ってきた
-    webpackConfigFile                := Some(baseDirectory.value / "custom-scalajs.webpack.config"),
-    webpack / version                := Dependencies.js.webpack,
-    startWebpackDevServer / version  := Dependencies.js.webpackDevServer,
+    // Web UIのCSSと画像アセットをwebpackでバンドルする
+    webpackConfigFile                    := Some(baseDirectory.value / "custom-scalajs.webpack.config"),
+    webpack / version                    := Dependencies.js.webpack,
+    startWebpackDevServer / version      := Dependencies.js.webpackDevServer,
     Compile / npmDevDependencies ++= Seq(
       js.`css-loader`,
-      js.`style-loader`,
-      js.`file-loader`,
-      js.`url-loader`
+      js.`style-loader`
     ),
-    git.remoteRepo                   := "git@github.com:seraphr/narou-tools.git",
-    buildResult                      := target.value / "scalajs-generated",
-    siteSourceDirectory              := buildResult.value,
-    makeSite                         := makeSite.dependsOn(build).value,
-    build                            := {
+    git.remoteRepo                       := "git@github.com:seraphr/narou-tools.git",
+    buildResult                          := target.value / "scalajs-generated",
+    siteSourceDirectory                  := buildResult.value,
+    makeSite                             := makeSite.dependsOn(build).value,
+    build                                := {
       val tTargetDir      = buildResult.value
       val tHtmlFile       = baseDirectory.value / "index-fastopt.html"
       val tTargetHtmlFile = tTargetDir / "index.html"
@@ -192,7 +195,7 @@ lazy val `narou-webui` = (project in file("narou-webui"))
       sbt.IO.copyFile(tHtmlFile, tTargetDir / "index.html")
       tTargetDir
     },
-    ghpagesCleanSite / excludeFilter := { (f: File) =>
+    ghpagesCleanSite / excludeFilter     := { (f: File) =>
       f.isDirectory && f.getName == "narou_novels"
     }
   )
