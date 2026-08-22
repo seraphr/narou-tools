@@ -14,6 +14,7 @@ import typings.antd.antdStrings
 import typings.antd.components.{ Button, Dropdown, Space }
 import typings.antd.esMenuInterfaceMod.MenuItemType
 import typings.antd.esMenuMenuMod.MenuProps
+import typings.antd.components.Flex
 
 private object AntdMenuAdapter {
   def item(aKey: String, aLabel: String, aOnClick: Callback): MenuItemType =
@@ -143,8 +144,9 @@ object NovelScatterChartPanel {
         props.onSelectNovel
       )
 
-      <.div(
+      Flex.wrap(true)(
         tDataButtons,
+        <.div(^.flexBasis := "100%"),
         tFilter,
         tScatterChart
       )
