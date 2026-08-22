@@ -12,6 +12,7 @@ import japgolly.scalajs.react.vdom.html_<^.*
 import typings.antd.anon.MenuPropsactiveKeyMenuProAbout
 import typings.antd.antdStrings
 import typings.antd.components.{ Button, Dropdown, Space }
+import typings.antd.components.Flex
 import typings.antd.esMenuInterfaceMod.MenuItemType
 import typings.antd.esMenuMenuMod.MenuProps
 
@@ -143,8 +144,9 @@ object NovelScatterChartPanel {
         props.onSelectNovel
       )
 
-      <.div(
+      Flex.wrap(true)(
         tDataButtons,
+        <.div(^.flexBasis := "100%"),
         tFilter,
         tScatterChart
       )
