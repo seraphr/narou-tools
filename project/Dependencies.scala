@@ -87,6 +87,6 @@ object Dependencies {
 
     val webpack          = "5.109.2"
     val webpackDevServer = "6.0.0"
-    val typescript       = "7.0.2"
+    val typescript       = "6.0.3"
   }
 }
