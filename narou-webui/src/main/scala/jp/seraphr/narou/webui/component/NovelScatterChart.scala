@@ -1,20 +1,20 @@
 package jp.seraphr.narou.webui.component
 
-import org.scalajs.dom.{ console, SVGElement }
+import org.scalajs.dom.SVGElement
 import scala.scalajs.js
 import scala.scalajs.js.annotation.JSExportAll
 
 import jp.seraphr.narou.model.NarouNovel
 import jp.seraphr.narou.webui.{ AxisData, ConvertInput, ScatterData }
-import jp.seraphr.recharts.{ Axis, CartesianGrid, ScatterChart }
+import jp.seraphr.recharts.{ Axis, CartesianGrid }
 
 import japgolly.scalajs.react.{ BackendScope, Callback, Reusability, ScalaComponent }
 import japgolly.scalajs.react.CtorType.ChildArg
 import japgolly.scalajs.react.extra.Px
 import typings.react.mod.SVGProps
 import typings.recharts.{ rechartsStrings, typesCartesianScatterMod as scatterMod }
-import typings.recharts.components.Scatter
-import typings.recharts.typesUtilTypesMod.Margin
+import typings.recharts.anon.PartialMargin
+import typings.recharts.components.{ Scatter, ScatterChart }
 
 object NovelScatterChart {
   import jp.seraphr.recharts.Implicits.*
@@ -63,114 +63,89 @@ object NovelScatterChart {
       }
   }
 
-  class Backend(scope: BackendScope[Props, Unit]) {
-    case class ScatterInput(
-        name: String,
-        points: Seq[PointData],
-        color: String
-    )
+  class Backend(aScope: BackendScope[Props, Unit]) {
+    case class ScatterInput(name: String, points: Seq[PointData], color: String)
+    case class ScattersInput(scatters: Seq[ScatterInput], selectNovel: NarouNovel => Callback)
 
-    case class ScattersInput(
-        scatters: Seq[ScatterInput],
-        selectNovel: NarouNovel => Callback
-    )
     object ScattersInput {
       implicit val reusable: Reusability[ScattersInput] =
-        Reusability.by[ScattersInput, Seq[Any]](input => Seq(input.scatters))(Reusability.by_==)
+        Reusability.by[ScattersInput, Seq[ScatterInput]](_.scatters)(Reusability.by_==)
 
     }
-    val scatterPropss =
-      Px.props(scope)
-        .map { props =>
-          val tScatters = props
+
+    private val mScatters =
+      Px.props(aScope)
+        .map { tProps =>
+          val tScatters = tProps
             .scatters
             .map { tScatterData =>
-              val tPoints = createPointData(props.novels, props.axisX, props.axisY, tScatterData)
-              val tName   = s"${tScatterData.name}(${tPoints.size})"
-
-              ScatterInput(tName, tPoints, tScatterData.color)
+              val tPoints = createPointData(tProps.novels, tProps.axisX, tProps.axisY, tScatterData)
+              ScatterInput(s"${tScatterData.name}(${tPoints.size})", tPoints, tScatterData.color)
             }
-          ScattersInput(tScatters, props.selectNovel)
+          ScattersInput(tScatters, tProps.selectNovel)
         }
         .withReuse
         .autoRefresh
-        .map { input =>
-          console.debug(s"create scatter props !!")
-          input
+        .map { tInput =>
+          tInput
             .scatters
             .map { tScatterData =>
-              scatterMod
-                .Props()
-                .setName(tScatterData.name)
-                .setData(tScatterData.points.map(a => a: Any).toJSArray)
-                .setFill(tScatterData.color)
-                .setIsAnimationActive(false)
-                .setOnClick { (a1, _, _) =>
-                  val novel = a1.asInstanceOf[js.Dynamic].payload.asInstanceOf[PointData].novel
-                  input.selectNovel(novel)
-                }
+              Scatter.withProps(
+                scatterMod
+                  .Props()
+                  .setName(tScatterData.name)
+                  .setData(tScatterData.points.map(tPoint => tPoint: Any).toJSArray)
+                  .setFill(tScatterData.color)
+                  .setIsAnimationActive(false)
+                  .setOnClick { (tPoint, _, _) =>
+                    val tNovel = tPoint.asInstanceOf[js.Dynamic].payload.asInstanceOf[PointData].novel
+                    tInput.selectNovel(tNovel)
+                  }
+              ): ChildArg
             }
         }
 
-    var lastScatters: Seq[ChildArg] = null
-    def render(props: Props)        = {
+    def render(aProps: Props) = {
       import typings.recharts.components.{ Label, Legend, ReferenceDot, Tooltip, XAxis, YAxis, ZAxis }
 
-      val Props(_, aSelectedNovel, aAxisX, aAxisY, _, _) = props
-      val tScatters: Seq[ChildArg]                       = scatterPropss.value().map(Scatter.withProps)
-      console.debug(s"scatters eq lastScatters => ${tScatters eq lastScatters}")
-      lastScatters = tScatters
-
-      val tChildren: Seq[ChildArg] = Seq(
+      val Props(_, tSelectedNovel, tAxisX, tAxisY, _, _) = aProps
+      val tChildren: Seq[ChildArg]                       = Seq(
         CartesianGrid(CartesianGrid.Props().setStrokeDasharray("3 3")),
         XAxis
           .`type`(Axis.Type.number)
           .dataKey("x")
-          .name(aAxisX.name)
+          .name(tAxisX.name)
           .label(
-            Label.create().value(aAxisX.name).angle(0).position(rechartsStrings.insideBottom).build.rawElement
+            Label.create().value(tAxisX.name).angle(0).position(rechartsStrings.insideBottom).build.rawElement
           )
-          .unit(aAxisX.unit),
+          .unit(tAxisX.unit),
         YAxis
           .create()
           .dataKey("y")
-          .name(aAxisY.name)
+          .name(tAxisY.name)
           .label(
-            Label.create().value(aAxisY.name).angle(-90).position(rechartsStrings.insideLeft).build.rawElement
+            Label.create().value(tAxisY.name).angle(-90).position(rechartsStrings.insideLeft).build.rawElement
           )
-          .unit(aAxisY.unit),
-        ZAxis().`type`(rechartsStrings.category).dataKey("z").range(js.Array(50, 50)).name("title"),
+          .unit(tAxisY.unit),
+        ZAxis().`type`(rechartsStrings.category).dataKey("z").range(js.Tuple2(50.0, 50.0)).name("title"),
         Tooltip.cursor(SVGProps[SVGElement]().setStrokeDasharray("3 3")).build,
         Legend.create()
       )
-      val tReDot                   = for {
-        tSelected <- aSelectedNovel
-        x         <- aAxisX.toValue(tSelected)
-        y         <- aAxisY.toValue(tSelected)
+      val tReferenceDot                                  = for {
+        tSelected <- tSelectedNovel
+        x         <- tAxisX.toValue(tSelected)
+        y         <- tAxisY.toValue(tSelected)
       } yield {
-        ReferenceDot
-          .create(
-            className = js.undefined,
-            cx = x,
-            cy = y,
-            r = 5
-          )
-          .x(x)
-          .y(y)
-          .isFront(true)
-          .fill("red")
-          .build
+        ReferenceDot[Double, Double]().x(x).y(y).r(5).fill("red").build
       }
 
-      ScatterChart(
-        ScatterChart
-          .Props()
-          .setWidth(2400)
-          .setHeight(600)
-          .setMargin(
-            Margin().setTop(20).setRight(20).setBottom(10).setLeft(10)
-          )
-      )(tChildren ++ tScatters ++ tReDot.to(Seq): _*)
+      ScatterChart[PointData]()
+        .width(2400)
+        .height(600)
+        .margin(PartialMargin().setTop(20).setRight(20).setBottom(10).setLeft(10))(
+          (tChildren ++ mScatters.value() ++ tReferenceDot.to(Seq))*
+        )
+        .build
     }
 
   }
@@ -178,7 +153,8 @@ object NovelScatterChart {
   val component = ScalaComponent
     .builder[Props]("NovelScatterChart")
     .stateless
-    .renderBackend[Backend]
+    .backend(new Backend(_))
+    .renderP((tScope, tProps) => tScope.backend.render(tProps))
     .configure(Reusability.shouldComponentUpdate)
     .build
 

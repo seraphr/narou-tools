@@ -20,7 +20,7 @@ import jp.seraphr.narou.webui.state.LazyLoad
 import japgolly.scalajs.react.*
 import japgolly.scalajs.react.vdom.html_<^.*
 
-@JSImport("antd/dist/antd.css", JSImport.Default)
+@JSImport("antd/dist/reset.css", JSImport.Default)
 @js.native
 object CSS extends js.Any
 
@@ -156,13 +156,13 @@ object RootView {
 
         <.div(
           Select()
-            .dropdownMatchSelectWidth(false)
+            .popupMatchSelectWidth(false)
             .loading(dirNames.isLoading)
             .onSelect((tValue, _) => actions.selectDir(tValue.toString))(
               tSelectDirOptions: _*
             ),
           Select()
-            .dropdownMatchSelectWidth(false)
+            .popupMatchSelectWidth(false)
             .loading(allMeta.isLoading)
             .onSelect((tValue, _) => actions.selectMeta(tValue.toString))(
               tSelectMetaOptions: _*
