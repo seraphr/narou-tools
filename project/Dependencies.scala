@@ -8,21 +8,21 @@ object Dependencies {
   val reactVersion         = "19.2.8"
   val scalatestVersion     = "3.2.20"
   val scalatestplusVersion = s"${scalatestVersion}.0"
-  val circeVersion         = "0.14.16"
+  val circeVersion         = "0.14.17"
   val monixVersion         = "3.4.1"
   val monocleVersion       = "3.3.0"
-  val sttpVersion          = "4.0.26"
+  val sttpVersion          = "4.0.27"
 
   object jvm {
     val scalaTest     = "org.scalatest"    %% "scalatest"        % scalatestVersion
     val commonsIO     = "commons-io"        % "commons-io"       % "2.22.0"
     val scopt         = "com.github.scopt" %% "scopt"            % "4.1.0"
     val slf4j         = "org.slf4j"         % "slf4j-api"        % "1.7.+"
-    val logback       = "ch.qos.logback"    % "logback-classic"  % "1.6.3"
+    val logback       = "ch.qos.logback"    % "logback-classic"  % "1.6.5"
     val monix         = "io.monix"         %% "monix"            % monixVersion
     val monixReactive = "io.monix"         %% "monix-reactive"   % monixVersion
     val dropbox       = "com.dropbox.core"  % "dropbox-core-sdk" % "8.0.2"
-    val jsoup         = "org.jsoup"         % "jsoup"            % "1.23.1"
+    val jsoup         = "org.jsoup"         % "jsoup"            % "1.23.2"
 
     val circe = Seq(
       "io.circe" %% "circe-core",
