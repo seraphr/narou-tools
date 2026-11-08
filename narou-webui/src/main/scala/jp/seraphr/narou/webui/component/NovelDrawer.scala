@@ -7,7 +7,8 @@ import jp.seraphr.narou.webui.action.Actions
 import japgolly.scalajs.react.{ React, ScalaComponent, ScalaFnComponent }
 import japgolly.scalajs.react.vdom.html_<^._
 import typings.antd.antdStrings
-import typings.antd.components.{ Button, Drawer }
+import typings.antd.components.Button
+import typings.antd.esDrawerDrawerMod.DrawerProps
 
 object NovelDrawer {
   case class Props(novel: Option[NarouNovel], actions: Actions)
@@ -27,25 +28,21 @@ object NovelDrawer {
         <.div(tNovel.keywords.mkString("[", ", ", "]")),
         <.div(<.a(^.href := tUrl)(tUrl)),
         <.div(Button.`type`(antdStrings.link).onClick(_ => tScope.modState(v => !v)).size(antdStrings.small)("あらすじ")),
-        Drawer
-          .visible(showStory)
-          .width(400)
-          .closable(true)
-          .onClose(_ => tScope.setState(false))(
-            <.pre(^.whiteSpace.preWrap)(tNovel.story)
-          )
+        AntdDrawer(
+          DrawerProps().setOpen(showStory).setSize(400).setClosable(true).setOnClose(_ => tScope.setState(false))
+        )(
+          <.pre(^.whiteSpace.preWrap)(tNovel.story)
+        )
       )
     }
     .build
 
   val innerComponent = ScalaFnComponent[Props] { case Props(tNovel, tActions) =>
-    Drawer
-      .visible(tNovel.nonEmpty)
-      .width(400)
-      .closable(true)
-      .onClose(_ => tActions.deselectNovel())(
-        tNovel.fold(EmptyVdom)(detailComponent(_))
-      )
+    AntdDrawer(
+      DrawerProps().setOpen(tNovel.nonEmpty).setSize(400).setClosable(true).setOnClose(_ => tActions.deselectNovel())
+    )(
+      tNovel.fold(EmptyVdom)(detailComponent(_))
+    )
   }
 
   private val mStoreWrapper = StoreWrapper.wrapCompletely(StoreProvider.context) { tState =>
